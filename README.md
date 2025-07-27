@@ -18,7 +18,7 @@
       <img src="https://github.com/user-attachments/assets/50dc49bf-6b22-46f4-b98b-ca471b23e5e7" width="100"/><br/>기원준🥚
     </td>
     <td align="center">
-      <img src="https://github.com/user-attachments/assets/b3003734-50d5-4a7c-93a0-468345b23d1a" width="100"/><br/>전진혁🐣
+      <img src="https://github.com/user-attachments/assets/ff51f94a-0558-4baf-a81b-f833ae3b7a6e" width="100"/><br/>전진혁🐣
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/85c59737-8172-4319-ac86-f1a766d83dab" width="100"/><br/>강지윤🐥
