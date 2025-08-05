@@ -44,11 +44,22 @@ function InsightTrends() {
                 <button className="text-blue-400 text-sm hover:text-blue-300">View Report</button>
               </div>
               <p className="text-gray-400 text-sm mb-4">Data from 1-12 Apr, 2024</p>
-              <div className="bg-gray-700 rounded-lg p-4 h-32 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-full h-2 bg-gray-600 rounded mb-2"></div>
-                  <div className="flex justify-between text-xs text-gray-400">
+              <div className="bg-gray-700 rounded-lg p-4 h-32">
+                <div className="flex items-end justify-between h-full">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="w-3 bg-green-500 rounded-t" style={{height: `${Math.random() * 30 + 10}px`}}></div>
+                      <div className="w-3 bg-purple-500 rounded-t mt-1" style={{height: `${Math.random() * 25 + 8}px`}}></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-400">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <span>Income</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                     <span>Expense</span>
                   </div>
                 </div>
@@ -62,15 +73,19 @@ function InsightTrends() {
                 <button className="text-blue-400 text-sm hover:text-blue-300">View Report</button>
               </div>
               <p className="text-gray-400 text-sm mb-4">Data from 1-12 Apr, 2024</p>
-              <div className="bg-gray-700 rounded-lg p-4 h-32 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="flex space-x-1 mb-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <div key={i} className="w-2 bg-purple-500 rounded" style={{height: `${Math.random() * 40 + 20}px`}}></div>
-                    ))}
-                  </div>
-                  <div className="flex justify-center space-x-4 text-xs text-gray-400">
+              <div className="bg-gray-700 rounded-lg p-4 h-32">
+                <div className="flex items-end justify-between h-full">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                    <div key={i} className="w-4 bg-purple-500 rounded" style={{height: `${Math.random() * 40 + 20}px`}}></div>
+                  ))}
+                </div>
+                <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-400">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                     <span>Expenses</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                     <span>Compare to last month</span>
                   </div>
                 </div>
@@ -98,28 +113,28 @@ function InsightTrends() {
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                       <span className="text-white">Food & Drink</span>
                     </div>
-                    <span className="text-gray-400">48%</span>
+                    <span className="text-white">48%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
                       <span className="text-white">Grocery</span>
                     </div>
-                    <span className="text-gray-400">32%</span>
+                    <span className="text-white">32%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                       <span className="text-white">Shopping</span>
                     </div>
-                    <span className="text-gray-400">13%</span>
+                    <span className="text-white">13%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
                       <span className="text-white">Transport</span>
                     </div>
-                    <span className="text-gray-400">7%</span>
+                    <span className="text-white">7%</span>
                   </div>
                 </div>
               </div>
@@ -128,77 +143,83 @@ function InsightTrends() {
         </div>
       </section>
 
-      {/* Car Information Section */}
+      {/* Car Visualization Section */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
-            {/* 3D View / Parts Overview */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="flex space-x-4 mb-6">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded">3D view</button>
-                <button className="px-4 py-2 bg-gray-700 text-gray-300 rounded hover:bg-gray-600">Scheme view</button>
+            {/* 3D Car Model */}
+            <div>
+              <div className="flex space-x-4 mb-4">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">3D view</button>
+                <button className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm">Scheme view</button>
               </div>
-              <div className="bg-gray-700 rounded-lg p-8 mb-4">
-                <div className="w-full h-64 bg-gradient-to-br from-gray-600 to-gray-500 rounded flex items-center justify-center">
-                  <span className="text-gray-400">🚗 3D Car Model</span>
+              
+              <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
+                <div className="relative h-64 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center">
+                  {/* 3D Car Model */}
+                  <div className="relative w-48 h-24 bg-white rounded-lg transform rotate-12">
+                    <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-300 rounded-full opacity-80"></div>
+                    <div className="absolute -top-1 left-8 w-3 h-3 bg-yellow-300 rounded-full opacity-80"></div>
+                    <div className="absolute -bottom-1 right-4 w-2 h-2 bg-yellow-300 rounded-full opacity-80"></div>
+                    <div className="absolute top-1/2 left-2 w-2 h-2 bg-black rounded-full"></div>
+                    <div className="absolute top-1/2 right-2 w-2 h-2 bg-black rounded-full"></div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white">Parts overview</span>
-                <div className="flex space-x-2">
+                
+                {/* Rotation Control */}
+                <div className="mt-4 flex items-center justify-between">
                   <button className="text-gray-400 hover:text-white">←</button>
-                  <div className="w-32 h-1 bg-gray-600 rounded"></div>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                      <div key={i} className="w-1 h-4 bg-gray-600 rounded"></div>
+                    ))}
+                  </div>
                   <button className="text-gray-400 hover:text-white">→</button>
                 </div>
+                
+                <p className="text-gray-400 text-sm mt-2">Parts overview</p>
               </div>
             </div>
 
-            {/* General Information */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            {/* Car Information */}
+            <div>
               <h3 className="text-white text-xl font-semibold mb-6">General information</h3>
               
-              <div className="bg-gray-700 rounded-lg p-4 mb-6">
-                <div className="w-full h-32 bg-gradient-to-r from-gray-600 to-gray-500 rounded flex items-center justify-center relative">
-                  <span className="text-gray-400">🚗 Car Diagram</span>
-                  <div className="absolute top-2 right-2 bg-white text-black px-2 py-1 rounded text-xs">
-                    NM-2546
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h4 className="text-white font-semibold">Audi A4, 2008</h4>
+                    <p className="text-gray-400 text-sm">1.8L SVT (160H/P), SEDAN • 120,500 MILES DRIVEN • GASOLINE</p>
                   </div>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-white font-semibold">Audi A4, 2008</h4>
-                  <p className="text-gray-400 text-sm">1.8L SVT (160H/P), SEDAN • 120,500 MILES DRIVEN • GASOLINE</p>
+                  <div className="bg-gray-700 px-3 py-1 rounded text-white text-sm">NM-2546</div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
-                  <button className="bg-gray-700 text-white p-3 rounded text-sm hover:bg-gray-600">👤 Driver information</button>
-                  <button className="bg-gray-700 text-white p-3 rounded text-sm hover:bg-gray-600">🚗 Car details</button>
-                  <button className="bg-gray-700 text-white p-3 rounded text-sm hover:bg-gray-600">⚠️ Accident details</button>
-                  <button className="bg-gray-700 text-white p-3 rounded text-sm hover:bg-gray-600">📋 Accident history</button>
+                <div className="flex space-x-2 mb-4">
+                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Driver information</button>
+                  <button className="px-3 py-2 bg-blue-600 text-white rounded text-sm">Car details</button>
+                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Accident details</button>
+                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Accident history</button>
                 </div>
                 
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <h5 className="text-white font-semibold">Uploaded photos (15)</h5>
-                    <button className="text-blue-400 text-sm hover:text-blue-300">View all ></button>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Uploaded photos (15)</h5>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className="w-full h-16 bg-gray-700 rounded flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">Photo {i}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <button className="text-blue-400 text-sm hover:text-blue-300">View all &gt;</button>
+                </div>
+                
+                <div className="grid grid-cols-6 gap-2 mt-2">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="w-12 h-8 bg-gray-600 rounded"></div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
+      
       <Footer />
     </div>
   );

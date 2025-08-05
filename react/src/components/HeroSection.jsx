@@ -15,26 +15,29 @@ function HeroSection() {
           </p>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="bg-purple-accent text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-600 transition-colors">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <button className="bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors">
               Get Started
             </button>
-            <button className="bg-transparent text-white border border-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-dark-blue transition-colors">
+            <button className="bg-transparent text-white border-2 border-gray-400 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-dark-blue transition-colors">
               How it works
             </button>
           </div>
         </div>
 
         {/* Car Image */}
-        <div className="mt-16 relative">
-          <div className="w-full max-w-4xl mx-auto">
-            <div className="bg-gray-300 rounded-lg p-8 relative">
-              <div className="text-center text-gray-600 font-semibold text-xl mb-4">
-                IONIQ 5
-              </div>
-              <div className="w-full h-64 bg-gradient-to-r from-gray-400 to-gray-300 rounded-lg flex items-center justify-center">
-                <img src={ioniq5} alt="Hyundai IONIQ 5" className="w-full h-full object-cover rounded-lg" />
-              </div>
+        <div className="relative">
+          <div className="w-full max-w-5xl mx-auto">
+            <div className="relative">
+              <img 
+                src={ioniq5} 
+                alt="Hyundai IONIQ 5" 
+                className="w-full h-auto max-h-96 object-contain mx-auto"
+                style={{
+                  filter: 'brightness(1.1) contrast(1.1)',
+                  transform: 'perspective(1000px) rotateY(-5deg)'
+                }}
+              />
             </div>
           </div>
         </div>

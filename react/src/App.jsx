@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -11,17 +13,35 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/library" element={<AssetLibrary />} />
-        <Route path="/insights" element={<InsightTrends />} />
-        <Route path="/lab" element={<PrototypeLab />} />
-        <Route path="/chatbot" element={<Chatbot />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/library" element={
+            <ProtectedRoute>
+              <AssetLibrary />
+            </ProtectedRoute>
+          } />
+          <Route path="/insights" element={
+            <ProtectedRoute>
+              <InsightTrends />
+            </ProtectedRoute>
+          } />
+          <Route path="/lab" element={
+            <ProtectedRoute>
+              <PrototypeLab />
+            </ProtectedRoute>
+          } />
+          <Route path="/chatbot" element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

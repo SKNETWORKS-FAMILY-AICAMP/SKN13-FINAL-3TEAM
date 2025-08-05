@@ -4,25 +4,25 @@ function AboutSection() {
   const features = [
     {
       icon: '👤',
-      color: 'pink-accent',
+      color: 'green',
       title: 'User-Centered Design Support',
       description: 'Product designers can quickly analyze and understand the Voice of the Customer (VoC)'
     },
     {
       icon: '🛡️',
-      color: 'orange-accent',
+      color: 'orange',
       title: 'Preserve Hyundai\'s Brand Identity',
       description: 'sLLM trained on the company\'s unique design identity'
     },
     {
       icon: '📊',
-      color: 'blue-accent',
+      color: 'blue',
       title: 'Market-Driven Design Analysis',
       description: 'Incorporate automotive mechanisms, competitor/subsidiary products, and market trends'
     },
     {
       icon: '⚙️',
-      color: 'orange-accent',
+      color: 'purple',
       title: 'Personalized Prototype Generation',
       description: 'Generate images and designs based on various prompts'
     }
@@ -34,7 +34,7 @@ function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div>
-            <h3 className="text-purple-accent text-lg font-semibold mb-4">
+            <h3 className="text-green-400 text-lg font-semibold mb-4">
               About us
             </h3>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -53,7 +53,7 @@ function AboutSection() {
           {/* Right Content - Feature Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="bg-dark-blue rounded-lg p-6 border border-gray-700">
+              <div key={index} className="bg-dark-blue rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
                 <div className={`text-3xl mb-4`}>
                   {feature.icon}
                 </div>
@@ -63,7 +63,7 @@ function AboutSection() {
                 <p className="text-gray-400 text-sm mb-4">
                   {feature.description}
                 </p>
-                <button className="text-purple-accent hover:text-purple-400 transition-colors text-sm font-semibold">
+                <button className="text-purple-400 hover:text-purple-300 transition-colors text-sm font-semibold">
                   Learn More
                 </button>
               </div>

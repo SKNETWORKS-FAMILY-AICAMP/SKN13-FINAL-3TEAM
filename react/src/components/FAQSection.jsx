@@ -32,7 +32,7 @@ function FAQSection() {
     <section className="bg-dark-blue py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h3 className="text-green-accent text-lg font-semibold mb-4">
+          <h3 className="text-green-400 text-lg font-semibold mb-4">
             FAQs
           </h3>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
