@@ -5,9 +5,10 @@
 # JJACKLETTE/urls.py
 
 from django.urls import path
-from .views import VLMGenerateCaptionView
+from .views import VLMGenerateCaptionView, ExaoneGenerateTextView
 
 urlpatterns = [
     # ... (기존의 다른 URL 패턴들)
     path('vlm-caption/', VLMGenerateCaptionView.as_view(), name='vlm-caption'),
+    path('generate-text/', ExaoneGenerateTextView.as_view(), name='generate-text'),
 ]

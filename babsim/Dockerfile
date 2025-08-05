@@ -32,6 +32,11 @@ COPY . /app/
 # RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 # CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"] # If Nginx is separate
 
+
+# 로컬에 있는 엑사원 모델 폴더를 컨테이너 안으로 복사
+# 이 과정이 Docker 빌드 단계에서 모델을 컨테이너에 포함시킵니다.
+COPY JJACKLETTE/models/exaone_4.0_1.2b /app/JJACKLETTE/models/exaone_4.0_1.2b
+
 # Gunicorn을 통한 Django 애플리케이션 실행 명령어
 # Nginx와 Gunicorn을 별도 컨테이너로 분리하므로, 이 컨테이너는 Gunicorn만 실행합니다.
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
