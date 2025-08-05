@@ -1,0 +1,12 @@
+Django
+djangorestframework
+gunicorn
+# Python-PostgreSQL 연결을 위한 드라이버 (현재 사용하지 않더라도 나중에 필요할 수 있습니다)
+psycopg2-binary
+# Hugging Face Transformers 라이브러리
+transformers
+# LLM 모델을 위한 PyTorch
+torch
+# Qdrant 클라이언트
+qdrant_client
+python-dotenv

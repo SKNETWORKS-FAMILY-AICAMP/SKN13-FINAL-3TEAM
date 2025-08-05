@@ -134,6 +134,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경�
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
+
+# Hugging Face 모델은 폴더명을 지정합니다.
+CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b' # <-- 파인튜닝되면 바꾸기
+
+CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
+
 
 # CORS 설정 (React 프론트엔드와 통신을 위해 필수)
 CORS_ALLOWED_ORIGINS = [
