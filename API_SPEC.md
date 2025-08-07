@@ -13,9 +13,11 @@
 
 ### 0. 주요 기능<br>
 1. Users 테이블 관련 API<br>
-1.1 로그인<br>
-1.2 유저 정보 조회<br>
-1.3 유저 정보 수정<br>
+1.1 회원가입<br>
+1.2 로그인<br>
+1.3 로그아웃<br>
+1.4 유저 정보 조회<br>
+1.5 유저 정보 수정<br>
 
 2. Chat_session 테이블 관련 API<br>
 2.1 유저별 챗봇 세션 조회<br>
@@ -109,7 +111,25 @@
 }
 ```
 
-#### 1.3 유저 정보 조회
+
+#### 1.3 로그아웃
+**POST** `/auth/logout/`
+
+**Request Body:**
+```json
+{
+  "refresh_token": "string"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "로그아웃 성공"
+}
+```
+
+#### 1.4 유저 정보 조회
 **GET** `/users/profile/`
 
 **Headers:**
@@ -128,7 +148,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
-#### 1.4 유저 정보 수정
+#### 1.5 유저 정보 수정
 **PUT** `/users/profile/`
 
 **Headers:**
