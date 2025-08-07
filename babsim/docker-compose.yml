@@ -1,0 +1,65 @@
+services:
+  # Django + Gunicorn 서비스
+  django_gunicorn:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트
+      - /app/node_modules # frontend/node_modules는 호스트에서 제외
+      # ----------------------------------------------------------------------
+      # Exaone 모델 폴더를 컨테이너 내부 경로로 마운트합니다.
+      # 호스트 경로: ./JJACKLETTE/models/exaone_4.0_1.2b
+      # 컨테이너 내부 경로: /app/JJACKLETTE/models/exaone_4.0_1.2b
+      - ./JJACKLETTE/models/exaone_4.0_1.2b:/app/JJACKLETTE/models/exaone_4.0_1.2b
+      # ----------------------------------------------------------------------
+      - ./data:/app/data
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    environment:
+      - VLM_API_URL=http://<your-pod-ip>:8000/generate_caption/
+    # depends_on: --> qdrant 사용 시
+    #   - db
+    #   - qdrant
+
+  # Nginx 서비스
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80" # 호스트의 80번 포트를 컨테이너의 80번 포트에 매핑
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro # Nginx 설정 파일 마운트
+      - ./frontend/build:/usr/share/nginx/html:ro      # React 빌드 결과물 마운트
+    depends_on:
+      - django_gunicorn # Django Gunicorn 서비스에 의존성 설정
+
+  # PostgreSQL 서비스
+  db:
+    image: postgres:15-alpine # 경량 PostgreSQL 이미지
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # 데이터 영속성 유지
+    env_file:
+      - .env # .env 파일에서 DB 환경 변수 로드
+    expose:
+      - "5432" # 다른 컨테이너에서 접근할 포트
+
+  # Qdrant 서비스
+  qdrant:
+    image: qdrant/qdrant:latest # Qdrant 이미지
+    volumes:
+      - qdrant_data:/qdrant/storage # 데이터 영속성 유지
+    env_file:
+      - .env # .env 파일에서 Qdrant 환경 변수 로드
+    expose:
+      - "6333" # Qdrant REST API 포트
+      - "6334" # Qdrant gRPC API 포트
+    ports: # (선택 사항) 호스트에서 Qdrant UI/API에 직접 접근하려면 주석 해제
+      - "6333:6333"
+      - "6334:6334"
+
+# Docker 볼륨 정의 (데이터 영속성을 위함)
+volumes:
+  postgres_data:
+  qdrant_data:
