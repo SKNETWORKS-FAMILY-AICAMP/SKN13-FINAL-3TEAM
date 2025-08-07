@@ -1,8 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { 
+  getCarModels, 
+  getCarModelDetail, 
+  getDesignMaterials, 
+  getEngineeringSpecs, 
+  getSalesStats, 
+  getUserReviews 
+} from '../services/insightService';
 
 function InsightTrends() {
+  const [carModels, setCarModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [modelDetail, setModelDetail] = useState(null);
+  const [filterType, setFilterType] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    loadCarModels();
+  }, [currentPage, filterType, filterYear]);
+
+  useEffect(() => {
+    if (selectedModel) {
+      loadModelDetail(selectedModel.car_model_id);
+    }
+  }, [selectedModel]);
+
+  const loadCarModels = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getCarModels(filterType, filterYear, currentPage, 10);
+      setCarModels(response.results || []);
+    } catch (error) {
+      console.error('차량 모델 로드 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadModelDetail = async (modelId) => {
+    try {
+      const response = await getCarModelDetail(modelId);
+      setModelDetail(response);
+    } catch (error) {
+      console.error('모델 상세 정보 로드 실패:', error);
+    }
+  };
+
+  const handleModelSelect = (model) => {
+    setSelectedModel(model);
+    setActiveTab('overview');
+  };
+
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+    loadCarModels();
+  };
+
   return (
     <div className="min-h-screen" style={{backgroundColor: '#353745'}}>
       <Header />
@@ -32,189 +90,261 @@ function InsightTrends() {
         </div>
       </section>
 
-      {/* Dashboard Widgets */}
+      {/* Main Content */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             
-            {/* Revenue Widget */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-white text-xl font-semibold">Revenue</h3>
-                <button className="text-blue-400 text-sm hover:text-blue-300">View Report</button>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">Data from 1-12 Apr, 2024</p>
-              <div className="bg-gray-700 rounded-lg p-4 h-32">
-                <div className="flex items-end justify-between h-full">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <div className="w-3 bg-green-500 rounded-t" style={{height: `${Math.random() * 30 + 10}px`}}></div>
-                      <div className="w-3 bg-purple-500 rounded-t mt-1" style={{height: `${Math.random() * 25 + 8}px`}}></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-400">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span>Income</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <span>Expense</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Daily Expenses Widget */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-white text-xl font-semibold">Daily Expenses</h3>
-                <button className="text-blue-400 text-sm hover:text-blue-300">View Report</button>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">Data from 1-12 Apr, 2024</p>
-              <div className="bg-gray-700 rounded-lg p-4 h-32">
-                <div className="flex items-end justify-between h-full">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                    <div key={i} className="w-4 bg-purple-500 rounded" style={{height: `${Math.random() * 40 + 20}px`}}></div>
-                  ))}
-                </div>
-                <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-400">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <span>Expenses</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                    <span>Compare to last month</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Summary Widget */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-white text-xl font-semibold">Summary</h3>
-                <button className="text-blue-400 text-sm hover:text-blue-300">View Report</button>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">Data from 1-12 Apr, 2024</p>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-white">$8,295</div>
-                  <div className="flex items-center justify-center text-green-400 text-sm">
-                    <span>↓</span>
-                    <span className="ml-1">2.1%</span>
-                  </div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="text-white">Food & Drink</span>
-                    </div>
-                    <span className="text-white">48%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
-                      <span className="text-white">Grocery</span>
-                    </div>
-                    <span className="text-white">32%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                      <span className="text-white">Shopping</span>
-                    </div>
-                    <span className="text-white">13%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
-                      <span className="text-white">Transport</span>
-                    </div>
-                    <span className="text-white">7%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Car Visualization Section */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            {/* 3D Car Model */}
-            <div>
-              <div className="flex space-x-4 mb-4">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">3D view</button>
-                <button className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm">Scheme view</button>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
-                <div className="relative h-64 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center">
-                  {/* 3D Car Model */}
-                  <div className="relative w-48 h-24 bg-white rounded-lg transform rotate-12">
-                    <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-300 rounded-full opacity-80"></div>
-                    <div className="absolute -top-1 left-8 w-3 h-3 bg-yellow-300 rounded-full opacity-80"></div>
-                    <div className="absolute -bottom-1 right-4 w-2 h-2 bg-yellow-300 rounded-full opacity-80"></div>
-                    <div className="absolute top-1/2 left-2 w-2 h-2 bg-black rounded-full"></div>
-                    <div className="absolute top-1/2 right-2 w-2 h-2 bg-black rounded-full"></div>
-                  </div>
-                </div>
+            {/* Left Sidebar - Car Models */}
+            <div className="lg:col-span-1">
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-white text-xl font-semibold mb-4">차량 모델</h3>
                 
-                {/* Rotation Control */}
-                <div className="mt-4 flex items-center justify-between">
-                  <button className="text-gray-400 hover:text-white">←</button>
-                  <div className="flex space-x-1">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                      <div key={i} className="w-1 h-4 bg-gray-600 rounded"></div>
+                {/* Filters */}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-2">차종</label>
+                    <select
+                      value={filterType}
+                      onChange={(e) => {
+                        setFilterType(e.target.value);
+                        handleFilterChange();
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                    >
+                      <option value="">전체</option>
+                      <option value="SUV">SUV</option>
+                      <option value="세단">세단</option>
+                      <option value="해치백">해치백</option>
+                      <option value="왜건">왜건</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-2">출시 연도</label>
+                    <select
+                      value={filterYear}
+                      onChange={(e) => {
+                        setFilterYear(e.target.value);
+                        handleFilterChange();
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                    >
+                      <option value="">전체</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                      <option value="2022">2022</option>
+                      <option value="2021">2021</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Car Models List */}
+                <div className="space-y-2">
+                  {isLoading ? (
+                    <div className="text-center text-gray-400">로딩 중...</div>
+                  ) : carModels.length === 0 ? (
+                    <div className="text-center text-gray-400">차량 모델이 없습니다.</div>
+                  ) : (
+                    carModels.map((model) => (
+                      <div
+                        key={model.car_model_id}
+                        onClick={() => handleModelSelect(model)}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          selectedModel?.car_model_id === model.car_model_id
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-white hover:bg-gray-600'
+                        }`}
+                      >
+                        <h4 className="font-semibold">{model.car_name}</h4>
+                        <p className="text-sm opacity-70">{model.type} • {model.release_year}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content - Model Details */}
+            <div className="lg:col-span-3">
+              {selectedModel ? (
+                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                  {/* Model Header */}
+                  <div className="p-6 border-b border-gray-700">
+                    <h2 className="text-white text-2xl font-semibold">{selectedModel.car_name}</h2>
+                    <p className="text-gray-400">{selectedModel.type} • {selectedModel.release_year} 출시</p>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex border-b border-gray-700">
+                    {[
+                      { id: 'overview', label: '개요' },
+                      { id: 'materials', label: '디자인 재질' },
+                      { id: 'specs', label: '공학적 스펙' },
+                      { id: 'sales', label: '판매 통계' },
+                      { id: 'reviews', label: '사용자 리뷰' }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-6 py-3 text-sm font-medium transition-colors ${
+                          activeTab === tab.id
+                            ? 'text-blue-400 border-b-2 border-blue-400'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
                     ))}
                   </div>
-                  <button className="text-gray-400 hover:text-white">→</button>
-                </div>
-                
-                <p className="text-gray-400 text-sm mt-2">Parts overview</p>
-              </div>
-            </div>
 
-            {/* Car Information */}
-            <div>
-              <h3 className="text-white text-xl font-semibold mb-6">General information</h3>
-              
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="text-white font-semibold">Audi A4, 2008</h4>
-                    <p className="text-gray-400 text-sm">1.8L SVT (160H/P), SEDAN • 120,500 MILES DRIVEN • GASOLINE</p>
+                  {/* Tab Content */}
+                  <div className="p-6">
+                    {activeTab === 'overview' && modelDetail && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="bg-gray-700 rounded-lg p-4">
+                            <h4 className="text-white font-semibold mb-3">디자인 재질</h4>
+                            <div className="space-y-2">
+                              {modelDetail.design_materials?.slice(0, 3).map((material) => (
+                                <div key={material.material_id} className="flex justify-between">
+                                  <span className="text-gray-300">{material.material_type}</span>
+                                  <span className="text-gray-400">{material.usage_area}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-700 rounded-lg p-4">
+                            <h4 className="text-white font-semibold mb-3">공학적 스펙</h4>
+                            {modelDetail.engineering_specs?.[0] && (
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-300">CD 값</span>
+                                  <span className="text-gray-400">{modelDetail.engineering_specs[0].cd_value}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-300">중량</span>
+                                  <span className="text-gray-400">{modelDetail.engineering_specs[0].weight}kg</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-300">알루미늄 비율</span>
+                                  <span className="text-gray-400">{modelDetail.engineering_specs[0].material_al_ratio * 100}%</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-700 rounded-lg p-4">
+                          <h4 className="text-white font-semibold mb-3">사용자 리뷰 요약</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {modelDetail.user_reviews?.slice(0, 3).map((review) => (
+                              <div key={review.review_id} className="text-center">
+                                <div className="text-2xl font-bold text-white">{review.sentiment_score}</div>
+                                <div className="text-gray-400 text-sm">평점</div>
+                                <div className="text-gray-300 text-xs mt-1">{review.mentioned_features}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'materials' && (
+                      <div className="space-y-4">
+                        <h3 className="text-white text-lg font-semibold">디자인 재질 정보</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {modelDetail?.design_materials?.map((material) => (
+                            <div key={material.material_id} className="bg-gray-700 rounded-lg p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-white font-medium">{material.material_type}</span>
+                                <span className="text-blue-400 text-sm">{material.usage_area}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'specs' && (
+                      <div className="space-y-4">
+                        <h3 className="text-white text-lg font-semibold">공학적 스펙</h3>
+                        {modelDetail?.engineering_specs?.[0] && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-700 rounded-lg p-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-white">{modelDetail.engineering_specs[0].cd_value}</div>
+                                <div className="text-gray-400">CD 값</div>
+                              </div>
+                            </div>
+                            <div className="bg-gray-700 rounded-lg p-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-white">{modelDetail.engineering_specs[0].weight}kg</div>
+                                <div className="text-gray-400">중량</div>
+                              </div>
+                            </div>
+                            <div className="bg-gray-700 rounded-lg p-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-white">{modelDetail.engineering_specs[0].material_al_ratio * 100}%</div>
+                                <div className="text-gray-400">알루미늄 비율</div>
+                              </div>
+                            </div>
+                            <div className="bg-gray-700 rounded-lg p-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-white">{modelDetail.engineering_specs[0].pedestrian_safety_score}</div>
+                                <div className="text-gray-400">보행자 안전 점수</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'sales' && (
+                      <div className="space-y-4">
+                        <h3 className="text-white text-lg font-semibold">판매 통계</h3>
+                        <div className="bg-gray-700 rounded-lg p-4">
+                          <div className="flex items-end justify-between h-32">
+                            {modelDetail?.sales_stats?.map((sale) => (
+                              <div key={`${sale.year}-${sale.month}`} className="flex flex-col items-center">
+                                <div 
+                                  className="w-8 bg-blue-500 rounded-t" 
+                                  style={{height: `${(sale.units_sold / 2000) * 100}px`}}
+                                ></div>
+                                <div className="text-gray-400 text-xs mt-1">{sale.month}월</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'reviews' && (
+                      <div className="space-y-4">
+                        <h3 className="text-white text-lg font-semibold">사용자 리뷰</h3>
+                        <div className="space-y-3">
+                          {modelDetail?.user_reviews?.map((review) => (
+                            <div key={review.review_id} className="bg-gray-700 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <div className="text-yellow-400">★</div>
+                                  <span className="text-white font-medium">{review.sentiment_score}</span>
+                                </div>
+                              </div>
+                              <p className="text-gray-300 text-sm">{review.mentioned_features}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-gray-700 px-3 py-1 rounded text-white text-sm">NM-2546</div>
                 </div>
-                
-                <div className="flex space-x-2 mb-4">
-                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Driver information</button>
-                  <button className="px-3 py-2 bg-blue-600 text-white rounded text-sm">Car details</button>
-                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Accident details</button>
-                  <button className="px-3 py-2 bg-gray-700 text-gray-300 rounded text-sm">Accident history</button>
+              ) : (
+                <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 text-center">
+                  <p className="text-gray-400">차량 모델을 선택해주세요.</p>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h5 className="text-white font-semibold mb-2">Uploaded photos (15)</h5>
-                  </div>
-                  <button className="text-blue-400 text-sm hover:text-blue-300">View all &gt;</button>
-                </div>
-                
-                <div className="grid grid-cols-6 gap-2 mt-2">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="w-12 h-8 bg-gray-600 rounded"></div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
