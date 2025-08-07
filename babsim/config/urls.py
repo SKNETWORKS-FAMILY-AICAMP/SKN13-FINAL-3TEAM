@@ -15,8 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from JJACKLETTE import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.chatbot_page, name='chatbot_page'),
+
+    # 2. API 경로 ('/api/chat/')를 ChatbotAPIView와 직접 연결
+    path('api/chat/', views.ChatbotAPIView.as_view(), name='chatbot_api'),
 ]
