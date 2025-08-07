@@ -5,7 +5,7 @@
 데이터베이스 설계문서를 기반으로 실제 테이블 구조에 맞춰 API를 구성합니다.
 
 ## 기본 정보
-- **Base URL**: `http://localhost:8000/api/v1`
+- **Base URL**: `http://localhost:8000/api`
 - **Content-Type**: `application/json`
 - **인증 방식**: JWT Token (Bearer Token)
 
@@ -277,7 +277,7 @@ Authorization: Bearer <access_token>
       "prompt_id": "uuid",
       "result_type": "text|image|3d|4d",
       "result_path": "string",
-      "text_result": "string"
+      "result": "string"
     }
   ]
 }
@@ -297,7 +297,7 @@ Authorization: Bearer <access_token>
   "prompt_id": "uuid",
   "result_type": "text|image|3d|4d",
   "result_path": "string",
-  "text_result": "string"
+  "result": "string"
 }
 ```
 
@@ -308,7 +308,7 @@ Authorization: Bearer <access_token>
   "prompt_id": "uuid",
   "result_type": "text",
   "result_path": "string",
-  "text_result": "string"
+  "result": "string"
 }
 ```
 
