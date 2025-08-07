@@ -11,6 +11,50 @@
 
 ## 데이터베이스 구조 기반 API
 
+### 0. 주요 기능<br>
+1. Users 테이블 관련 API<br>
+1.1 로그인<br>
+1.2 유저 정보 조회<br>
+1.3 유저 정보 수정<br>
+
+2. Chat_session 테이블 관련 API<br>
+2.1 유저별 챗봇 세션 조회<br>
+2.2 챗봇 세션 생성<br>
+2.3 챗봇 세션 종료<br>
+
+3. Prompt_log 테이블 관련 API<br>
+3.1 세션별 프롬프트 로그 조회<br>
+3.2 프롬프트 로그 생성<br>
+
+4. Generated_result 테이블 관련 API<br>
+4.1 프롬프트별 생성 결과 조회<br>
+4.2 생성 결과 저장<br>
+
+5. Asset_library 테이블 관련 APi<br>
+5.1 디자인 자료 목록 조회<br>
+5.2 디자인 자료 업로드<br>
+
+6. Library_comments 테이블 관련 API<br>
+6.1 라이브러리 댓글 조회<br>
+6.2 댓글 작성<br>
+
+7. Insight_trends 테이블 관련 API<br>
+7.1 차량 모델 목록 조회<br>
+7.2 특정 차량 모델 상세 정보<br>
+
+8. Design_material 테이블 관련 API<br>
+8.1 차량별 디자인 재질 정보 조회<br>
+
+9. Engineering_spec 테이블 관련 API<br>
+9.1 차량별 공학적 스펙 조회<br>
+
+10. Sales_stat 테이블 관련 API<br>
+10.1 차량별 판매 통계 조회<br>
+
+11. User_review 테이블 관련 API<br>
+11.1 차량별 사용자 리뷰 조회<br>
+
+
 ### 1. Users 테이블 관련 API
 
 #### 1.1 회원가입
