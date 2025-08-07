@@ -1,6 +1,8 @@
 import { createMockResponse } from './mockData';
+import { apiRequest } from './authService';
+import httpLogger from '../utils/httpLogger';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api';
 const USE_MOCK_DATA = true;
 
 // 목업 데이터
@@ -33,25 +35,63 @@ const mockGeneratedResults = [
   }
 ];
 
+// HTTP 요청 시뮬레이션 함수
+const simulateHttpRequest = async (url, options, mockData) => {
+  const requestId = httpLogger.logRequest(url, options, mockData);
+
+  console.log('🌐 HTTP 요청 시뮬레이션:', {
+    url,
+    method: options.method,
+    headers: options.headers,
+    body: options.body
+  });
+
+  // 실제 fetch 요청을 보내지만 목업 응답을 반환
+  try {
+    const response = await fetch(url, options);
+    console.log('📡 실제 HTTP 요청 전송됨:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url
+    });
+    httpLogger.logResponse(requestId, response);
+  } catch (error) {
+    console.log('❌ 네트워크 오류 (예상됨 - Django 서버가 실행되지 않음):', error.message);
+    httpLogger.logResponse(requestId, null, error);
+  }
+
+  // 목업 응답 반환
+  const mockResponse = await createMockResponse(mockData);
+  console.log('✅ 목업 응답 반환:', mockData);
+  return mockResponse;
+};
+
 // 챗봇 세션 관련 API
 export const getChatSessions = async (page = 1, pageSize = 10) => {
+  const mockData = {
+    count: mockChatSessions.length,
+    next: null,
+    previous: null,
+    results: mockChatSessions
+  };
+
   if (USE_MOCK_DATA) {
-    const mockResponse = await createMockResponse({
-      count: mockChatSessions.length,
-      next: null,
-      previous: null,
-      results: mockChatSessions
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/sessions/?page=${page}&page_size=${pageSize}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/sessions/?page=${page}&page_size=${pageSize}`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/?page=${page}&page_size=${pageSize}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -61,26 +101,36 @@ export const getChatSessions = async (page = 1, pageSize = 10) => {
 };
 
 export const createChatSession = async () => {
+  const newSession = {
+    session_id: `session-${Date.now()}`,
+    user_id: 'user-1',
+    started_at: new Date().toISOString(),
+    ended_at: null
+  };
+  mockChatSessions.push(newSession);
+
+  const mockData = newSession;
+
   if (USE_MOCK_DATA) {
-    const newSession = {
-      session_id: `session-${Date.now()}`,
-      user_id: 'user-1',
-      started_at: new Date().toISOString(),
-      ended_at: null
-    };
-    mockChatSessions.push(newSession);
-    
-    const mockResponse = await createMockResponse(newSession, 201);
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/sessions/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({
+          started_at: new Date().toISOString()
+        })
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/sessions/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
       body: JSON.stringify({
         started_at: new Date().toISOString()
       })
@@ -93,26 +143,36 @@ export const createChatSession = async () => {
 };
 
 export const endChatSession = async (sessionId) => {
+  const session = mockChatSessions.find(s => s.session_id === sessionId);
+  if (session) {
+    session.ended_at = new Date().toISOString();
+  }
+
+  const mockData = {
+    message: '세션이 종료되었습니다.',
+    session: session
+  };
+
   if (USE_MOCK_DATA) {
-    const session = mockChatSessions.find(s => s.session_id === sessionId);
-    if (session) {
-      session.ended_at = new Date().toISOString();
-    }
-    
-    const mockResponse = await createMockResponse({
-      message: '세션이 종료되었습니다.',
-      session: session
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/sessions/${sessionId}/end/`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({
+          ended_at: new Date().toISOString()
+        })
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}/end/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/end/`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
       body: JSON.stringify({
         ended_at: new Date().toISOString()
       })
@@ -126,24 +186,31 @@ export const endChatSession = async (sessionId) => {
 
 // 프롬프트 로그 관련 API
 export const getPromptLogs = async (sessionId, page = 1, pageSize = 20) => {
+  const sessionLogs = mockPromptLogs.filter(log => log.session_id === sessionId);
+  const mockData = {
+    count: sessionLogs.length,
+    next: null,
+    previous: null,
+    results: sessionLogs
+  };
+
   if (USE_MOCK_DATA) {
-    const sessionLogs = mockPromptLogs.filter(log => log.session_id === sessionId);
-    const mockResponse = await createMockResponse({
-      count: sessionLogs.length,
-      next: null,
-      previous: null,
-      results: sessionLogs
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/sessions/${sessionId}/prompts/?page=${page}&page_size=${pageSize}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}/prompts/?page=${page}&page_size=${pageSize}`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/prompts/?page=${page}&page_size=${pageSize}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -153,27 +220,39 @@ export const getPromptLogs = async (sessionId, page = 1, pageSize = 20) => {
 };
 
 export const createPromptLog = async (sessionId, userPrompt, aiResponse) => {
+  const newPrompt = {
+    prompt_id: `prompt-${Date.now()}`,
+    session_id: sessionId,
+    user_prompt: userPrompt,
+    ai_response: aiResponse,
+    created_at: new Date().toISOString()
+  };
+  mockPromptLogs.push(newPrompt);
+
+  const mockData = newPrompt;
+
   if (USE_MOCK_DATA) {
-    const newPrompt = {
-      prompt_id: `prompt-${Date.now()}`,
-      session_id: sessionId,
-      user_prompt: userPrompt,
-      ai_response: aiResponse,
-      created_at: new Date().toISOString()
-    };
-    mockPromptLogs.push(newPrompt);
-    
-    const mockResponse = await createMockResponse(newPrompt, 201);
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/prompts/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_prompt: userPrompt,
+          ai_response: aiResponse
+        })
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/prompts/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/prompts/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
       body: JSON.stringify({
         session_id: sessionId,
         user_prompt: userPrompt,
@@ -189,22 +268,29 @@ export const createPromptLog = async (sessionId, userPrompt, aiResponse) => {
 
 // 생성 결과 관련 API
 export const getGeneratedResults = async (promptId) => {
+  const promptResults = mockGeneratedResults.filter(result => result.prompt_id === promptId);
+  const mockData = {
+    count: promptResults.length,
+    results: promptResults
+  };
+
   if (USE_MOCK_DATA) {
-    const promptResults = mockGeneratedResults.filter(result => result.prompt_id === promptId);
-    const mockResponse = await createMockResponse({
-      count: promptResults.length,
-      results: promptResults
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/prompts/${promptId}/results/`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/prompts/${promptId}/results/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/prompts/${promptId}/results/`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -214,27 +300,40 @@ export const getGeneratedResults = async (promptId) => {
 };
 
 export const createGeneratedResult = async (promptId, resultType, resultPath, result) => {
+  const newResult = {
+    result_id: `result-${Date.now()}`,
+    prompt_id: promptId,
+    result_type: resultType,
+    result_path: resultPath,
+    result: result
+  };
+  mockGeneratedResults.push(newResult);
+
+  const mockData = newResult;
+
   if (USE_MOCK_DATA) {
-    const newResult = {
-      result_id: `result-${Date.now()}`,
-      prompt_id: promptId,
-      result_type: resultType,
-      result_path: resultPath,
-      result: result
-    };
-    mockGeneratedResults.push(newResult);
-    
-    const mockResponse = await createMockResponse(newResult, 201);
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/chat/results/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({
+          prompt_id: promptId,
+          result_type: resultType,
+          result_path: resultPath,
+          result: result
+        })
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/results/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/results/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
       body: JSON.stringify({
         prompt_id: promptId,
         result_type: resultType,
@@ -251,6 +350,8 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 
 // 챗봇 메시지 전송 (AI 응답 시뮬레이션)
 export const sendChatMessage = async (sessionId, message) => {
+  console.log('💬 챗봇 메시지 전송:', { sessionId, message });
+  
   // 실제로는 AI 서비스와 연동
   const aiResponse = `현대차 디자인에 대한 질문이군요. ${message}에 대한 답변입니다.`;
   

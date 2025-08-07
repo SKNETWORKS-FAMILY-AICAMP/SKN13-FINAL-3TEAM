@@ -1,6 +1,7 @@
 import { createMockResponse } from './mockData';
+import { apiRequest } from './authService';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api';
 const USE_MOCK_DATA = true;
 
 // 목업 데이터
@@ -83,25 +84,70 @@ const mockUserReviews = [
   }
 ];
 
+// HTTP 요청 시뮬레이션 함수
+const simulateHttpRequest = async (url, options, mockData) => {
+  console.log('🌐 HTTP 요청 시뮬레이션:', {
+    url,
+    method: options.method,
+    headers: options.headers,
+    body: options.body
+  });
+
+  // 실제 fetch 요청을 보내지만 목업 응답을 반환
+  try {
+    const response = await fetch(url, options);
+    console.log('📡 실제 HTTP 요청 전송됨:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url
+    });
+  } catch (error) {
+    console.log('❌ 네트워크 오류 (예상됨 - Django 서버가 실행되지 않음):', error.message);
+  }
+
+  // 목업 응답 반환
+  const mockResponse = await createMockResponse(mockData);
+  console.log('✅ 목업 응답 반환:', mockData);
+  return mockResponse;
+};
+
 // 차량 모델 관련 API
 export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSize = 10) => {
+  let filteredModels = mockCarModels;
+  
+  if (type) {
+    filteredModels = filteredModels.filter(model => model.type === type);
+  }
+  if (releaseYear) {
+    filteredModels = filteredModels.filter(model => model.release_year === parseInt(releaseYear));
+  }
+  
+  const mockData = {
+    count: filteredModels.length,
+    next: null,
+    previous: null,
+    results: filteredModels
+  };
+
   if (USE_MOCK_DATA) {
-    let filteredModels = mockCarModels;
-    
-    if (type) {
-      filteredModels = filteredModels.filter(model => model.type === type);
-    }
-    if (releaseYear) {
-      filteredModels = filteredModels.filter(model => model.release_year === parseInt(releaseYear));
-    }
-    
-    const mockResponse = await createMockResponse({
-      count: filteredModels.length,
-      next: null,
-      previous: null,
-      results: filteredModels
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString()
     });
-    return await mockResponse.json();
+    if (type) params.append('type', type);
+    if (releaseYear) params.append('release_year', releaseYear);
+
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/?${params}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
@@ -112,12 +158,8 @@ export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSi
     if (type) params.append('type', type);
     if (releaseYear) params.append('release_year', releaseYear);
 
-    const response = await fetch(`${API_BASE_URL}/insights/models/?${params}`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/?${params}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -127,34 +169,41 @@ export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSi
 };
 
 export const getCarModelDetail = async (carModelId) => {
+  const carModel = mockCarModels.find(model => model.car_model_id === carModelId);
+  if (!carModel) {
+    throw new Error('차량 모델을 찾을 수 없습니다.');
+  }
+
+  const materials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
+  const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
+  const sales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
+  const reviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
+
+  const mockData = {
+    ...carModel,
+    design_materials: materials,
+    engineering_specs: specs,
+    sales_stats: sales,
+    user_reviews: reviews
+  };
+
   if (USE_MOCK_DATA) {
-    const carModel = mockCarModels.find(model => model.car_model_id === carModelId);
-    if (!carModel) {
-      throw new Error('차량 모델을 찾을 수 없습니다.');
-    }
-
-    const materials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
-    const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
-    const sales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
-    const reviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
-
-    const mockResponse = await createMockResponse({
-      ...carModel,
-      design_materials: materials,
-      engineering_specs: specs,
-      sales_stats: sales,
-      user_reviews: reviews
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/${carModelId}/`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/insights/models/${carModelId}/`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -165,21 +214,36 @@ export const getCarModelDetail = async (carModelId) => {
 
 // 디자인 재질 관련 API
 export const getDesignMaterials = async (carModelId, materialType = '', usageArea = '') => {
+  let filteredMaterials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
+  
+  if (materialType) {
+    filteredMaterials = filteredMaterials.filter(mat => mat.material_type === materialType);
+  }
+  if (usageArea) {
+    filteredMaterials = filteredMaterials.filter(mat => mat.usage_area === usageArea);
+  }
+  
+  const mockData = {
+    count: filteredMaterials.length,
+    results: filteredMaterials
+  };
+
   if (USE_MOCK_DATA) {
-    let filteredMaterials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
-    
-    if (materialType) {
-      filteredMaterials = filteredMaterials.filter(mat => mat.material_type === materialType);
-    }
-    if (usageArea) {
-      filteredMaterials = filteredMaterials.filter(mat => mat.usage_area === usageArea);
-    }
-    
-    const mockResponse = await createMockResponse({
-      count: filteredMaterials.length,
-      results: filteredMaterials
-    });
-    return await mockResponse.json();
+    const params = new URLSearchParams();
+    if (materialType) params.append('material_type', materialType);
+    if (usageArea) params.append('usage_area', usageArea);
+
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/${carModelId}/materials/?${params}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
@@ -187,12 +251,8 @@ export const getDesignMaterials = async (carModelId, materialType = '', usageAre
     if (materialType) params.append('material_type', materialType);
     if (usageArea) params.append('usage_area', usageArea);
 
-    const response = await fetch(`${API_BASE_URL}/insights/models/${carModelId}/materials/?${params}`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/materials/?${params}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -203,22 +263,29 @@ export const getDesignMaterials = async (carModelId, materialType = '', usageAre
 
 // 공학적 스펙 관련 API
 export const getEngineeringSpecs = async (carModelId) => {
+  const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
+  const mockData = {
+    count: specs.length,
+    results: specs
+  };
+
   if (USE_MOCK_DATA) {
-    const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
-    const mockResponse = await createMockResponse({
-      count: specs.length,
-      results: specs
-    });
-    return await mockResponse.json();
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/${carModelId}/specs/`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/insights/models/${carModelId}/specs/`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/specs/`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -229,21 +296,39 @@ export const getEngineeringSpecs = async (carModelId) => {
 
 // 판매 통계 관련 API
 export const getSalesStats = async (carModelId, year = '', month = '', page = 1, pageSize = 12) => {
+  let filteredSales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
+  
+  if (year) {
+    filteredSales = filteredSales.filter(sale => sale.year === parseInt(year));
+  }
+  if (month) {
+    filteredSales = filteredSales.filter(sale => sale.month === parseInt(month));
+  }
+  
+  const mockData = {
+    count: filteredSales.length,
+    results: filteredSales
+  };
+
   if (USE_MOCK_DATA) {
-    let filteredSales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
-    
-    if (year) {
-      filteredSales = filteredSales.filter(sale => sale.year === parseInt(year));
-    }
-    if (month) {
-      filteredSales = filteredSales.filter(sale => sale.month === parseInt(month));
-    }
-    
-    const mockResponse = await createMockResponse({
-      count: filteredSales.length,
-      results: filteredSales
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString()
     });
-    return await mockResponse.json();
+    if (year) params.append('year', year);
+    if (month) params.append('month', month);
+
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/${carModelId}/sales/?${params}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
@@ -254,12 +339,8 @@ export const getSalesStats = async (carModelId, year = '', month = '', page = 1,
     if (year) params.append('year', year);
     if (month) params.append('month', month);
 
-    const response = await fetch(`${API_BASE_URL}/insights/models/${carModelId}/sales/?${params}`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/sales/?${params}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {
@@ -270,21 +351,39 @@ export const getSalesStats = async (carModelId, year = '', month = '', page = 1,
 
 // 사용자 리뷰 관련 API
 export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentimentScoreMax = '', page = 1, pageSize = 10) => {
+  let filteredReviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
+  
+  if (sentimentScoreMin) {
+    filteredReviews = filteredReviews.filter(review => review.sentiment_score >= parseFloat(sentimentScoreMin));
+  }
+  if (sentimentScoreMax) {
+    filteredReviews = filteredReviews.filter(review => review.sentiment_score <= parseFloat(sentimentScoreMax));
+  }
+  
+  const mockData = {
+    count: filteredReviews.length,
+    results: filteredReviews
+  };
+
   if (USE_MOCK_DATA) {
-    let filteredReviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
-    
-    if (sentimentScoreMin) {
-      filteredReviews = filteredReviews.filter(review => review.sentiment_score >= parseFloat(sentimentScoreMin));
-    }
-    if (sentimentScoreMax) {
-      filteredReviews = filteredReviews.filter(review => review.sentiment_score <= parseFloat(sentimentScoreMax));
-    }
-    
-    const mockResponse = await createMockResponse({
-      count: filteredReviews.length,
-      results: filteredReviews
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString()
     });
-    return await mockResponse.json();
+    if (sentimentScoreMin) params.append('sentiment_score_min', sentimentScoreMin);
+    if (sentimentScoreMax) params.append('sentiment_score_max', sentimentScoreMax);
+
+    return await simulateHttpRequest(
+      `${API_BASE_URL}/insights/models/${carModelId}/reviews/?${params}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      },
+      mockData
+    ).then(response => response.json());
   }
 
   try {
@@ -295,12 +394,8 @@ export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentime
     if (sentimentScoreMin) params.append('sentiment_score_min', sentimentScoreMin);
     if (sentimentScoreMax) params.append('sentiment_score_max', sentimentScoreMax);
 
-    const response = await fetch(`${API_BASE_URL}/insights/models/${carModelId}/reviews/?${params}`, {
+    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/reviews/?${params}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
     });
     return await response.json();
   } catch (error) {

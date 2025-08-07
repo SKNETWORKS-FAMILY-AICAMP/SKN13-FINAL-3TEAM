@@ -13,14 +13,99 @@ import {
   checkEmailExists
 } from './mockData';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
 const USE_MOCK_DATA = true;
 
+// 사용자 정보 수정 API
+export const updateUserProfile = async (userData) => {
+  if (USE_MOCK_DATA) {
+    // 목업 데이터 사용
+    try {
+      // 현재 사용자 정보 가져오기
+      const currentUser = JSON.parse(localStorage.getItem('mockUsers') || '[]').find(
+        user => user.e_mail === userData.e_mail
+      );
+      
+      if (!currentUser) {
+        return {
+          success: false,
+          error: '사용자를 찾을 수 없습니다.',
+        };
+      }
+
+      // 사용자 정보 업데이트
+      const updatedUser = {
+        ...currentUser,
+        user_name: userData.user_name || currentUser.user_name,
+        e_mail: userData.e_mail || currentUser.e_mail,
+        phone_number: userData.phone_number || currentUser.phone_number,
+        company: userData.company || currentUser.company,
+        department: userData.department || currentUser.department,
+        position: userData.position || currentUser.position,
+      };
+
+      // 로컬 스토리지 업데이트
+      const users = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+      const updatedUsers = users.map(user => 
+        user.e_mail === currentUser.e_mail ? updatedUser : user
+      );
+      localStorage.setItem('mockUsers', JSON.stringify(updatedUsers));
+
+      const mockResponse = await createMockResponse({
+        success: true,
+        user: updatedUser,
+        message: '사용자 정보가 성공적으로 업데이트되었습니다.',
+      });
+      
+      return await mockResponse.json();
+    } catch (error) {
+      return {
+        success: false,
+        error: '사용자 정보 수정 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  // 실제 API 호출
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/auth/profile/update/`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      return {
+        success: true,
+        user: data.user,
+        message: data.message || '사용자 정보가 성공적으로 업데이트되었습니다.',
+      };
+    } else {
+      return {
+        success: false,
+        error: data.message || '사용자 정보 수정에 실패했습니다.',
+      };
+    }
+  } catch (error) {
+    console.error('Update user profile error:', error);
+    return {
+      success: false,
+      error: '사용자 정보 수정 중 오류가 발생했습니다.',
+    };
+  }
+};
+
 // 토큰 저장
 const setToken = (token) => {
   localStorage.setItem('access_token', token);
+};
+
+// refresh token 저장
+const setRefreshToken = (refreshToken) => {
+  localStorage.setItem('refresh_token', refreshToken);
 };
 
 // 토큰 가져오기
@@ -28,9 +113,15 @@ const getToken = () => {
   return localStorage.getItem('access_token');
 };
 
+// refresh token 가져오기
+const getRefreshToken = () => {
+  return localStorage.getItem('refresh_token');
+};
+
 // 토큰 삭제
 const removeToken = () => {
   localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 };
 
 // API 요청 헤더 생성
@@ -54,6 +145,7 @@ export const login = async (email, password) => {
       
       // 토큰 저장
       setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
       
       return {
         success: true,
@@ -93,6 +185,7 @@ export const login = async (email, password) => {
 
     // 토큰 저장
     setToken(data.access_token);
+    setRefreshToken(data.refresh_token);
     
     return {
       success: true,
@@ -196,9 +289,14 @@ export const logout = async () => {
 
   // 실제 API 호출
   try {
+    const refreshToken = getRefreshToken();
+    
     const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
       method: 'POST',
       headers: getAuthHeaders(),
+      body: JSON.stringify({
+        refresh_token: refreshToken,
+      }),
     });
 
     if (response.ok) {
@@ -293,6 +391,7 @@ export const refreshToken = async (refreshToken) => {
     const data = await mockResponse.json();
     
     setToken(data.access_token);
+    setRefreshToken(data.refresh_token);
     
     return {
       success: true,
@@ -320,6 +419,7 @@ export const refreshToken = async (refreshToken) => {
     }
 
     setToken(data.access_token);
+    setRefreshToken(data.refresh_token);
     
     return {
       success: true,
@@ -349,7 +449,61 @@ export const getMockUsers = () => {
 export const resetMockData = () => {
   localStorage.removeItem('mockUsers');
   localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
   window.location.reload();
+};
+
+// HTTP 요청 인터셉터 (토큰 자동 갱신)
+export const apiRequest = async (url, options = {}) => {
+  const token = getToken();
+  const refreshTokenValue = getRefreshToken();
+  
+  // 기본 헤더 설정
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...options.headers,
+  };
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    // 401 에러가 발생하고 refresh token이 있는 경우
+    if (response.status === 401 && refreshTokenValue) {
+      try {
+        const refreshResult = await refreshToken(refreshTokenValue);
+        if (refreshResult.success) {
+          // 새로운 토큰으로 재시도
+          const newHeaders = {
+            'Content-Type': 'application/json',
+            ...(refreshResult.access_token && { Authorization: `Bearer ${refreshResult.access_token}` }),
+            ...options.headers,
+          };
+
+          const retryResponse = await fetch(url, {
+            ...options,
+            headers: newHeaders,
+          });
+
+          return retryResponse;
+        } else {
+          // 토큰 갱신 실패 시 로그아웃
+          removeToken();
+          throw new Error('토큰이 만료되었습니다. 다시 로그인해주세요.');
+        }
+      } catch (refreshError) {
+        removeToken();
+        throw new Error('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
+      }
+    }
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export default {
@@ -357,8 +511,10 @@ export default {
   register,
   logout,
   getUserProfile,
+  updateUserProfile,
   isAuthenticated,
   refreshToken,
   getMockUsers,
   resetMockData,
+  apiRequest,
 }; 
