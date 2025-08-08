@@ -16,11 +16,7 @@ def load_model():
     if model is not None:
         return
 
-    # ---▼▼▼ 바로 이 한 줄이 모든 문제의 핵심입니다! ▼▼▼---
-    # 컨테이너 내부 경로를 정확하게 지정합니다.
-    # 슬래시(/)를 사용하고, PC의 C: 드라이브 경로는 절대 쓰지 않습니다.
-    model_path = "/app/model/exaone_4.0_1.2b"
-    # ---▲▲▲ 이 한 줄만 올바르게 수정하면 됩니다 ▲▲▲---
+    model_path = "models/exaone_4.0_1.2b"
     # model_path = "LGAI-EXAONE/EXAONE-4.0-1.2B"
 
     # 이전 로그를 보니, PC의 `.../models` 폴더 안에 `exaone-4.0-1.2b` 폴더를 두신 것 같습니다.

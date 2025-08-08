@@ -9,7 +9,6 @@ from .apps import JjackletteConfig
 
 logger = logging.getLogger(__name__)
 
-# @sync_to_async 데코레이터 제거
 def generate_response(user_input: str) -> str:
     """
     완전한 동기 방식으로 작동하는 LLM 응답 생성 함수
