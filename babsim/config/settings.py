@@ -39,12 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'corsheaders',
     'JJACKLETTE',
-    'rest_framework'
+    'rest_framework',
     'rest_framework_simplejwt',
-    'simplejwt_logout'
+    'rest_framework_simplejwt.token_blacklist',
+    
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -158,7 +160,7 @@ AUTH_USER_MODEL = 'JJACKLETTE.Users'
 # CORS 설정 (React 프론트엔드와 통신을 위해 필수)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", # React 개발 서버 주소
-    "http://locahhost:5173", # Vite 기본 포트
+    "http://localhost:5173", # Vite 기본 포트
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173"
     # "http://localhost", # Nginx를 통한 접근 (배포 환경)

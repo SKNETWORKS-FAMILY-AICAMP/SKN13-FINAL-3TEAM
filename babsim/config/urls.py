@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from JJACKLETTE import views
 from rest_framework_simplejwt.views import TokenRefreshView
-from JJACKLETTE.serializers import MyTokenObtainPairSerializer
+    path('api/auth/logout/', views.LogoutAPIView.as_view(), name='logout'),
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -33,7 +33,7 @@ urlpatterns = [
     path('api/auth/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # React 코드의 refreshToken과 일치
     path('api/users/profile/', views.UserProfileAPIView.as_view(), name='user_profile'),
-    path('api/auth/logout/', BlacklistTokenView.as_view(), name='token_blacklist'),
+    
     path('api/auth/profile/update/', views.UserProfileAPIView.as_view(), name='user_profile_update'),
 
     # 2. 채팅 API (chatService.js)

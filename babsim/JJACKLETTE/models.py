@@ -1,11 +1,6 @@
 from django.db import models
-
-# PostgreSQL에 저장될 데이터 모델들을 정의
-# 예를 들어, 아이템 정보, 사용자 정보 등
-# 벡터 임베딩 값을 저장해야 한다면, VectorField (별도 라이브러리 필요) 또는
-# ArrayField (PostgreSQL의 배열 필드)를 사용하여 임베딩 값을 저장할 수 있습니다.
-from django.db import models
 import uuid
+from django.contrib.auth.models import AbstractUser
 
 # 1. design_material
 class DesignMaterial(models.Model):
@@ -49,12 +44,11 @@ class InsightTrends(models.Model):
     type = models.CharField(max_length=50)
     release_year = models.IntegerField()
 
-# 6. users
-class Users(models.Model):
+# 6. users (Custom User Model)
+class Users(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    password = models.CharField(max_length=50)
-    user_name = models.CharField(max_length=50)
-    e_mail = models.CharField(max_length=50)
+    # AbstractUser가 기본적으로 제공하는 필드 (username, email, password)는 제거
+    # user_name -> username, e_mail -> email 로 매핑됨
     created_at = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(null=True, blank=True)
 
@@ -72,7 +66,6 @@ class PromptLog(models.Model):
     user_prompt = models.TextField()
     ai_response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-# ai_response: max_length 255 -> textfield로 수정
 
 # 9. generated_result
 class GeneratedResult(models.Model):

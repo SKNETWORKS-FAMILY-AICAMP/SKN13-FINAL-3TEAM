@@ -12,6 +12,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import *
 from .models import *
+from rest_framework_simplejwt.tokens import RefreshToken
+
 # from .llm_interface import generate_response
 
 # def chatbot_page(request):
@@ -44,6 +46,19 @@ class UserProfileAPIView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({"message": "사용자 정보가 성공적으로 업데이트되었습니다.", "user": serializer.data}, status=status.HTTP_200_OK)
+
+# 로그아웃 (토큰 블랙리스트 방식)
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # 채팅 API View        
 # 채팅 세션 목록 조회 및 새 세션 생성 API (/api/chat/sessions/)
