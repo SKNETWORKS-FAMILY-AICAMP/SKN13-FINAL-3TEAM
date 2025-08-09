@@ -1,28 +1,24 @@
+version: '3.8'
+
 services:
   # Django + Gunicorn 서비스
   django_gunicorn:
     build:
-      context: .
+      context: . # Dockerfile이 있는 현재 디렉토리
       dockerfile: Dockerfile
+    # command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 # Dockerfile CMD 대체 가능
     volumes:
-      - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트
-      - /app/node_modules # frontend/node_modules는 호스트에서 제외
-      # ----------------------------------------------------------------------
-      # Exaone 모델 폴더를 컨테이너 내부 경로로 마운트합니다.
-      # 호스트 경로: ./JJACKLETTE/models/exaone_4.0_1.2b
-      # 컨테이너 내부 경로: /app/JJACKLETTE/models/exaone_4.0_1.2b
-      - ./JJACKLETTE/models/exaone_4.0_1.2b:/app/JJACKLETTE/models/exaone_4.0_1.2b
-      # ----------------------------------------------------------------------
-      - ./data:/app/data
+      - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트 (개발 시 코드 변경 반영)
+      - /app/node_modules # frontend/node_modules는 호스트에서 제외 (volume으로 덮어쓰지 않음)
+      - ./models:/app/models:ro
+
     expose:
-      - "8000"
+      - "8000" # Nginx에서 접근할 포트
     env_file:
-      - .env
-    environment:
-      - VLM_API_URL=http://<your-pod-ip>:8000/generate_caption/
-    # depends_on: --> qdrant 사용 시
-    #   - db
-    #   - qdrant
+      - .env # .env 파일에서 환경 변수 로드
+    depends_on:
+      - postgres # PostgreSQL 컨테이너에 의존성 설정
+      - qdrant # Qdrant 컨테이너에 의존성 설정
 
   # Nginx 서비스
   nginx:
@@ -36,7 +32,7 @@ services:
       - django_gunicorn # Django Gunicorn 서비스에 의존성 설정
 
   # PostgreSQL 서비스
-  db:
+  postgres:
     image: postgres:15-alpine # 경량 PostgreSQL 이미지
     volumes:
       - postgres_data:/var/lib/postgresql/data # 데이터 영속성 유지

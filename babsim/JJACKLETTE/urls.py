@@ -5,10 +5,15 @@
 # JJACKLETTE/urls.py
 
 from django.urls import path
-from .views import VLMGenerateCaptionView, ExaoneGenerateTextView
+from . import views
 
 urlpatterns = [
-    # ... (기존의 다른 URL 패턴들)
-    path('vlm-caption/', VLMGenerateCaptionView.as_view(), name='vlm-caption'),
-    path('generate-text/', ExaoneGenerateTextView.as_view(), name='generate-text'),
+    # 챗봇 UI 페이지를 보여주는 URL
+    # 예: http://localhost:8000/chatbot/
+    path('', views.chatbot_page, name='chatbot_page'),
+
+    # 챗봇 API와 통신하는 URL
+    # 예: http://localhost:8000/chatbot/api/
+    # 클래스 기반 뷰(APIView)를 사용했으므로, .as_view()를 꼭 붙여줘야 합니다.
+    path('api/', views.ChatbotAPIView.as_view(), name='chatbot_api'),
 ]

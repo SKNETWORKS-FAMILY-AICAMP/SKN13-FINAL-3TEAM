@@ -37,11 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'corsheaders',
     'JJACKLETTE',
+    'rest_framework'
+    'rest_framework_simplejwt',
+    'simplejwt_logout'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -141,12 +145,25 @@ CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b' # <-- 파인튜닝되면 바꾸기
 
 CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
 
+# Custom User Model
+AUTH_USER_MODEL = 'JJACKLETTE.Users'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+AUTH_USER_MODEL = 'JJACKLETTE.Users'
 
 # CORS 설정 (React 프론트엔드와 통신을 위해 필수)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", # React 개발 서버 주소
+    "http://locahhost:5173", # Vite 기본 포트
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173"
     # "http://localhost", # Nginx를 통한 접근 (배포 환경)
     # "http://your.domain.com", # 배포 시 실제 도메인
+
 ]
 CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True
 
