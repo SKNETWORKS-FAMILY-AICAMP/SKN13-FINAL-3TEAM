@@ -1,6 +1,16 @@
 from django.db import models
-import uuid
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+import uuid
+
+class Users(AbstractUser):
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # AbstractUser가 기본적으로 제공하는 필드 (username, email, password)는 제거
+    # user_name -> username, e_mail -> email 로 매핑됨
+    created_at = models.DateTimeField(null=True, blank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+
 
 # 1. design_material
 class DesignMaterial(models.Model):
@@ -44,20 +54,17 @@ class InsightTrends(models.Model):
     type = models.CharField(max_length=50)
     release_year = models.IntegerField()
 
-# 6. users (Custom User Model)
-class Users(AbstractUser):
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # AbstractUser가 기본적으로 제공하는 필드 (username, email, password)는 제거
-    # user_name -> username, e_mail -> email 로 매핑됨
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(null=True, blank=True)
-
 # 7. chat_session
 class ChatSession(models.Model):
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_id = models.ForeignKey('Users', on_delete=models.CASCADE)
+    user = models.ForeignKey(  # ← 변경: 필드명 user로 정리 + AUTH_USER_MODEL 사용
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_sessions"
+    )
+    title = models.CharField(max_length=200, blank=True)  # ← 변경: 세션 제목(선택)
+    # user_id = models.ForeignKey('Users', on_delete=models.CASCADE)
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True) # 변경: 세션 상태 플래그
 
 # 8. prompt_log
 class PromptLog(models.Model):

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,16 +38,18 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'corsheaders',
-    'JJACKLETTE',
+    'django.contrib.staticfiles',
+    
+    # 3rd
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    
+    'corsheaders',
+
+    'JJACKLETTE',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -135,12 +138,23 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경로
 
+# [ADDED] 생성 이미지 서빙을 위한 미디어 경로
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+EXAONE_MODEL_PATH = os.getenv("EXAONE_MODEL_PATH", str(BASE_DIR / "models" / "exaone_4.0_1.2b"))
+SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
+
+# CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b'
+# CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
 
 # Hugging Face 모델은 폴더명을 지정합니다.
 CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b' # <-- 파인튜닝되면 바꾸기
@@ -153,9 +167,24 @@ AUTH_USER_MODEL = 'JJACKLETTE.Users'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    # 기본 인증
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",  
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 20,
 }
 AUTH_USER_MODEL = 'JJACKLETTE.Users'
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # ← 추가: 토큰 수명
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # ← 추가
+    "ROTATE_REFRESH_TOKENS": True,                    # 로그아웃: refresh 회전 시 새 토큰 발급
+    "BLACKLIST_AFTER_ROTATION": True,                 # 로그아웃: 회전된 이전 refresh를 블랙리스트 처리
+    "AUTH_HEADER_TYPES": ("Bearer",),                 # ← 추가
+}
+
 
 # CORS 설정 (React 프론트엔드와 통신을 위해 필수)
 CORS_ALLOWED_ORIGINS = [
@@ -167,7 +196,22 @@ CORS_ALLOWED_ORIGINS = [
     # "http://your.domain.com", # 배포 시 실제 도메인
 
 ]
+
+# CSRF_TRUSTED_ORIGINS = [       # ← 추가: 폼/쿠키 기반 호출 시 필요
+#     "http://localhost:3000",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:3000",
+#     "http://127.0.0.1:5173",
+# ]
+
 CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},  # ← 추가: 콘솔 로깅
+    "root": {"handlers": ["console"], "level": "INFO"},            # ← 추가
+}
 
 # Qdrant/Milvus 설정 (services.py 등에서 사용)
 QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
