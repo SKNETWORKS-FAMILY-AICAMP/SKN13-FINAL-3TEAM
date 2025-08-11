@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXAONE LLM 챗봇</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; background-color: #f4f4f9; }
+        h1 { text-align: center; color: #333; }
+        #chat-window { background-color: #fff; border: 1px solid #ccc; height: 400px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        #chat-form { display: flex; }
+        #chat-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; }
+        #chat-submit { padding: 10px 15px; border: none; background-color: #007bff; color: white; cursor: pointer; border-radius: 0 5px 5px 0; }
+        .message { margin-bottom: 10px; white-space: pre-wrap; }
+        .message strong { color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>EXAONE LLM 챗봇</h1>
+    <div id="chat-window">
+        <p class="message"><strong>봇:</strong> 안녕하세요! 무엇이든 물어보세요.</p>
+    </div>
+    <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." autocomplete="off" required>
+        <button type="submit" id="chat-submit">전송</button>
+    </form>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatWindow = document.getElementById('chat-window');
+
+        chatForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            addMessage(userMessage, '사용자');
+            chatInput.value = '';
+            chatInput.disabled = true;
+
+            try {
+                // 1. API 주소 수정: /api/chatbot/ -> /api/chat/
+                const response = await fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                }
+
+                // 2. 응답 데이터 키 수정: data.reply -> data.response
+                addMessage(data.response, '봇');
+
+            } catch (error) {
+                console.error('API 요청 오류:', error);
+                addMessage(`오류가 발생했습니다: ${error.message}`, '봇');
+            } finally {
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        });
+
+        function addMessage(message, sender) {
+            const p = document.createElement('p');
+            p.className = 'message';
+            // message가 undefined일 경우를 대비한 방어 코드 추가
+            p.innerHTML = `<strong>${sender}:</strong> ${String(message || '응답 없음').replace(/\n/g, '<br>')}`;
+            chatWindow.appendChild(p);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+    </script>
+</body>
+</html>
