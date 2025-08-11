@@ -159,168 +159,113 @@
 
 > (구체적 폴더 구조와 각 디렉터리별 기능 및 예시 설명. 추후 작성)
 <br>
-📦ProjectRoot  
-┣ 📜.DS_Store  
-┣ 📜README.md  
-┣ 📂babsim  
-┃ ┣ 📜.DS_Store  
-┃ ┣ 📜.env  
-┃ ┣ 📜.gitignore  
-┃ ┣ 📜docker-compose.yml  
-┃ ┣ 📜Dockerfile  
-┃ ┣ 📜manage.py  
-┃ ┣ 📜nginx.conf  
-┃ ┣ 📜package-lock.json  
-┃ ┣ 📜requirements.txt  
-┃ ┣ 📜test_model.py  
-┃ ┣ 📂.vscode  
-┃ ┃ ┗ 📜settings.json  
-┃ ┣ 📂config  
-┃ ┃ ┣ 📜asgi.py  
-┃ ┃ ┣ 📜settings.py  
-┃ ┃ ┣ 📜urls.py  
-┃ ┃ ┣ 📜views.py  
-┃ ┃ ┣ 📜wsgi.py  
-┃ ┃ ┣ 📜__init__.py  
-┃ ┃ ┗ 📂__pycache__  
-┃ ┃   ┣ 📜settings.cpython-310.pyc  
-┃ ┃   ┣ ...  
-┃ ┣ 📂data  
-┃ ┃ ┗ 📜.DS_Store  
-┃ ┣ 📂frontend  
-┃ ┃ ┣ 📜.DS_Store  
-┃ ┃ ┗ 📂build  
-┃ ┃   ┣ 📜.DS_Store  
-┃ ┃   ┣ 📜.gitignore  
-┃ ┃   ┣ 📜index.html  
-┃ ┃   ┣ 📜vite.svg  
-┃ ┃   ┗ 📂assets  
-┃ ┃     ┣ 📜index-BjJceZ3H.js  
-┃ ┃     ┣ 📜index-tUhWM6ky.css  
-┃ ┃     ┗ 📜ioniq5-1E-ln0eX.png  
-┃ ┣ 📂JJACKLETTE  
-┃ ┃ ┣ 📜admin.py  
-┃ ┃ ┣ 📜apps.py  
-┃ ┃ ┣ 📜llm.py  
-┃ ┃ ┣ 📜llm_interface.py  
-┃ ┃ ┣ 📜models.py  
-┃ ┃ ┣ 📜serializers.py  
-┃ ┃ ┣ 📜services.py  
-┃ ┃ ┣ 📜tests.py  
-┃ ┃ ┣ 📜urls.py  
-┃ ┃ ┣ 📜views.py  
-┃ ┃ ┣ 📜__init__.py  
-┃ ┃ ┣ 📂management  
-┃ ┃ ┃ ┗ 📂commands  
-┃ ┃ ┃   ┣ 📜import_data.py  
-┃ ┃ ┃   ┗ 📂__pycache__  
-┃ ┃ ┣ 📂migrations  
-┃ ┃ ┃ ┣ 📜0001_initial.py  
-┃ ┃ ┃ ┣ 📜__init__.py  
-┃ ┃ ┃ ┗ 📂__pycache__  
-┃ ┃ ┣ 📂__pycache__  
-┃ ┃ ┃ ┣ 📜admin.cpython-310.pyc  
-┃ ┃ ┃ ┣ ...  
-┃ ┣ 📂models  
-┃ ┃ ┗ 📜.DS_Store  
-┃ ┣ 📂node_modules  
-┃ ┃ ┗ 📜.package-lock.json  
-┃ ┣ 📂scripts  
-┃ ┃ ┣ 📜embedding.py  
-┃ ┃ ┗ 📜preprocess.py  
-┃ ┣ 📂templates  
-┃ ┃ ┗ 📜home.html  
-┃ ┗ 📂text_data  
-┃   ┣ 📜.DS_Store  
-┃   ┗ 📂DB  
-┃     ┣ 📜hyundai_car_reviews.json  
-┃     ┗ 📂car_specs  
-┃       ┣ 📜Electrified G80.csv  
-┃       ┣ 📜Electrified GV70.csv  
-┃       ┣ 📜G70.csv  
-┃       ┣ ...  
-┣ 📂document  
-┃ ┣ 📜API_SPEC.md  
-┃ ┣ 📜chat_pipeline_5.png  
-┃ ┣ 📜jjacklette_ERD.png  
-┃ ┗ 📜System Architecture.pdf  
-┣ 📂evaluation  
-┃ ┣ 📜baseline_performance_report.md  
-┃ ┣ 📜base_model_evaluation_results.md  
-┃ ┣ 📜finetuned_evaluation_results.md  
-┃ ┗ 📜md.ipynb  
-┣ 📂image_data  
-┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024  
-┃ ┃ ┣ 📜Hyundai-45_EV_Concept-2019-thb.jpg  
-┃ ┃ ┣ ...  
-┃ ┗ 📂hyundai_images_nobg_cropped_1024  
-┃   ┣ 📜Large-36014-2021Sonata.jpg  
-┃   ┣ ...  
-┣ 📂react  
-┃ ┣ 📜.gitignore  
-┃ ┣ 📜eslint.config.js  
-┃ ┣ 📜index.html  
-┃ ┣ 📜package-lock.json  
-┃ ┣ 📜package.json  
-┃ ┣ 📜postcss.config.js  
-┃ ┣ 📜README.md  
-┃ ┣ 📜tailwind.config.js  
-┃ ┣ 📜vite.config.js  
-┃ ┣ 📂public  
-┃ ┃ ┗ 📜vite.svg  
-┃ ┗ 📂src  
-┃   ┣ 📜App.css  
-┃   ┣ 📜App.jsx  
-┃   ┣ 📜index.css  
-┃   ┣ 📜main.jsx  
-┃   ┣ 📂assets  
-┃   ┃ ┣ 📜ioniq5.png  
-┃   ┃ ┗ 📜react.svg  
-┃   ┣ 📂components  
-┃   ┃ ┣ 📜AboutSection.jsx  
-┃   ┃ ┣ ...  
-┃   ┣ 📂contexts  
-┃   ┃ ┗ 📜AuthContext.jsx  
-┃   ┣ 📂pages  
-┃   ┃ ┣ 📜AssetLibrary.jsx  
-┃   ┃ ┣ ...  
-┃   ┣ 📂services  
-┃   ┃ ┣ 📜authService.js  
-┃   ┃ ┣ ...  
-┃   ┗ 📂utils  
-┃     ┗ 📜httpLogger.js  
-┣ 📂SD-3.5  
-┃ ┗ 📜SD-3.5_load.ipynb  
-┣ 📂text_data  
-┃ ┣ 📜finetuning01.ipynb  
-┃ ┣ 📜hyundai_docs_parse.py  
-┃ ┣ 📜init_vectorDB.py  
-┃ ┣ ...  
-┃ ┣ 📂DB  
-┃ ┃ ┣ 📜hyundai_car_reviews.json  
-┃ ┃ ┗ 📂car_specs  
-┃ ┃   ┣ 📜Electrified G80.csv  
-┃ ┃   ┣ ...  
-┃ ┣ 📂finetuning  
-┃ ┃ ┣ 📜hyundai_journal_articles.txt  
-┃ ┃ ┣ ...  
-┃ ┣ 📂QA_context  
-┃ ┃ ┣ 📜hyundai_journal_articles.jsonl  
-┃ ┃ ┣ ...  
-┃ ┣ 📂QA_json  
-┃ ┃ ┣ 📜hyundai_journal_articles.json  
-┃ ┃ ┣ ...  
-┃ ┣ 📂RAG  
-┃ ┃ ┣ 📜hyundai_car_history.json  
-┃ ┃ ┣ ...  
-┃ ┗ 📂split_data  
-┃   ┣ 📜test.jsonl  
-┃   ┣ 📜train.jsonl  
-┃   ┗ 📜validation.jsonl  
-┗ 📂산출물  
-  ┣ 📜0.기획_프로젝트 기획서_3TEAM.pdf  
-  ┣ 📜1. 데이터 수집 및 저장_데이터 조회 프로그램_3TEAM.pdf  
-  ┣ 📜...  
+📦ProjectRoot<br>
+┣ 📜.DS_Store<br>
+┣ 📜README.md<br>
+┣ 📂babsim<br>
+┃ ┣ 📜.DS_Store<br>
+┃ ┣ 📜.env<br>
+┃ ┣ 📜.gitignore<br>
+┃ ┣ 📜docker-compose.yml<br>
+┃ ┣ 📜Dockerfile<br>
+┃ ┣ 📜manage.py<br>
+┃ ┣ 📜nginx.conf<br>
+┃ ┣ 📜package-lock.json<br>
+┃ ┣ 📜requirements.txt<br>
+┃ ┣ 📜test_model.py<br>
+┃ ┣ 📂.vscode<br>
+┃ ┃ ┗ 📜settings.json<br>
+┃ ┣ 📂config<br>
+┃ ┃ ┣ 📜asgi.py<br>
+┃ ┃ ┣ 📜settings.py<br>
+┃ ┃ ┣ 📜urls.py<br>
+┃ ┃ ┣ 📜views.py<br>
+┃ ┃ ┣ 📜wsgi.py<br>
+┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃   ┣ 📜settings.cpython-310.pyc<br>
+┃ ┃   ┣ ...<br>
+┃ ┣ 📂data<br>
+┃ ┃ ┗ 📜.DS_Store<br>
+┃ ┣ 📂frontend<br>
+┃ ┃ ┣ 📜.DS_Store<br>
+┃ ┃ ┗ 📂build<br>
+┃ ┃   ┣ 📜.DS_Store<br>
+┃ ┃   ┣ 📜.gitignore<br>
+┃ ┃   ┣ 📜index.html<br>
+┃ ┃   ┣ 📜vite.svg<br>
+┃ ┃   ┗ 📂assets<br>
+┃ ┃     ┣ 📜index-BjJceZ3H.js<br>
+┃ ┃     ┣ 📜index-tUhWM6ky.css<br>
+┃ ┃     ┗ 📜ioniq5-1E-ln0eX.png<br>
+┃ ┣ 📂JJACKLETTE<br>
+┃ ┃ ┣ 📜admin.py<br>
+┃ ┃ ┣ 📜apps.py<br>
+┃ ┃ ┣ 📜llm.py<br>
+┃ ┃ ┣ 📜llm_interface.py<br>
+┃ ┃ ┣ 📜models.py<br>
+┃ ┃ ┣ 📜serializers.py<br>
+┃ ┃ ┣ 📜services.py<br>
+┃ ┃ ┣ 📜tests.py<br>
+┃ ┃ ┣ 📜urls.py<br>
+┃ ┃ ┣ 📜views.py<br>
+┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┣ 📂management<br>
+┃ ┃ ┃ ┗ 📂commands<br>
+┃ ┃ ┃   ┣ 📜import_data.py<br>
+┃ ┃ ┃   ┗ 📂__pycache__<br>
+┃ ┃ ┣ 📂migrations<br>
+┃ ┃ ┃ ┣ 📜0001_initial.py<br>
+┃ ┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃ ┣ 📂__pycache__<br>
+┃ ┃ ┃ ┣ 📜admin.cpython-310.pyc<br>
+┃ ┃ ┃ ┣ ...<br>
+┃ ┣ 📂models<br>
+┃ ┃ ┗ 📜.DS_Store<br>
+┃ ┣ 📂node_modules<br>
+┃ ┃ ┗ 📜.package-lock.json<br>
+┃ ┣ 📂scripts<br>
+┃ ┃ ┣ 📜embedding.py<br>
+┃ ┃ ┗ 📜preprocess.py<br>
+┃ ┣ 📂templates<br>
+┃ ┃ ┗ 📜home.html<br>
+┃ ┗ 📂text_data<br>
+┃   ┣ 📜.DS_Store<br>
+┃   ┗ 📂DB<br>
+┃     ┣ 📜hyundai_car_reviews.json<br>
+┃     ┗ 📂car_specs<br>
+┃       ┣ 📜Electrified G80.csv<br>
+┃       ┣ 📜Electrified GV70.csv<br>
+┃       ┣ 📜G70.csv<br>
+┃       ┣ ...<br>
+┣ 📂document<br>
+┃ ┣ 📜API_SPEC.md<br>
+┃ ┣ 📜chat_pipeline_5.png<br>
+┃ ┣ 📜jjacklette_ERD.png<br>
+┃ ┗ 📜System Architecture.pdf<br>
+┣ 📂evaluation<br>
+┃ ┣ 📜baseline_performance_report.md<br>
+┃ ┣ 📜base_model_evaluation_results.md<br>
+┃ ┣ 📜finetuned_evaluation_results.md<br>
+┃ ┗ 📜md.ipynb<br>
+┣ 📂image_data<br>
+┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024<br>
+┃ ┃ ┣ 📜Hyundai-45_EV_Concept-2019-thb.jpg<br>
+┃ ┃ ┣ ...<br>
+┃ ┗ 📂hyundai_images_nobg_cropped_1024<br>
+┃   ┣ 📜Large-36014-2021Sonata.jpg<br>
+┃   ┣ ...<br>
+┣ 📂react<br>
+┃ ┣ 📜.gitignore<br>
+┃ ┣ 📜eslint.config.js<br>
+┃ ┣ 📜index.html<br>
+┃ ┣ 📜package-lock.json<br>
+┃ ┣ 📜package.json<br>
+┃ ┣ 📜postcss.config.js<br>
+┃ ┣ 📜README.md<br>
+┃ ┣ 📜tai
+
 
 
 ## 🐥 7. 모델 학습 결과서
