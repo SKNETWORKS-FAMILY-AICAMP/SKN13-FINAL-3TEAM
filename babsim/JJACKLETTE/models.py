@@ -53,7 +53,7 @@ class Users(AbstractUser):
     # AbstractUser가 기본적으로 제공하는 필드 (username, email, password)는 제거
     # user_name -> username, e_mail -> email 로 매핑됨
     created_at = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(null=True, bdlank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
     user_prompt = models.TextField()
     ai_response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
