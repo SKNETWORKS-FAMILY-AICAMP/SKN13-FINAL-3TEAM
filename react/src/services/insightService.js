@@ -111,6 +111,7 @@ const simulateHttpRequest = async (url, options, mockData) => {
   return mockResponse;
 };
 
+<<<<<<< HEAD
 // CSV 파일을 파싱하는 유틸리티 함수
 const parseCSV = (csvText) => {
   const lines = csvText.split('\n');
@@ -392,6 +393,8 @@ export const searchReviews = (carReviews, searchTerm, carName) => {
   });
 };
 
+=======
+>>>>>>> beb203adba0342a9db39c2d614aaa6f4b671d6fe
 // 차량 모델 관련 API
 export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSize = 10) => {
   let filteredModels = mockCarModels;
