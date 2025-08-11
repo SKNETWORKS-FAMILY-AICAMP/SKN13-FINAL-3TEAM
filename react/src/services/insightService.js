@@ -111,6 +111,287 @@ const simulateHttpRequest = async (url, options, mockData) => {
   return mockResponse;
 };
 
+// CSV 파일을 파싱하는 유틸리티 함수
+const parseCSV = (csvText) => {
+  const lines = csvText.split('\n');
+  if (lines.length < 2) return null;
+  
+  const headers = lines[0].split(',').map(h => h.trim());
+  const data = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim()) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      data.push(row);
+    }
+  }
+  
+  return { headers, data };
+};
+
+// Insight & Trends 서비스
+import carSpecsData from '../assets/insight_trends/car_specs';
+import carReviewsData from '../assets/insight_trends/hyundai_car_reviews.json';
+
+// 차량 스펙 데이터 로드
+export const loadCarSpecs = async () => {
+  try {
+    // CSV 파일들을 동적으로 import하여 데이터 로드
+    const specs = [];
+    
+    // 차량 스펙 데이터 처리
+    for (const [carName, specData] of Object.entries(carSpecsData)) {
+      if (specData && typeof specData === 'object') {
+        specs.push({
+          car_name: carName,
+          ...specData
+        });
+      }
+    }
+    
+    return specs;
+  } catch (error) {
+    console.error('차량 스펙 로드 실패:', error);
+    return [];
+  }
+};
+
+// 차량 리뷰 데이터 로드
+export const loadCarReviews = async () => {
+  try {
+    return carReviewsData || [];
+  } catch (error) {
+    console.error('차량 리뷰 로드 실패:', error);
+    return [];
+  }
+};
+
+// 차량 통계 생성
+export const generateCarStats = (carSpecs, carReviews) => {
+  try {
+    // 인기도 통계 (차량별 언급 횟수)
+    const popularityStats = [];
+    const carMentions = {};
+    
+    carReviews.forEach(review => {
+      const carName = review.car_name;
+      if (carName) {
+        carMentions[carName] = (carMentions[carName] || 0) + 1;
+      }
+    });
+    
+    Object.entries(carMentions)
+      .sort(([,a], [,b]) => b - a)
+      .forEach(([carName, count]) => {
+        popularityStats.push([carName, count]);
+      });
+
+    // 카테고리별 통계
+    const categoryStats = {};
+    carSpecs.forEach(spec => {
+      if (spec.category) {
+        categoryStats[spec.category] = (categoryStats[spec.category] || 0) + 1;
+      }
+    });
+
+    // 태그별 통계
+    const tagStats = {};
+    carReviews.forEach(review => {
+      if (review.tags) {
+        Object.entries(review.tags).forEach(([category, value]) => {
+          if (!tagStats[category]) tagStats[category] = {};
+          if (!tagStats[category][value]) tagStats[category][value] = 0;
+          tagStats[category][value]++;
+        });
+      }
+    });
+
+    return {
+      popularityStats,
+      categoryStats,
+      tagStats,
+      totalCars: carSpecs.length,
+      totalReviews: carReviews.length
+    };
+  } catch (error) {
+    console.error('통계 생성 실패:', error);
+    return {
+      popularityStats: [],
+      categoryStats: {},
+      tagStats: {},
+      totalCars: 0,
+      totalReviews: 0
+    };
+  }
+};
+
+// 차량별 상세 통계
+export const getCarDetailStats = (carName, carSpecs, carReviews) => {
+  try {
+    const carSpec = carSpecs.find(spec => 
+      spec.car_name.includes(carName) || carName.includes(spec.car_name.split(' ')[0])
+    );
+    
+    const carReviews = carReviews.filter(review => 
+      review.car_name.includes(carName) || carName.includes(review.car_name.split(' ')[0])
+    );
+
+    return {
+      spec: carSpec,
+      reviews: carReviews,
+      reviewCount: carReviews.length,
+      averageRating: carReviews.length > 0 
+        ? carReviews.reduce((sum, review) => sum + (review.rating || 0), 0) / carReviews.length 
+        : 0
+    };
+  } catch (error) {
+    console.error('차량 상세 통계 생성 실패:', error);
+    return null;
+  }
+};
+
+// 트렌드 키워드 분석
+export const analyzeTrends = (carReviews) => {
+  try {
+    const keywordCounts = {};
+    const sentimentTrends = {};
+    
+    carReviews.forEach(review => {
+      // 키워드 카운트
+      if (review.tags) {
+        Object.entries(review.tags).forEach(([category, value]) => {
+          const key = `${category}:${value}`;
+          keywordCounts[key] = (keywordCounts[key] || 0) + 1;
+        });
+      }
+      
+      // 감성 트렌드
+      if (review.rating) {
+        const year = new Date().getFullYear(); // 임시로 현재 연도 사용
+        if (!sentimentTrends[year]) sentimentTrends[year] = [];
+        sentimentTrends[year].push(review.rating);
+      }
+    });
+
+    // 상위 키워드 정렬
+    const topKeywords = Object.entries(keywordCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([key, count]) => {
+        const [category, value] = key.split(':');
+        return { category, value, count };
+      });
+
+    // 연도별 평균 평점
+    const yearlySentiment = Object.entries(sentimentTrends).map(([year, ratings]) => ({
+      year: parseInt(year),
+      averageRating: ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+    }));
+
+    return {
+      topKeywords,
+      yearlySentiment,
+      totalKeywords: Object.keys(keywordCounts).length
+    };
+  } catch (error) {
+    console.error('트렌드 분석 실패:', error);
+    return {
+      topKeywords: [],
+      yearlySentiment: [],
+      totalKeywords: 0
+    };
+  }
+};
+
+// 디자인 인사이트 생성
+export const generateDesignInsights = (carSpecs, carReviews) => {
+  try {
+    const insights = {
+      popularFeatures: [],
+      designTrends: [],
+      materialPreferences: [],
+      colorTrends: []
+    };
+
+    // 인기 기능 분석
+    const featureCounts = {};
+    carReviews.forEach(review => {
+      if (review.tags && review.tags.features) {
+        const features = Array.isArray(review.tags.features) 
+          ? review.tags.features 
+          : [review.tags.features];
+        
+        features.forEach(feature => {
+          featureCounts[feature] = (featureCounts[feature] || 0) + 1;
+        });
+      }
+    });
+
+    insights.popularFeatures = Object.entries(featureCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([feature, count]) => ({ feature, count }));
+
+    // 디자인 트렌드 분석
+    const designCounts = {};
+    carReviews.forEach(review => {
+      if (review.tags && review.tags.design) {
+        designCounts[review.tags.design] = (designCounts[review.tags.design] || 0) + 1;
+      }
+    });
+
+    insights.designTrends = Object.entries(designCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([design, count]) => ({ design, count }));
+
+    return insights;
+  } catch (error) {
+    console.error('디자인 인사이트 생성 실패:', error);
+    return {
+      popularFeatures: [],
+      designTrends: [],
+      materialPreferences: [],
+      colorTrends: []
+    };
+  }
+};
+
+// 차량 검색 기능
+export const searchCars = (carSpecs, searchTerm, category) => {
+  if (!searchTerm && category === 'all') return carSpecs;
+  
+  return carSpecs.filter(car => {
+    const matchesSearch = !searchTerm || 
+      car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      car.category.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = category === 'all' || car.category === category;
+    
+    return matchesSearch && matchesCategory;
+  });
+};
+
+// 리뷰 검색 기능
+export const searchReviews = (carReviews, searchTerm, carName) => {
+  if (!searchTerm && !carName) return carReviews;
+  
+  return carReviews.filter(review => {
+    const matchesSearch = !searchTerm || 
+      review.review.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.car_name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCar = !carName || 
+      review.car_name.toLowerCase().includes(carName.toLowerCase());
+    
+    return matchesSearch && matchesCar;
+  });
+};
+
 // 차량 모델 관련 API
 export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSize = 10) => {
   let filteredModels = mockCarModels;
