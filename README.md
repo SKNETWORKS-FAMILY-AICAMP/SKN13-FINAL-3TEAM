@@ -158,18 +158,205 @@
 ## 🐥 6. 폴더 구조 / 주요 폴더 설명
 
 > (구체적 폴더 구조와 각 디렉터리별 기능 및 예시 설명. 추후 작성)
+<br>
+📦ProjectRoot  
+┣ 📜.DS_Store  
+┣ 📜README.md  
+┣ 📂babsim  
+┃ ┣ 📜.DS_Store  
+┃ ┣ 📜.env  
+┃ ┣ 📜.gitignore  
+┃ ┣ 📜docker-compose.yml  
+┃ ┣ 📜Dockerfile  
+┃ ┣ 📜manage.py  
+┃ ┣ 📜nginx.conf  
+┃ ┣ 📜package-lock.json  
+┃ ┣ 📜requirements.txt  
+┃ ┣ 📜test_model.py  
+┃ ┣ 📂.vscode  
+┃ ┃ ┗ 📜settings.json  
+┃ ┣ 📂config  
+┃ ┃ ┣ 📜asgi.py  
+┃ ┃ ┣ 📜settings.py  
+┃ ┃ ┣ 📜urls.py  
+┃ ┃ ┣ 📜views.py  
+┃ ┃ ┣ 📜wsgi.py  
+┃ ┃ ┣ 📜__init__.py  
+┃ ┃ ┗ 📂__pycache__  
+┃ ┃   ┣ 📜settings.cpython-310.pyc  
+┃ ┃   ┣ ...  
+┃ ┣ 📂data  
+┃ ┃ ┗ 📜.DS_Store  
+┃ ┣ 📂frontend  
+┃ ┃ ┣ 📜.DS_Store  
+┃ ┃ ┗ 📂build  
+┃ ┃   ┣ 📜.DS_Store  
+┃ ┃   ┣ 📜.gitignore  
+┃ ┃   ┣ 📜index.html  
+┃ ┃   ┣ 📜vite.svg  
+┃ ┃   ┗ 📂assets  
+┃ ┃     ┣ 📜index-BjJceZ3H.js  
+┃ ┃     ┣ 📜index-tUhWM6ky.css  
+┃ ┃     ┗ 📜ioniq5-1E-ln0eX.png  
+┃ ┣ 📂JJACKLETTE  
+┃ ┃ ┣ 📜admin.py  
+┃ ┃ ┣ 📜apps.py  
+┃ ┃ ┣ 📜llm.py  
+┃ ┃ ┣ 📜llm_interface.py  
+┃ ┃ ┣ 📜models.py  
+┃ ┃ ┣ 📜serializers.py  
+┃ ┃ ┣ 📜services.py  
+┃ ┃ ┣ 📜tests.py  
+┃ ┃ ┣ 📜urls.py  
+┃ ┃ ┣ 📜views.py  
+┃ ┃ ┣ 📜__init__.py  
+┃ ┃ ┣ 📂management  
+┃ ┃ ┃ ┗ 📂commands  
+┃ ┃ ┃   ┣ 📜import_data.py  
+┃ ┃ ┃   ┗ 📂__pycache__  
+┃ ┃ ┣ 📂migrations  
+┃ ┃ ┃ ┣ 📜0001_initial.py  
+┃ ┃ ┃ ┣ 📜__init__.py  
+┃ ┃ ┃ ┗ 📂__pycache__  
+┃ ┃ ┣ 📂__pycache__  
+┃ ┃ ┃ ┣ 📜admin.cpython-310.pyc  
+┃ ┃ ┃ ┣ ...  
+┃ ┣ 📂models  
+┃ ┃ ┗ 📜.DS_Store  
+┃ ┣ 📂node_modules  
+┃ ┃ ┗ 📜.package-lock.json  
+┃ ┣ 📂scripts  
+┃ ┃ ┣ 📜embedding.py  
+┃ ┃ ┗ 📜preprocess.py  
+┃ ┣ 📂templates  
+┃ ┃ ┗ 📜home.html  
+┃ ┗ 📂text_data  
+┃   ┣ 📜.DS_Store  
+┃   ┗ 📂DB  
+┃     ┣ 📜hyundai_car_reviews.json  
+┃     ┗ 📂car_specs  
+┃       ┣ 📜Electrified G80.csv  
+┃       ┣ 📜Electrified GV70.csv  
+┃       ┣ 📜G70.csv  
+┃       ┣ ...  
+┣ 📂document  
+┃ ┣ 📜API_SPEC.md  
+┃ ┣ 📜chat_pipeline_5.png  
+┃ ┣ 📜jjacklette_ERD.png  
+┃ ┗ 📜System Architecture.pdf  
+┣ 📂evaluation  
+┃ ┣ 📜baseline_performance_report.md  
+┃ ┣ 📜base_model_evaluation_results.md  
+┃ ┣ 📜finetuned_evaluation_results.md  
+┃ ┗ 📜md.ipynb  
+┣ 📂image_data  
+┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024  
+┃ ┃ ┣ 📜Hyundai-45_EV_Concept-2019-thb.jpg  
+┃ ┃ ┣ ...  
+┃ ┗ 📂hyundai_images_nobg_cropped_1024  
+┃   ┣ 📜Large-36014-2021Sonata.jpg  
+┃   ┣ ...  
+┣ 📂react  
+┃ ┣ 📜.gitignore  
+┃ ┣ 📜eslint.config.js  
+┃ ┣ 📜index.html  
+┃ ┣ 📜package-lock.json  
+┃ ┣ 📜package.json  
+┃ ┣ 📜postcss.config.js  
+┃ ┣ 📜README.md  
+┃ ┣ 📜tailwind.config.js  
+┃ ┣ 📜vite.config.js  
+┃ ┣ 📂public  
+┃ ┃ ┗ 📜vite.svg  
+┃ ┗ 📂src  
+┃   ┣ 📜App.css  
+┃   ┣ 📜App.jsx  
+┃   ┣ 📜index.css  
+┃   ┣ 📜main.jsx  
+┃   ┣ 📂assets  
+┃   ┃ ┣ 📜ioniq5.png  
+┃   ┃ ┗ 📜react.svg  
+┃   ┣ 📂components  
+┃   ┃ ┣ 📜AboutSection.jsx  
+┃   ┃ ┣ ...  
+┃   ┣ 📂contexts  
+┃   ┃ ┗ 📜AuthContext.jsx  
+┃   ┣ 📂pages  
+┃   ┃ ┣ 📜AssetLibrary.jsx  
+┃   ┃ ┣ ...  
+┃   ┣ 📂services  
+┃   ┃ ┣ 📜authService.js  
+┃   ┃ ┣ ...  
+┃   ┗ 📂utils  
+┃     ┗ 📜httpLogger.js  
+┣ 📂SD-3.5  
+┃ ┗ 📜SD-3.5_load.ipynb  
+┣ 📂text_data  
+┃ ┣ 📜finetuning01.ipynb  
+┃ ┣ 📜hyundai_docs_parse.py  
+┃ ┣ 📜init_vectorDB.py  
+┃ ┣ ...  
+┃ ┣ 📂DB  
+┃ ┃ ┣ 📜hyundai_car_reviews.json  
+┃ ┃ ┗ 📂car_specs  
+┃ ┃   ┣ 📜Electrified G80.csv  
+┃ ┃   ┣ ...  
+┃ ┣ 📂finetuning  
+┃ ┃ ┣ 📜hyundai_journal_articles.txt  
+┃ ┃ ┣ ...  
+┃ ┣ 📂QA_context  
+┃ ┃ ┣ 📜hyundai_journal_articles.jsonl  
+┃ ┃ ┣ ...  
+┃ ┣ 📂QA_json  
+┃ ┃ ┣ 📜hyundai_journal_articles.json  
+┃ ┃ ┣ ...  
+┃ ┣ 📂RAG  
+┃ ┃ ┣ 📜hyundai_car_history.json  
+┃ ┃ ┣ ...  
+┃ ┗ 📂split_data  
+┃   ┣ 📜test.jsonl  
+┃   ┣ 📜train.jsonl  
+┃   ┗ 📜validation.jsonl  
+┗ 📂산출물  
+  ┣ 📜0.기획_프로젝트 기획서_3TEAM.pdf  
+  ┣ 📜1. 데이터 수집 및 저장_데이터 조회 프로그램_3TEAM.pdf  
+  ┣ 📜...  
 
----
 
 ## 🐥 7. 모델 학습 결과서
 
 > (파인튜닝/모델 실험 결과, 주요 지표, 예시 Q&A 등. 추후 작성)
+### 📊 SD-3.5-medium 파인튜닝 결과 요약
+모델: `stabilityai/stable-diffusion-3.5-medium` (LoRA 방식, SimpleTuner 사용, 시드값 42 고정)  
+데이터셋: 이미지-캡션 쌍 100개 (학습·테스트 동일)  
+목표: 베이스 vs 파인튜닝 모델 이미지 생성 품질 비교  
+평가 지표: CLIP Score, FID
+
+| 실험 | 학습 조건 | CLIP Score 변화 | FID 변화 | 분석 |
+|------|-----------|-----------------|----------|------|
+| 1차  | 2 epoch, 1000 steps | +1.1 ↑ | 10.59 → 4.03 | 품질 큰 폭 향상 |
+| 2차  | 5 epoch, 3000 steps | +0.4 ↑ | 10.59 → 8.63 | 개선 폭 감소, 과적합 가능성 |
+
+**결론:** 적절한 학습 스텝(1000~2000)에서 가장 효과적이며, 과도한 학습 시 품질 저하 우려, 총 이미지 데이터셋이 개수 걸맞게 에폭을 주면 될 것으로 예상.
 
 ---
 
 ## 🐥 8. 프로토타입
 
 > (프로토타입/서비스 구현 스크린샷, 핵심 기능별 예시 등. 추후 작성)
+<br>Home<br><img width="1617" height="1447" alt="Image" src="https://github.com/user-attachments/assets/7234b089-538c-4928-ad77-e54fd853bd6a" />
+<br>
+<br>Asset Library<br><img width="1617" height="1453" alt="Image" src="https://github.com/user-attachments/assets/46c11afd-71da-4326-9f60-fd7dfce95d38" />
+<br><세부 사항>
+<br>자료 내부<br><img width="1192" height="1206" alt="Image" src="https://github.com/user-attachments/assets/687319be-b494-470f-b188-4f6ae19fb2c1" />
+<br>
+<br>Insight & Trands<br><img width="797" height="1022" alt="Image" src="https://github.com/user-attachments/assets/10632320-88c8-4542-a0fe-4795aa7d7d66" />
+<br><세부 사항>
+<br>제원<br><img width="1009" height="877" alt="Image" src="https://github.com/user-attachments/assets/46ce8ab5-72b8-4425-994c-fbad7a1d6529" />
+<br>리뷰 분석<br><img width="1016" height="977" alt="Image" src="https://github.com/user-attachments/assets/a7cdb6cb-83a5-4a8d-b21e-2192c3bd4090" />
+<br>트렌드<br><img width="1007" height="479" alt="Image" src="https://github.com/user-attachments/assets/8448ea96-c815-4e74-91c0-e9236dcaa794" />
+<br>
+<br>Prototype Lab<br><img width="1632" height="1426" alt="Image" src="https://github.com/user-attachments/assets/440d2dd3-6de2-4531-89ee-44df5cd6b096" />
 
 ---
 
