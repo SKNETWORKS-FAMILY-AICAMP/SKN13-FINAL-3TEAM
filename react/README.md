@@ -97,6 +97,18 @@ src/
 
 `src/services/authService.js`에서 `USE_MOCK_DATA`를 `false`로 변경하면 실제 API 서버와 연동됩니다.
 
+### Unsplash API 설정 (커버 이미지 자동 생성)
+
+자산 업로드 시 커버 이미지를 자동으로 생성하려면 Unsplash API 키를 설정해야 합니다:
+
+1. [Unsplash Developers](https://unsplash.com/developers)에서 API 키 발급
+2. 프로젝트 루트에 `.env` 파일 생성
+3. 다음 내용 추가:
+   ```
+   VITE_UNSPLASH_ACCESS_KEY=YOUR_ACTUAL_API_KEY_HERE
+   ```
+4. API 키가 설정되지 않은 경우 기본 이미지가 사용됩니다
+
 ```javascript
 const USE_MOCK_DATA = false; // 실제 API 사용
 ```
