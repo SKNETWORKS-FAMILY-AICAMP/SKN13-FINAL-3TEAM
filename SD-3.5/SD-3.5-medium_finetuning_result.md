@@ -114,3 +114,28 @@
 - 학습 스텝 별 중간 체크포인트 저장 후 비교.
 - CLIP 외에도 **LPIPS**나 **Inception Score(IS)** 등 추가 지표 활용.
 - 다양한 프롬프트 스타일(짧은 문장, 세부 묘사 포함)로 평가 확장.
+
+
+## 6. 모델 출력 예시
+```python
+prompt = (
+    "designed by Hyundai, front left 3/4 view, long sleek silhouette, "
+    "aggressive LED headlamps, sculpted hood, parametric grille pattern, "
+    "dynamic side character lines, floating roof, frameless windows, "
+    "flush door handles, wide stance, concept lighting, premium metallic blue finish, high-tech minimalism"
+    
+)
+negative_prompt = (
+    "cartoon, illustration, sketch, anime, cgi, 3d render, "
+    "side view, rear view, top view, back view, cropped, truncated, incomplete, out of frame, "
+    "deformed, extra wheels, extra doors, text, watermark, logo, "
+    "outdoor, street, landscape, colored background, "
+    "cut, reflection, frame, border, blurry, low quality"
+)
+```
+
+- Base Model<br>
+<img width="1024" height="1024" alt="Image" src="https://github.com/user-attachments/assets/14317500-58ce-49eb-ad16-377ca6006333" />
+
+- LoRA Model<br>
+<img width="1024" height="1024" alt="Image" src="https://github.com/user-attachments/assets/46b1fac7-24a3-4c45-89ad-8c601d8c66da" />
