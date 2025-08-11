@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Django + Gunicorn 서비스
