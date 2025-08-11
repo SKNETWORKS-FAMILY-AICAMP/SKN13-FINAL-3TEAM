@@ -145,7 +145,7 @@
 ## 🐥 5. 파이프라인, 시스템 아키텍처, ERD
 
 🔧**파이프라인**  
-<img src="https://github.com/user-attachments/assets/7a8b04f2-009c-4dd5-b38d-27e0777590b3" width="800" alt="Pipeline"> <br>
+<img src="https://github.com/user-attachments/assets/ace36901-0056-4197-ad5b-1d7ccac15dba"" width="800" alt="Pipeline"> <br>
 
 🔧**시스템 아키텍처**  
 <img src="https://github.com/user-attachments/assets/e22b039c-0dc3-4e44-90c6-f902847507ae" width="800" alt="System Architecture"> <br>
