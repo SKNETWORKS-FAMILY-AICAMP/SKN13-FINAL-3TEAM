@@ -145,10 +145,10 @@
 ## 🐥 5. 파이프라인, 시스템 아키텍처, ERD
 
 🔧**파이프라인**  
-<img src="https://github.com/user-attachments/assets/ace36901-0056-4197-ad5b-1d7ccac15dba"" width="800" alt="Pipeline"> <br>
+<img width="4669" height="2146" alt="pipeline" src="https://github.com/user-attachments/assets/04dc5062-492c-43fa-a5ab-df1a3512c4d2" /> <br>
 
 🔧**시스템 아키텍처**  
-<img src="https://github.com/user-attachments/assets/e22b039c-0dc3-4e44-90c6-f902847507ae" width="800" alt="System Architecture"> <br>
+<img width="6220" height="4380" alt="Image" src="https://github.com/user-attachments/assets/040ee919-4aa7-4160-84e3-410a9fc4c3b7" />> <br>
 
 🔧**ERD**  
 <img src="https://github.com/user-attachments/assets/2283e29a-2568-46f0-b52f-6ef64ec4b643" width="800" alt="ERD"> <br>
@@ -164,7 +164,6 @@
 ┣ 📜README.md<br>
 ┣ 📂babsim<br>
 ┃ ┣ 📜.DS_Store<br>
-┃ ┣ 📜.env<br>
 ┃ ┣ 📜.gitignore<br>
 ┃ ┣ 📜docker-compose.yml<br>
 ┃ ┣ 📜Dockerfile<br>
@@ -288,20 +287,29 @@
 
 ## 🐥 8. 프로토타입
 
-> (프로토타입/서비스 구현 스크린샷, 핵심 기능별 예시 등. 추후 작성)
-<br>Home<br><img width="1617" height="1447" alt="Image" src="https://github.com/user-attachments/assets/7234b089-538c-4928-ad77-e54fd853bd6a" />
+  
+><br>**Home**<br>
+<img width="1617" height="1447" alt="Image" src="https://github.com/user-attachments/assets/7234b089-538c-4928-ad77-e54fd853bd6a" />  
 <br>
-<br>Asset Library<br><img width="1617" height="1453" alt="Image" src="https://github.com/user-attachments/assets/46c11afd-71da-4326-9f60-fd7dfce95d38" />
-<br><세부 사항>
-<br>자료 내부<br><img width="1192" height="1206" alt="Image" src="https://github.com/user-attachments/assets/687319be-b494-470f-b188-4f6ae19fb2c1" />
+<br>**Asset Library**<br>
+<img width="1617" height="1453" alt="Image" src="https://github.com/user-attachments/assets/46c11afd-71da-4326-9f60-fd7dfce95d38" />  
+&emsp;📄**세부 사항**  
+&emsp;&emsp;자료 내부<br>
+&emsp;&emsp;<img width="1192" height="1206" alt="Image" src="https://github.com/user-attachments/assets/687319be-b494-470f-b188-4f6ae19fb2c1" />  
 <br>
-<br>Insight & Trands<br><img width="797" height="1022" alt="Image" src="https://github.com/user-attachments/assets/10632320-88c8-4542-a0fe-4795aa7d7d66" />
-<br><세부 사항>
-<br>제원<br><img width="1009" height="877" alt="Image" src="https://github.com/user-attachments/assets/46ce8ab5-72b8-4425-994c-fbad7a1d6529" />
-<br>리뷰 분석<br><img width="1016" height="977" alt="Image" src="https://github.com/user-attachments/assets/a7cdb6cb-83a5-4a8d-b21e-2192c3bd4090" />
-<br>트렌드<br><img width="1007" height="479" alt="Image" src="https://github.com/user-attachments/assets/8448ea96-c815-4e74-91c0-e9236dcaa794" />
+<br>**Insight & Trends**<br>
+<img width="797" height="1022" alt="Image" src="https://github.com/user-attachments/assets/10632320-88c8-4542-a0fe-4795aa7d7d66" />
+<br>  
+&emsp;📄**세부 사항**  
+&emsp;&emsp;제원<br>
+&emsp;&emsp;<img width="1009" height="877" alt="Image" src="https://github.com/user-attachments/assets/46ce8ab5-72b8-4425-994c-fbad7a1d6529" />  
+&emsp;&emsp;리뷰 분석<br>
+&emsp;&emsp;<img width="1016" height="977" alt="Image" src="https://github.com/user-attachments/assets/a7cdb6cb-83a5-4a8d-b21e-2192c3bd4090" />  
+&emsp;&emsp;트렌드<br>
+&emsp;&emsp;<img width="1007" height="479" alt="Image" src="https://github.com/user-attachments/assets/8448ea96-c815-4e74-91c0-e9236dcaa794" />  
 <br>
-<br>Prototype Lab<br><img width="1632" height="1426" alt="Image" src="https://github.com/user-attachments/assets/440d2dd3-6de2-4531-89ee-44df5cd6b096" />
+<br>**Prototype Lab**<br>
+<img width="1632" height="1426" alt="Image" src="https://github.com/user-attachments/assets/440d2dd3-6de2-4531-89ee-44df5cd6b096" />
 
 ---
 
