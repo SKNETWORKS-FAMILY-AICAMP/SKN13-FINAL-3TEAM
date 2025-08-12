@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
 
-    'JJACKLETTE',
+    # 'JJACKLETTE',
+    "JJACKLETTE.apps.JjackletteConfig",
 ]
 
 MIDDLEWARE = [
@@ -175,7 +176,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
 }
-AUTH_USER_MODEL = 'JJACKLETTE.Users'
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # ← 추가: 토큰 수명
