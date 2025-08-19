@@ -17,6 +17,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
 
 # Quick-start development settings - unsuitable for production
@@ -39,11 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount.providers.google',
+
     # 3rd
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'rest_framework.authtoken',
     'corsheaders',
 
     # 'JJACKLETTE',
@@ -59,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -141,7 +148,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경�
 
 # [ADDED] 생성 이미지 서빙을 위한 미디어 경로
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 EXAONE_MODEL_PATH = os.getenv("EXAONE_MODEL_PATH", str(BASE_DIR / "models" / "exaone_4.0_1.2b"))
 SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
@@ -182,7 +189,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # ← 추가
     "ROTATE_REFRESH_TOKENS": True,                    # 로그아웃: refresh 회전 시 새 토큰 발급
     "BLACKLIST_AFTER_ROTATION": True,                 # 로그아웃: 회전된 이전 refresh를 블랙리스트 처리
-    "AUTH_HEADER_TYPES": ("Bearer",),                 # ← 추가
+    "AUTH_HEADER_TYPES": ("Bearer",), 
+    "USER_ID_FIELD": "user_id",
 }
 
 
@@ -217,3 +225,33 @@ LOGGING = {
 QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
 QDRANT_PORT_GRPC = int(os.getenv('QDRANT_PORT', '6334'))
 QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
+
+# allauth가 여러 사이트를 관리할 수 있도록 설정
+SITE_ID = 1
+
+# dj-rest-auth가 JWT 토큰을 사용하도록 설정
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False, # 소셜 로그인은 이 옵션을 False로 해야 함
+}
+
+# 이메일 관련 설정 (구글이 이미 인증했으므로 별도 인증은 불필요)
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+# 구글 소셜 로그인 설정
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [ # 구글로부터 어떤 정보를 가져올지 정의
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': { # 인증 요청 시 파라미터
+            'access_type': 'online',
+        }
+    }
+}
+

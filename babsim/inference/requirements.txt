@@ -1,0 +1,17 @@
+# FastAPI & Server
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# PyTorch (CUDA 12.1 for RTX 40 series)
+torch==2.3.0
+torchvision==0.18.0
+torchaudio==2.3.0
+
+# Hugging Face Core Libraries
+transformers==4.42.4
+diffusers==0.29.2
+accelerate==0.31.0
+
+# Model Optimization (for Low VRAM GPU)
+bitsandbytes==0.43.1
+xformers==0.0.26.post1
