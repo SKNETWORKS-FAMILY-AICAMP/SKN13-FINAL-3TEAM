@@ -123,7 +123,8 @@ class DesignMaterialSerializer(serializers.ModelSerializer):
 class EngineeringSpecSerializer(serializers.ModelSerializer):
     class Meta:
         model = EngineeringSpec
-        fields = ('spec_id', 'cd_value', 'weight', 'material_al_ratio', 'wheel_base', 'pedestrian_safety_score', 'sensor_ready')
+        fields = '__all__'
+        # fields = ('spec_id', 'cd_value', 'weight', 'material_al_ratio', 'wheel_base', 'pedestrian_safety_score', 'sensor_ready')
 
 class SalesStatSerializer(serializers.ModelSerializer):
     class Meta:
@@ -142,12 +143,12 @@ class InsightTrendsSerializer(serializers.ModelSerializer):
 
 class InsightTrendsDetailSerializer(serializers.ModelSerializer):
     design_materials = DesignMaterialSerializer(many=True, read_only=True)
-    engineering_specs = EngineeringSpecSerializer(many=True, read_only=True)
+    engineeringspec = EngineeringSpecSerializer(read_only=True)
     sales_stats = SalesStatSerializer(many=True, read_only=True)
     user_reviews = UserReviewSerializer(many=True, read_only=True)
     class Meta:
         model = InsightTrends
-        fields = ('car_model_id', 'car_name', 'type', 'release_year', 'design_materials', 'engineering_specs', 'sales_stats', 'user_reviews')
+        fields = ('car_model_id', 'car_name', 'type', 'release_year', 'design_materials', 'engineeringspec', 'sales_stats', 'user_reviews')
 
 
 

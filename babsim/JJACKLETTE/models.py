@@ -33,28 +33,34 @@ class InsightTrends(models.Model):
     type = models.CharField(max_length=50)
     release_year = models.IntegerField()
 
+# engineering_spec
+class EngineeringSpec(models.Model):
+    car_model = models.OneToOneField('InsightTrends', on_delete=models.CASCADE) # <--- 따옴표 확인
+    length = models.IntegerField(null=True, blank=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    wheel_base = models.IntegerField(null=True, blank=True)
+    front_track = models.IntegerField(null=True, blank=True)
+    rear_track = models.IntegerField(null=True, blank=True)
+    seating_capacity = models.IntegerField(null=True, blank=True)
+    weight = models.IntegerField(null=True, blank=True)
+    fuel_tank = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        # self.car_model.car_name 대신 self.car_model.car_name으로 접근
+        return f"{self.car_model.car_name} Specs"
+
 # design_material
 class DesignMaterial(models.Model):
     material_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    car_model = models.ForeignKey(InsightTrends, on_delete=models.CASCADE, related_name='design_materials')
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='design_materials')
     material_type = models.CharField(max_length=100)
     usage_area = models.CharField(max_length=100)
-
-# engineering_spec
-class EngineeringSpec(models.Model):
-    spec_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    car_model = models.ForeignKey(InsightTrends, on_delete=models.CASCADE, related_name='engineering_specs')
-    cd_value = models.FloatField()
-    weight = models.IntegerField()
-    material_al_ratio = models.FloatField()
-    wheel_base = models.IntegerField()
-    pedestrian_safety_score = models.FloatField()
-    sensor_ready = models.BooleanField()
 
 # sales_stat
 class SalesStat(models.Model):
     id = models.AutoField(primary_key=True)
-    car_model = models.ForeignKey(InsightTrends, on_delete=models.CASCADE, related_name='sales_stats')
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='sales_stats')
     year = models.IntegerField()
     month = models.IntegerField()
     units_sold = models.IntegerField()
@@ -64,7 +70,7 @@ class SalesStat(models.Model):
 # user_review
 class UserReview(models.Model):
     review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    car_model = models.ForeignKey(InsightTrends, on_delete=models.CASCADE, related_name='user_reviews')
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='user_reviews')
     sentiment_score = models.FloatField()
     mentioned_features = models.TextField(blank=True, null=True)
 
@@ -102,7 +108,7 @@ class ChatSession(models.Model):
 # prompt_log
 class PromptLog(models.Model):
     prompt_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name="prompt_logs")
+    session = models.ForeignKey('ChatSession', on_delete=models.CASCADE, related_name="prompt_logs")
     user_prompt = models.TextField()
     ai_response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -110,7 +116,7 @@ class PromptLog(models.Model):
 # generated_result
 class GeneratedResult(models.Model):
     result_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    prompt = models.ForeignKey(PromptLog, on_delete=models.CASCADE, related_name="generated_results")
+    prompt = models.ForeignKey('PromptLog', on_delete=models.CASCADE, related_name="generated_results")
     result_type = models.CharField(max_length=50, choices=[('text', 'Text'), ('image', 'Image'), ('3d', '3D'), ('4d', '4D')])
     result_path = models.CharField(max_length=255, blank=True)
     result = models.TextField(blank=True, null=True)
@@ -125,7 +131,7 @@ class AssetLibrary(models.Model):
 # library_comments
 class LibraryComments(models.Model):
     comment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    library_asset = models.ForeignKey(AssetLibrary, on_delete=models.CASCADE, related_name="comments")
+    library_asset = models.ForeignKey('AssetLibrary', on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="library_comments")
     comments = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

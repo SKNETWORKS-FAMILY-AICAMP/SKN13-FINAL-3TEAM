@@ -5,7 +5,6 @@
 import requests
 from datetime import datetime
 from rest_framework.pagination import PageNumberPagination
-from concurrent.futures import ThreadPoolExecutor
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -17,7 +16,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
-from . import ai_services
 
 from .models import *
 from .serializers import *

@@ -9,8 +9,7 @@ services:
     volumes:
       - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트 (개발 시 코드 변경 반영)
       - /app/node_modules # frontend/node_modules는 호스트에서 제외 (volume으로 덮어쓰지 않음)
-      - ./mediafiles:/app/medifailes
-
+      - ./mediafiles:/app/mediafiles
     expose:
       - "8000" # Nginx에서 접근할 포트
     env_file:
@@ -56,11 +55,12 @@ services:
 
   inference-server:
     build:
-      context: .
-      dockerfile: ./inference/Dockerfile
+      context: ./inference
+      dockerfile: Dockerfile
     volumes:
       # 생성된 이미지를 Django와 공유하기 위한 볼륨
-      - ./mediafiles:/app/mediafiles
+      - ./mediafiles:/app/generated_images
+      - ./models:/app/models:ro
     ports:
       - "8001:8001"
     # GPU를 사용하기 위한 필수 설정
