@@ -7,6 +7,7 @@ import {
   getPromptLogs,
   sendChatMessage 
 } from '../services/chatService';
+import backgroundImage from '../assets/PrototypeLab_background.png';
 
 function PrototypeLab() {
   const [chatSessions, setChatSessions] = useState([]);
@@ -15,6 +16,7 @@ function PrototypeLab() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
@@ -40,6 +42,7 @@ function PrototypeLab() {
   // 전체 스크롤 감지
   useEffect(() => {
     const handleWindowScroll = () => {
+      setScrollY(window.scrollY);
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.scrollHeight - 50;
       setShouldAutoScroll(nearBottom);
@@ -232,7 +235,7 @@ function PrototypeLab() {
               {message.resultType === 'image' && (
                 <div>
                   <img 
-                    src={message.content} 
+                    src={message.filePath || message.content} 
                     alt="Generated" 
                     className="w-full h-auto rounded-lg mb-2"
                     onError={(e) => {
@@ -242,7 +245,7 @@ function PrototypeLab() {
                   />
                   <div className="hidden bg-gray-600 rounded-lg p-8 text-gray-400 text-center">
                     <p className="text-sm mb-2">이미지 로드 실패</p>
-                    <p className="text-xs">경로: {message.content}</p>
+                    <p className="text-xs">경로: {message.filePath || message.content}</p>
                   </div>
                 </div>
               )}
@@ -258,7 +261,7 @@ function PrototypeLab() {
                      controls
                      preload="metadata"
                    >
-                     <source src="/src/assets/prototype_lab/Ionic6_3D.mp4" type="video/mp4" />
+                     <source src={message.filePath || "/src/assets/prototype_lab/Ionic6_3D.mp4"} type="video/mp4" />
                      브라우저가 비디오를 지원하지 않습니다.
                    </video>
                    
@@ -272,7 +275,7 @@ function PrototypeLab() {
                      <button 
                        onClick={() => {
                          const link = document.createElement('a');
-                         link.href = '/src/assets/prototype_lab/Ionic6_3D.mp4';
+                         link.href = message.filePath || '/src/assets/prototype_lab/Ionic6_3D.mp4';
                          link.download = 'Ionic6_3D.mp4';
                          link.click();
                        }}
@@ -295,7 +298,7 @@ function PrototypeLab() {
                      controls
                      preload="metadata"
                    >
-                     <source src="/src/assets/prototype_lab/Ionic6_4D.mp4" type="video/mp4" />
+                     <source src={message.filePath || "/src/assets/prototype_lab/Ionic6_4D.mp4"} type="video/mp4" />
                      브라우저가 비디오를 지원하지 않습니다.
                    </video>
                    
@@ -309,7 +312,7 @@ function PrototypeLab() {
                      <button 
                        onClick={() => {
                          const link = document.createElement('a');
-                         link.href = '/src/assets/prototype_lab/Ionic6_4D.mp4';
+                         link.href = message.filePath || '/src/assets/prototype_lab/Ionic6_4D.mp4';
                          link.download = 'Ionic6_4D.mp4';
                          link.click();
                        }}
@@ -343,128 +346,142 @@ function PrototypeLab() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-900" style={{
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed'
+    }}>
       <Header />
       
       <div className="flex min-h-screen pt-16">
         {/* Left Sidebar - 대화 세션 이력 */}
-        <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col min-h-screen">
-          <div className="p-6 border-b border-gray-700">
-            <h2 className="text-white text-xl font-semibold mb-4">내 대화</h2>
-            <button
-              onClick={startNewConversation}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-            >
-              <span className="text-lg">+</span>
-              <span>새로운 대화</span>
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {chatSessions.map((session) => (
-              <div
-                key={session.session_id}
-                onClick={() => setCurrentSession(session)}
-                className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                  currentSession?.session_id === session.session_id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                }`}
+        <div 
+          className="fixed left-2 z-50 w-60"
+          style={{
+            top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
+            transform: 'none',
+            transition: 'top 0.1s ease-out'
+          }}
+        >
+          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[70vh]">
+            {/* Fixed Header */}
+            <div className="p-6 border-b border-gray-700">
+              <h3 className="text-xl font-bold text-white text-center">내 대화</h3>
+              <button
+                onClick={startNewConversation}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 mt-4"
               >
-                <p className="text-sm font-medium truncate">
-                  {session.title || `대화 ${session.session_id.slice(-4)}`}
-                </p>
-                <p className="text-xs opacity-75 mt-1">
-                  {new Date(session.started_at).toLocaleDateString()} {new Date(session.started_at).toLocaleTimeString()}
-                </p>
+                <span className="text-lg">+</span>
+                <span>새로운 대화</span>
+              </button>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="p-6 flex-1 min-h-[calc(70vh-120px)] overflow-y-auto">
+              <div className="space-y-4">
+                {chatSessions.map((session) => (
+                  <div
+                    key={session.session_id}
+                    onClick={() => setCurrentSession(session)}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      currentSession?.session_id === session.session_id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-800/50 hover:bg-gray-800/70 text-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium truncate">
+                        {session.title || `대화 ${session.session_id.slice(-4)}`}
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {new Date(session.started_at).toLocaleDateString()} {new Date(session.started_at).toLocaleTimeString()}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col relative min-h-screen">
-          {/* Background Image - 채팅 전체 배경 */}
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="/src/assets/chatbot.png" 
-              alt="Background" 
-              className="w-full h-full object-cover opacity-20"
-            />
-            <div className="absolute inset-0 bg-gray-900 bg-opacity-70"></div>
-          </div>
-
           {/* Content Overlay */}
           <div className="relative z-10 flex-1 flex flex-col">
             {/* Hero Section */}
-            <div className="p-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-4">
-                  <h1 className="text-4xl font-bold text-white mb-2">Prototype Lab</h1>
-                  <p className="text-gray-300 text-base mb-2">
-                    Turn your ideas into images — with just one prompt.
-                  </p>
-                  <p className="text-gray-400 max-w-3xl mx-auto text-sm">
-                    다양한 조건을 프롬프트로 입력하면, AI가 text-to-image 및 image-to-image 기술로 다채로운 시각적 프로토타입을 생성해줍니다.
-                  </p>
+            <section className="relative py-24 lg:py-32">
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black/30"></div>
+              
+              <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 className="text-6xl font-bold text-white mb-6">Prototype Lab</h1>
+                <p className="text-gray-300 text-xl mb-8">
+                  Turn your ideas into images — with just one prompt.
+                </p>
+                <div className="text-gray-400 space-y-2 mb-8">
+                  <p>다양한 조건을 프롬프트로 입력하면, AI가 text-to-image 및 image-to-image 기술로 다채로운 시각적 프로토타입을 생성해줍니다.</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Chat Container - 메시지와 입력창을 하나로 통합 */}
+            <div className="flex-1 px-4 pb-4">
+              <div className="max-w-4xl mx-auto h-full">
+                <div className="bg-gray-800/90 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-700/50" ref={chatContainerRef}>
+                  {/* Chat Messages - 채팅 메시지 표시 영역 */}
+                  <div className="flex-1 p-4 overflow-y-auto max-h-[60vh]">
+                    {messages.length === 0 ? (
+                      <div className="text-center text-gray-400 py-8">
+                        <div className="text-4xl mb-4">💬</div>
+                        <p className="text-lg mb-2">새로운 대화를 시작해보세요!</p>
+                        <p className="text-sm">현대차 디자인과 관련된 질문을 해보세요.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {messages.map((message) => renderMessage(message))}
+                        {isLoading && (
+                          <div className="flex justify-start mb-4">
+                            <div className="bg-gray-700 text-white rounded-lg px-4 py-2">
+                              <div className="flex items-center space-x-2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <span className="text-sm">AI가 응답을 생성하고 있습니다...</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Chat Input - 채팅창 내부에 통합 */}
+                  <div className="border-t border-gray-700/50 p-4 bg-gray-700/80 backdrop-blur-sm">
+                    <form onSubmit={handleSendMessage} className="flex space-x-4">
+                      <input
+                        type="text"
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder="무엇이든 물어보세요"
+                        className="flex-1 bg-gray-600/90 backdrop-blur-sm border border-gray-500/50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                        disabled={!currentSession || isLoading}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!inputMessage.trim() || !currentSession || isLoading}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg px-6 py-3 transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+                      >
+                        <span>전송</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
-
-                                      {/* Chat Container - 메시지와 입력창을 하나로 통합 */}
-             <div className="flex-1 px-4 pb-4">
-               <div className="max-w-4xl mx-auto h-full">
-                 <div className="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-lg overflow-hidden" ref={chatContainerRef}>
-                                       {/* Chat Messages */}
-                    <div className="p-4 h-[700px] overflow-y-auto">
-                     {messages.length === 0 ? (
-                       <div className="text-center text-gray-400 py-12">
-                         <p className="text-lg">새로운 대화를 시작하거나 기존 대화를 선택해주세요</p>
-                       </div>
-                     ) : (
-                       <div className="space-y-4">
-                         {messages.map(renderMessage)}
-                         {isLoading && (
-                           <div className="flex justify-start mb-4">
-                             <div className="bg-gray-700 text-white rounded-lg px-4 py-2">
-                               <div className="flex items-center space-x-2">
-                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                 <span className="text-sm">생성 중...</span>
-                               </div>
-                             </div>
-                           </div>
-                         )}
-                         <div ref={messagesEndRef} />
-                       </div>
-                     )}
-                   </div>
-
-                   {/* Chat Input - 채팅창 내부에 통합 */}
-                   <div className="border-t border-gray-700 p-4 bg-gray-700 bg-opacity-50">
-                     <form onSubmit={handleSendMessage} className="flex space-x-4">
-                       <input
-                         type="text"
-                         value={inputMessage}
-                         onChange={(e) => setInputMessage(e.target.value)}
-                         placeholder="무엇이든 물어보세요"
-                         className="flex-1 bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                         disabled={!currentSession || isLoading}
-                       />
-                       <button
-                         type="submit"
-                         disabled={!inputMessage.trim() || !currentSession || isLoading}
-                         className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg px-6 py-3 transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
-                       >
-                         <span>전송</span>
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                         </svg>
-                       </button>
-                     </form>
-                   </div>
-                 </div>
-               </div>
-             </div>
           </div>
         </div>
       </div>
