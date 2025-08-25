@@ -2,7 +2,7 @@ import { createMockResponse } from './mockData';
 import { apiRequest } from './authService';
 
 const API_BASE_URL = 'http://localhost:8000/api';
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 // 새로운 테이블 구조에 맞는 목업 데이터
 const mockAssets = [

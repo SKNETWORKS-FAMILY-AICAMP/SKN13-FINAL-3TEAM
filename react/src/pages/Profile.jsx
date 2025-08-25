@@ -140,12 +140,12 @@ function Profile() {
   return (
     <div className="min-h-screen relative" style={{backgroundColor: '#353745'}}>
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 z-0 pointer-events-none"
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none mt-0"
         style={{
           backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'contain',
-          backgroundPosition: 'top center',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
         }}
       />
@@ -445,8 +445,6 @@ function Profile() {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

@@ -7,16 +7,16 @@ import {
   mockLogoutSuccess,
   mockRefreshTokenSuccess,
   createMockResponse,
-  getMockUsers as getMockUsersFromData,
+  getMockUsers,
   addMockUser,
   validateMockUser,
   checkEmailExists
 } from './mockData';
 
-const API_BASE_URL = 'http://localhost:80/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
-const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = true;
 
 // 프로필 이미지 업로드 API
 export const uploadProfileImage = async (imageFile) => {
@@ -102,105 +102,61 @@ export const updateUserProfile = async (userData) => {
       }
 
       // 사용자 정보 업데이트
-      const updatedUser = {
-        ...currentUser,
-        user_name: userData.user_name || currentUser.user_name,
-        e_mail: userData.e_mail || currentUser.e_mail,
-        phone_number: userData.phone_number || currentUser.phone_number,
-        company: userData.company || currentUser.company,
-        department: userData.department || currentUser.department,
-        position: userData.position || currentUser.position,
-        profile_image: userData.profile_image || currentUser.profile_image,
-        background_image: userData.background_image || currentUser.background_image,
-      };
-
-      // 로컬 스토리지 업데이트
+      const updatedUser = { ...currentUser, ...userData };
       const users = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-      const updatedUsers = users.map(user => 
-        user.e_mail === currentUser.e_mail ? updatedUser : user
-      );
-      localStorage.setItem('mockUsers', JSON.stringify(updatedUsers));
-
-      const mockResponse = await createMockResponse({
-        success: true,
-        user: updatedUser,
-        message: '사용자 정보가 성공적으로 업데이트되었습니다.',
-      });
+      const userIndex = users.findIndex(user => user.e_mail === userData.e_mail);
       
-      return await mockResponse.json();
+      if (userIndex !== -1) {
+        users[userIndex] = updatedUser;
+        localStorage.setItem('mockUsers', JSON.stringify(users));
+        
+        return {
+          success: true,
+          message: '사용자 정보가 성공적으로 업데이트되었습니다.',
+          user: updatedUser,
+        };
+      } else {
+        return {
+          success: false,
+          error: '사용자 정보 업데이트에 실패했습니다.',
+        };
+      }
     } catch (error) {
       return {
         success: false,
-        error: '사용자 정보 수정 중 오류가 발생했습니다.',
+        error: '사용자 정보 업데이트 중 오류가 발생했습니다.',
       };
     }
   }
 
   // 실제 API 호출
   try {
-    const response = await apiRequest(`${API_BASE_URL}/auth/profile/update/`, {
-      method: 'PUT',
+    const response = await apiRequest(`${API_BASE_URL}/auth/profile/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(userData),
     });
 
     const data = await response.json();
-    
-    if (response.ok) {
-      return {
-        success: true,
-        user: data.user,
-        message: data.message || '사용자 정보가 성공적으로 업데이트되었습니다.',
-      };
-    } else {
-      return {
-        success: false,
-        error: data.message || '사용자 정보 수정에 실패했습니다.',
-      };
+
+    if (!response.ok) {
+      throw new Error(data.message || '사용자 정보 업데이트에 실패했습니다.');
     }
+
+    return {
+      success: true,
+      message: '사용자 정보가 성공적으로 업데이트되었습니다.',
+      user: data.user,
+    };
   } catch (error) {
     console.error('Update user profile error:', error);
     return {
       success: false,
-      error: '사용자 정보 수정 중 오류가 발생했습니다.',
+      error: error.message || '사용자 정보 업데이트 중 오류가 발생했습니다.',
     };
   }
-};
-
-// 토큰 저장
-export const setToken = (token) => {
-export const setToken = (token) => {
-  localStorage.setItem('access_token', token);
-};
-
-// refresh token 저장
-export const setRefreshToken = (refreshToken) => {
-export const setRefreshToken = (refreshToken) => {
-  localStorage.setItem('refresh_token', refreshToken);
-};
-
-// 토큰 가져오기
-export const getToken = () => {
-  return localStorage.getItem('access_token');
-};
-
-// refresh token 가져오기
-export const getRefreshToken = () => {
-  return localStorage.getItem('refresh_token');
-};
-
-// 토큰 삭제
-export const removeToken = () => {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
-};
-
-// API 요청 헤더 생성
-const getAuthHeaders = () => {
-  const token = getToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
 };
 
 // 로그인 API
@@ -219,12 +175,11 @@ export const login = async (email, password) => {
       
       return {
         success: true,
+        message: data.message,
         user: data.user,
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
       };
     } else {
-      const mockResponse = await createMockResponse(mockLoginError(), 401);
+      const mockResponse = await createMockResponse(mockLoginError('이메일 또는 비밀번호가 올바르지 않습니다.'), 400);
       const data = await mockResponse.json();
       
       return {
@@ -242,7 +197,7 @@ export const login = async (email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email,
+        e_mail: email,
         password: password,
       }),
     });
@@ -256,18 +211,17 @@ export const login = async (email, password) => {
     // 토큰 저장
     setToken(data.access_token);
     setRefreshToken(data.refresh_token);
-    
+
     return {
       success: true,
+      message: data.message,
       user: data.user,
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
     };
   } catch (error) {
     console.error('Login error:', error);
     return {
       success: false,
-      error: error.message,
+      error: error.message || '로그인 중 오류가 발생했습니다.',
     };
   }
 };
@@ -275,43 +229,40 @@ export const login = async (email, password) => {
 // 회원가입 API
 export const register = async (userData) => {
   if (USE_MOCK_DATA) {
-    // 목업 데이터 사용 - 이미 존재하는 이메일인지 확인
-    const existingUser = checkEmailExists(userData.e_mail);
-    
-    if (existingUser) {
-      const mockResponse = await createMockResponse({
-        error: "Registration failed",
-        message: "이미 존재하는 이메일입니다.",
-        details: {}
-      }, 400);
+    // 목업 데이터 사용
+    try {
+      // 이메일 중복 체크
+      if (checkEmailExists(userData.e_mail)) {
+        return {
+          success: false,
+          error: '이미 존재하는 이메일입니다.',
+        };
+      }
+
+      // 새 사용자 추가
+      const newUser = {
+        user_id: `user_${Date.now()}`,
+        ...userData,
+        created_at: new Date().toISOString(),
+        last_login: new Date().toISOString(),
+      };
+
+      addMockUser(newUser);
+
+      const mockResponse = await createMockResponse(mockRegisterSuccess(newUser));
       const data = await mockResponse.json();
-      
+
+      return {
+        success: true,
+        message: data.message,
+        user: data.user,
+      };
+    } catch (error) {
       return {
         success: false,
-        error: data.message,
+        error: '회원가입 중 오류가 발생했습니다.',
       };
     }
-
-    // 새 사용자 생성
-    const newUser = {
-      user_id: `550e8400-e29b-41d4-a716-${Date.now()}`,
-      user_name: userData.user_name,
-      e_mail: userData.e_mail,
-      password: userData.password,
-      created_at: new Date().toISOString(),
-      last_login: new Date().toISOString()
-    };
-
-    // localStorage에 새 사용자 추가
-    addMockUser(newUser);
-
-    const mockResponse = await createMockResponse(mockRegisterSuccess(newUser));
-    const data = await mockResponse.json();
-    
-    return {
-      success: true,
-      user: data.user,
-    };
   }
 
   // 실제 API 호출
@@ -321,12 +272,7 @@ export const register = async (userData) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        user_name: userData.user_name,
-        e_mail: userData.e_mail,
-        password: userData.password,
-        password_confirm: userData.password_confirm,
-      }),
+      body: JSON.stringify(userData),
     });
 
     const data = await response.json();
@@ -337,13 +283,14 @@ export const register = async (userData) => {
 
     return {
       success: true,
+      message: data.message,
       user: data.user,
     };
   } catch (error) {
     console.error('Register error:', error);
     return {
       success: false,
-      error: error.message,
+      error: error.message || '회원가입 중 오류가 발생했습니다.',
     };
   }
 };
@@ -352,34 +299,39 @@ export const register = async (userData) => {
 export const logout = async () => {
   if (USE_MOCK_DATA) {
     // 목업 데이터 사용
-    await createMockResponse(mockLogoutSuccess);
     removeToken();
-    return { success: true };
+    const mockResponse = await createMockResponse(mockLogoutSuccess);
+    const data = await mockResponse.json();
+    
+    return {
+      success: true,
+      message: data.message,
+    };
   }
 
   // 실제 API 호출
   try {
-    const refreshToken = getRefreshToken();
-    
-    const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
+    const response = await apiRequest(`${API_BASE_URL}/auth/logout/`, {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        refresh_token: refreshToken,
-      }),
     });
 
     if (response.ok) {
       removeToken();
-      return { success: true };
+      return {
+        success: true,
+        message: '로그아웃 성공',
+      };
+    } else {
+      throw new Error('로그아웃에 실패했습니다.');
     }
   } catch (error) {
     console.error('Logout error:', error);
+    removeToken(); // 에러가 발생해도 토큰은 제거
+    return {
+      success: false,
+      error: error.message || '로그아웃 중 오류가 발생했습니다.',
+    };
   }
-  
-  // API 호출 실패해도 토큰은 삭제
-  removeToken();
-  return { success: true };
 };
 
 // 유저 정보 조회 API
@@ -397,7 +349,7 @@ export const getUserProfile = async () => {
     // 간단한 토큰 파싱 (실제로는 JWT 라이브러리 사용)
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const users = getMockUsersFromData();
+      const users = getMockUsers();
       const user = users.find(u => u.user_id === payload.user_id);
       
       if (user) {
@@ -448,9 +400,44 @@ export const getUserProfile = async () => {
   }
 };
 
+// 인증 헤더 생성
+const getAuthHeaders = () => {
+  const token = getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 // 인증 상태 확인
 export const isAuthenticated = () => {
   return !!getToken();
+};
+
+// 토큰 저장
+export const setToken = (token) => {
+  localStorage.setItem('access_token', token);
+};
+
+// refresh token 저장
+export const setRefreshToken = (refreshToken) => {
+  localStorage.setItem('refresh_token', refreshToken);
+};
+
+// 토큰 가져오기
+export const getToken = () => {
+  return localStorage.getItem('access_token');
+};
+
+// refresh token 가져오기
+export const getRefreshToken = () => {
+  return localStorage.getItem('refresh_token');
+};
+
+// 토큰 삭제
+export const removeToken = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 };
 
 // 토큰 갱신 API
@@ -474,7 +461,6 @@ export const refreshToken = async (refreshToken) => {
   try {
     // django 실제 토큰 갱신 주소는 /auth/token/refresh라서 수정.
     const response = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
-    // const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -508,8 +494,8 @@ export const refreshToken = async (refreshToken) => {
 };
 
 // 더미 데이터 사용자 목록 반환 (테스트용)
-export const getMockUsers = () => {
-  const users = getMockUsersFromData();
+export const getMockUsersFromService = () => {
+  const users = getMockUsers();
   return users.map(user => ({
     email: user.e_mail,
     password: user.password,
@@ -586,7 +572,7 @@ export default {
   updateUserProfile,
   isAuthenticated,
   refreshToken,
-  getMockUsers,
+  getMockUsersFromService,
   resetMockData,
   apiRequest,
-}; 
+};

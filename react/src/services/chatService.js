@@ -3,7 +3,7 @@ import { apiRequest } from './authService';
 import httpLogger from '../utils/httpLogger';
 
 const API_BASE_URL = 'http://localhost:80/api';
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 // 목업 데이터 - 실제 파일 경로 사용
 const mockChatSessions = [
