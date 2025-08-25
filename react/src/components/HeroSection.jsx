@@ -15,7 +15,7 @@ function HeroSection() {
           </p>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <button className="bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors">
               Get Started
             </button>
@@ -26,13 +26,13 @@ function HeroSection() {
         </div>
 
         {/* Car Image */}
-        <div className="relative">
+        <div className="relative -mt-8">
           <div className="w-full max-w-5xl mx-auto">
             <div className="relative">
               <img 
                 src={ioniq5} 
                 alt="Hyundai IONIQ 5" 
-                className="w-full h-auto max-h-96 object-contain mx-auto"
+                className="w-full h-auto max-h-80 object-contain mx-auto"
                 style={{
                   filter: 'brightness(1.1) contrast(1.1)',
                   transform: 'perspective(1000px) rotateY(-5deg)'

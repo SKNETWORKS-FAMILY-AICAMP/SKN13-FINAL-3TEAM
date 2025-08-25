@@ -66,7 +66,7 @@ function App() {
               <Profile />
             </ProtectedRoute>
           } />
-          <Route path="/workspace" element={
+          <Route path="/myworkspace" element={
             <ProtectedRoute>
               <MyWorkspace />
             </ProtectedRoute>

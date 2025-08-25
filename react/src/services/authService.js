@@ -18,6 +18,72 @@ const API_BASE_URL = 'http://localhost:8000/api';
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
 const USE_MOCK_DATA = true;
 
+// 프로필 이미지 업로드 API
+export const uploadProfileImage = async (imageFile) => {
+  if (USE_MOCK_DATA) {
+    // MOCKDATA 모드: base64로 변환해서 localStorage에 저장
+    try {
+      const reader = new FileReader();
+      return new Promise((resolve) => {
+        reader.onload = () => {
+          const base64Image = reader.result;
+          const fileName = `profile_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${imageFile.name.split('.').pop()}`;
+          
+          // localStorage에 base64 이미지 저장
+          localStorage.setItem(`profile_image_${fileName}`, base64Image);
+          
+          resolve({
+            success: true,
+            image_url: base64Image, // base64 데이터 직접 반환
+            message: '프로필 이미지가 로컬에 저장되었습니다.',
+          });
+        };
+        reader.readAsDataURL(imageFile);
+      });
+    } catch (error) {
+      return {
+        success: false,
+        error: '프로필 이미지 저장 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  // 실제 API 모드: /auth/profile/upload-image/ 호출
+  try {
+    const formData = new FormData();
+    formData.append('profile_image', imageFile);
+
+    const response = await apiRequest(`${API_BASE_URL}/auth/profile/upload-image/`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // FormData를 사용할 때는 Content-Type을 설정하지 않음
+      },
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      return {
+        success: true,
+        image_url: data.image_url,
+        message: data.message || '프로필 이미지가 성공적으로 업로드되었습니다.',
+      };
+    } else {
+      return {
+        success: false,
+        error: data.message || '프로필 이미지 업로드에 실패했습니다.',
+      };
+    }
+  } catch (error) {
+    console.error('Upload profile image error:', error);
+    return {
+      success: false,
+      error: '프로필 이미지 업로드 중 오류가 발생했습니다.',
+    };
+  }
+};
+
 // 사용자 정보 수정 API
 export const updateUserProfile = async (userData) => {
   if (USE_MOCK_DATA) {
@@ -44,6 +110,8 @@ export const updateUserProfile = async (userData) => {
         company: userData.company || currentUser.company,
         department: userData.department || currentUser.department,
         position: userData.position || currentUser.position,
+        profile_image: userData.profile_image || currentUser.profile_image,
+        background_image: userData.background_image || currentUser.background_image,
       };
 
       // 로컬 스토리지 업데이트
@@ -99,27 +167,27 @@ export const updateUserProfile = async (userData) => {
 };
 
 // 토큰 저장
-const setToken = (token) => {
+export const setToken = (token) => {
   localStorage.setItem('access_token', token);
 };
 
 // refresh token 저장
-const setRefreshToken = (refreshToken) => {
+export const setRefreshToken = (refreshToken) => {
   localStorage.setItem('refresh_token', refreshToken);
 };
 
 // 토큰 가져오기
-const getToken = () => {
+export const getToken = () => {
   return localStorage.getItem('access_token');
 };
 
 // refresh token 가져오기
-const getRefreshToken = () => {
+export const getRefreshToken = () => {
   return localStorage.getItem('refresh_token');
 };
 
 // 토큰 삭제
-const removeToken = () => {
+export const removeToken = () => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 };
@@ -354,7 +422,7 @@ export const getUserProfile = async () => {
 
   // 실제 API 호출
   try {
-    const response = await fetch(`${API_BASE_URL}/users/profile/`, {
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

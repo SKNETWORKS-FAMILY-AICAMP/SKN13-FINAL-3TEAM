@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { isAuthenticated, getUserProfile, logout } from '../services/authService';
+import { getUserProfile, logout, getToken } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        if (isAuthenticated()) {
+        if (getToken()) {
           const result = await getUserProfile();
           if (result.success) {
             setUser(result.user);
@@ -54,7 +54,6 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout: logoutUser,
-    isAuthenticated: !!user,
   };
 
   return (

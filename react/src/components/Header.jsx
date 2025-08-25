@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const location = useLocation();
@@ -28,7 +28,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-gray-800 rounded-t-lg" style={{ borderBottom: '1px solid #374151' }}>
+    <header className="bg-gray-800 rounded-t-lg">
       <div className="w-full px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo - Left */}
@@ -104,7 +104,7 @@ export default function Header() {
 
           {/* Action Buttons - Right */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
+            {user ? (
               // 로그인된 상태: 사용자 정보와 메뉴 버튼
               <div className="flex items-center space-x-4">
                 <div className="text-white text-sm">
@@ -127,7 +127,7 @@ export default function Header() {
                   
                                      {/* 드롭다운 메뉴 */}
                    {isMenuOpen && (
-                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[60]">
                        <Link 
                          to="/profile" 
                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
@@ -136,7 +136,7 @@ export default function Header() {
                          Profile
                        </Link>
                        <Link 
-                         to="/workspace" 
+                         to="/myworkspace" 
                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                          onClick={() => setIsMenuOpen(false)}
                        >
@@ -171,15 +171,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      {/* Full width border */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: 0, 
-        left: 0, 
-        right: 0, 
-        height: '1px', 
-        backgroundColor: '#374151' 
-      }}></div>
+
     </header>
   );
 }

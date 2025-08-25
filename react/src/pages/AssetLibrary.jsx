@@ -23,17 +23,54 @@ function AssetLibrary() {
     coverPhoto: null
   });
   const [isUploading, setIsUploading] = useState(false);
+  
+  // 카테고리 필터링을 위한 상태 추가
+  const [selectedCategories, setSelectedCategories] = useState(['전체']);
+  const [filteredAssets, setFilteredAssets] = useState([]);
+
+  // 카테고리 목록 정의 (대분류/소분류 형식)
+  const categories = [
+    {
+      name: '전체',
+      subItems: []
+    },
+    {
+      name: '디자인 원리',
+      subItems: ['디자인 철학', '브랜드 아이덴티티', '색상 디자인']
+    },
+    {
+      name: '기술 분야',
+      subItems: ['공기역학', '인간공학', '재료 공학', '사용자 경험']
+    },
+    {
+      name: '차량 유형',
+      subItems: ['전기차 디자인', 'SUV 디자인', '세단 디자인', '컨셉카']
+    },
+    {
+      name: '세부 요소',
+      subItems: ['인테리어 디자인', '조명 디자인', '휠 디자인']
+    },
+    {
+      name: '브랜드 특화',
+      subItems: ['모터스튜디오']
+    }
+  ];
 
   useEffect(() => {
     loadAssets();
   }, [currentPage]);
 
+  // 카테고리 필터링이 변경될 때마다 자산 필터링
+  useEffect(() => {
+    filterAssets();
+  }, [selectedCategories, assets]);
+
   const loadAssets = async () => {
     setIsLoading(true);
     try {
-              const response = await getAssets(currentPage, 6, searchTerm, searchType);
-        setAssets(response.results || []);
-        setTotalPages(Math.ceil(response.count / 6));
+      const response = await getAssets(currentPage, 6, searchTerm, searchType);
+      setAssets(response.results || []);
+      setTotalPages(Math.ceil(response.count / 6));
     } catch (error) {
       console.error('자산 로드 실패:', error);
     } finally {
@@ -41,17 +78,98 @@ function AssetLibrary() {
     }
   };
 
+  // 카테고리별 자산 필터링 함수
+  const filterAssets = () => {
+    if (selectedCategories.includes('전체')) {
+      setFilteredAssets(assets);
+    } else {
+      const filtered = assets.filter(asset => 
+        selectedCategories.includes(asset.category)
+      );
+      setFilteredAssets(filtered);
+    }
+  };
+
+  // 카테고리 선택/해제 처리
+  const handleCategoryChange = (category) => {
+    if (category === '전체') {
+      if (selectedCategories.includes('전체')) {
+        setSelectedCategories([]);
+      } else {
+        // 모든 카테고리 선택
+        const allCategories = ['전체'];
+        categories.forEach(cat => {
+          if (cat.subItems.length > 0) {
+            allCategories.push(...cat.subItems);
+          }
+        });
+        setSelectedCategories(allCategories);
+      }
+    } else {
+      // 대분류인지 확인
+      const isMajorCategory = categories.find(cat => cat.name === category);
+      
+      if (isMajorCategory) {
+        // 대분류 클릭 시
+        if (selectedCategories.includes(category)) {
+          // 대분류가 이미 선택된 경우: 대분류와 모든 하위 소분류 제거
+          const newCategories = selectedCategories.filter(cat => 
+            cat !== category && !isMajorCategory.subItems.includes(cat)
+          );
+          const finalCategories = newCategories.filter(cat => cat !== '전체');
+          setSelectedCategories(finalCategories);
+        } else {
+          // 대분류가 선택되지 않은 경우: 대분류와 모든 하위 소분류 추가
+          const newCategories = [
+            ...selectedCategories.filter(cat => cat !== '전체'),
+            category,
+            ...isMajorCategory.subItems
+          ];
+          setSelectedCategories(newCategories);
+        }
+      } else {
+        // 소분류 클릭 시 (기존 로직)
+        if (selectedCategories.includes(category)) {
+          const newCategories = selectedCategories.filter(cat => cat !== category);
+          // "전체"도 함께 제거
+          const finalCategories = newCategories.filter(cat => cat !== '전체');
+          setSelectedCategories(finalCategories);
+        } else {
+          const newCategories = [...selectedCategories.filter(cat => cat !== '전체'), category];
+          setSelectedCategories(newCategories);
+        }
+      }
+    }
+  };
+
+  // 스크롤 이벤트를 위한 상태
+  const [scrollY, setScrollY] = useState(0);
+
+  // 스크롤 이벤트 핸들러
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleSearch = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const searchValue = formData.get('search') || '';
     setSearchTerm(searchValue);
     setCurrentPage(1);
-    // 검색어가 변경된 후 loadAssets 호출
     setTimeout(() => {
       loadAssets();
     }, 0);
   };
+
+  // 검색어나 검색 타입이 변경될 때도 자산 필터링
+  useEffect(() => {
+    filterAssets();
+  }, [searchTerm, searchType, assets]);
 
   const handleAssetClick = async (asset) => {
     setSelectedAsset(asset);
@@ -70,10 +188,8 @@ function AssetLibrary() {
     try {
       await createComment(selectedAsset.lib_id, newComment);
       setNewComment('');
-      // 댓글 목록 새로고침
       const response = await getComments(selectedAsset.lib_id);
       setComments(response.results || []);
-      // 자산 정보도 새로고침 (댓글 수 업데이트)
       loadAssets();
     } catch (error) {
       console.error('댓글 작성 실패:', error);
@@ -115,7 +231,7 @@ function AssetLibrary() {
     if (e) e.stopPropagation();
     try {
       await toggleAssetLike(assetId);
-      loadAssets(); // 자산 목록 새로고침
+      loadAssets();
     } catch (error) {
       console.error('좋아요 처리 실패:', error);
     }
@@ -124,7 +240,6 @@ function AssetLibrary() {
   const handleCommentLike = async (commentId) => {
     try {
       await toggleCommentLike(commentId);
-      // 댓글 목록 새로고침
       if (selectedAsset) {
         const response = await getComments(selectedAsset.lib_id);
         setComments(response.results || []);
@@ -150,10 +265,8 @@ function AssetLibrary() {
         backgroundRepeat: 'no-repeat',
         minHeight: '60vh'
       }}>
-        {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/50"></div>
         
-        {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-6xl font-bold text-white mb-6">Asset Library</h1>
           <p className="text-gray-300 text-xl mb-8">
@@ -176,14 +289,14 @@ function AssetLibrary() {
                 <option value="title">제목만</option>
                 <option value="summary">요약만</option>
               </select>
-                      <input
-        type="text"
-        name="search"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="검색어를 입력하세요"
-        className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-      />
+              <input
+                type="text"
+                name="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="검색어를 입력하세요"
+                className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              />
               <button 
                 type="submit"
                 className="px-6 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
@@ -203,23 +316,76 @@ function AssetLibrary() {
         </div>
       </section>
 
+      {/* 자산 카테고리 필터링 박스 - 화면 고정 위치 */}
+      <div className="fixed left-6 z-40 w-60 max-h-[80vh]" style={{
+        top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
+        transform: 'none',
+        transition: 'top 0.1s ease-out'
+      }}>
+        <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl">
+          <div className="p-6 border-b border-gray-700">
+            <h3 className="text-xl font-bold text-white text-center">자산 카테고리</h3>
+          </div>
+          
+          <div className="p-6 max-h-[calc(80vh-80px)] overflow-y-auto">
+            <div className="space-y-4">
+              {categories.map((category, index) => (
+                <div key={index} className="border-b border-gray-700 pb-3 last:border-b-0">
+                  <div className="flex items-center justify-between mb-2">
+                                         <h4 
+                       className={`text-lg font-semibold cursor-pointer transition-colors ${
+                         selectedCategories.includes(category.name) 
+                           ? 'text-blue-400 font-bold' 
+                           : 'text-blue-400 hover:text-blue-300'
+                       }`}
+                       onClick={() => handleCategoryChange(category.name)}
+                     >
+                      {category.name}
+                    </h4>
+                    {category.subItems.length > 0 && (
+                      <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
+                        {category.subItems.length}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {category.subItems.length > 0 && (
+                    <div className="ml-4 space-y-1">
+                      {category.subItems.map((item, itemIndex) => (
+                        <div 
+                          key={itemIndex} 
+                          className={`text-sm cursor-pointer transition-colors py-1 px-2 rounded hover:bg-gray-800/50 ${
+                            selectedCategories.includes(item)
+                              ? 'text-white font-bold'
+                              : 'text-gray-300 hover:text-white'
+                          }`}
+                          onClick={() => handleCategoryChange(item)}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Assets Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '32px'
-          }}>
+          <div className="grid grid-cols-3 gap-8 ml-0 lg:ml-64">
             {isLoading ? (
               <div className="col-span-full text-center text-white">로딩 중...</div>
-            ) : assets.length === 0 ? (
+            ) : filteredAssets.length === 0 ? (
               <div className="col-span-full text-center text-gray-400">
                 업로드된 자산이 없습니다.
               </div>
             ) : (
-              assets.map((asset) => (
+              filteredAssets.map((asset) => (
                 <div 
                   key={asset.lib_id}
                   onClick={() => handleAssetClick(asset)}
@@ -281,9 +447,9 @@ function AssetLibrary() {
           {/* Pagination */}
           {totalPages >= 1 && (
             <div className="mt-12 flex flex-col items-center space-y-4">
-                      <div className="text-gray-400 text-sm">
-          한 페이지당 6개씩 표시
-        </div>
+              <div className="text-gray-400 text-sm">
+                한 페이지당 6개씩 표시 • 총 {filteredAssets.length}개 결과
+              </div>
               <div className="flex items-center justify-center space-x-4">
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -340,7 +506,6 @@ function AssetLibrary() {
                 <p className="text-gray-300 text-base mb-4">
                   {selectedAsset.summary}
                 </p>
-                {/* Asset Like Button */}
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleAssetLike(selectedAsset.lib_id)}
@@ -400,7 +565,6 @@ function AssetLibrary() {
                 댓글 ({comments.length})
               </h3>
               
-              {/* Comments List */}
               <div className="space-y-3 mb-4 max-h-60 overflow-y-auto custom-scrollbar">
                 {comments.map((comment) => (
                   <div key={comment.comment_id} className="bg-gray-700 rounded-lg p-4">
@@ -426,7 +590,6 @@ function AssetLibrary() {
                 ))}
               </div>
 
-              {/* Add Comment */}
               <form onSubmit={handleCommentSubmit} className="flex space-x-2">
                 <input
                   type="text"
@@ -600,4 +763,4 @@ function AssetLibrary() {
   );
 }
 
-export default AssetLibrary; 
+export default AssetLibrary;
