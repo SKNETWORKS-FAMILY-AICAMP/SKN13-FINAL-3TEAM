@@ -4,85 +4,7 @@ import { apiRequest } from './authService';
 const API_BASE_URL = 'http://localhost:8000/api';
 const USE_MOCK_DATA = true;
 
-// 목업 데이터
-const mockCarModels = [
-  {
-    car_model_id: 'car-1',
-    car_name: '아이오닉 5',
-    type: 'SUV',
-    release_year: 2021
-  },
-  {
-    car_model_id: 'car-2',
-    car_name: '그랜저',
-    type: '세단',
-    release_year: 2022
-  },
-  {
-    car_model_id: 'car-3',
-    car_name: '투싼',
-    type: 'SUV',
-    release_year: 2023
-  }
-];
-
-const mockDesignMaterials = [
-  {
-    material_id: 'mat-1',
-    car_model_id: 'car-1',
-    material_type: '알루미늄',
-    usage_area: '후드'
-  },
-  {
-    material_id: 'mat-2',
-    car_model_id: 'car-1',
-    material_type: '강철',
-    usage_area: '차체'
-  }
-];
-
-const mockEngineeringSpecs = [
-  {
-    spec_id: 'spec-1',
-    car_model_id: 'car-1',
-    cd_value: 0.25,
-    weight: 1500,
-    material_al_ratio: 0.3,
-    wheel_base: 2700,
-    pedestrian_safety_score: 85.5,
-    sensor_ready: true
-  }
-];
-
-const mockSalesStats = [
-  {
-    car_model_id: 'car-1',
-    year: 2024,
-    month: 1,
-    units_sold: 1500
-  },
-  {
-    car_model_id: 'car-1',
-    year: 2024,
-    month: 2,
-    units_sold: 1800
-  }
-];
-
-const mockUserReviews = [
-  {
-    review_id: 'review-1',
-    car_model_id: 'car-1',
-    sentiment_score: 4.2,
-    mentioned_features: '디자인, 성능, 안전성'
-  },
-  {
-    review_id: 'review-2',
-    car_model_id: 'car-1',
-    sentiment_score: 3.8,
-    mentioned_features: '연비, 편의성'
-  }
-];
+// 기본 차량 모델 정보는 loadCarSpecs()에서 동적으로 생성
 
 // HTTP 요청 시뮬레이션 함수
 const simulateHttpRequest = async (url, options, mockData) => {
@@ -93,7 +15,15 @@ const simulateHttpRequest = async (url, options, mockData) => {
     body: options.body
   });
 
-  // 실제 fetch 요청을 보내지만 목업 응답을 반환
+  // 목업 모드에서는 실제 HTTP 요청을 보내지 않음
+  if (USE_MOCK_DATA) {
+    console.log('🔄 목업 모드: 실제 HTTP 요청 건너뛰기');
+    const mockResponse = await createMockResponse(mockData);
+    console.log('✅ 목업 응답 반환:', mockData);
+    return mockResponse;
+  }
+
+  // 실제 fetch 요청을 보내지만 목업 응답을 반환 (USE_MOCK_DATA가 false일 때만)
   try {
     const response = await fetch(url, options);
     console.log('📡 실제 HTTP 요청 전송됨:', {
@@ -131,6 +61,19 @@ const parseCSV = (csvText) => {
   }
   
   return { headers, data };
+};
+
+// 3D 모델 경로를 반환하는 함수
+const get3DModelPath = (carName) => {
+  const modelMapping = {
+    '아이오닉 5': '/models/아이오닉 5.glb',
+    '쏘나타 디 엣지': '/models/쏘나타 디 엣지.glb',
+    '산타페': '/models/산타페.glb',
+    '포터2': '/models/포터2.glb',
+    '코나': '/models/코나.glb'
+  };
+  
+  return modelMapping[carName] || null;
 };
 
 // Insight & Trends 서비스
@@ -394,7 +337,16 @@ export const searchReviews = (carReviews, searchTerm, carName) => {
 
 // 차량 모델 관련 API
 export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSize = 10) => {
-  let filteredModels = mockCarModels;
+  // 실제 assets 데이터에서 차량 정보 로드
+  const carSpecs = await loadCarSpecs();
+  
+  // carSpecs 데이터를 기반으로 차량 모델 정보 생성
+  let filteredModels = carSpecs.map((spec, index) => ({
+    car_model_id: `car-${index + 1}`,
+    car_name: spec.car_name,
+    type: spec.category || 'SUV', // car_specs의 category 필드 사용
+    release_year: spec.year || 2024 // car_specs의 year 필드 사용
+  }));
   
   if (type) {
     filteredModels = filteredModels.filter(model => model.type === type);
@@ -450,22 +402,39 @@ export const getCarModels = async (type = '', releaseYear = '', page = 1, pageSi
 };
 
 export const getCarModelDetail = async (carModelId) => {
-  const carModel = mockCarModels.find(model => model.car_model_id === carModelId);
-  if (!carModel) {
+  // 실제 assets 데이터에서 차량 정보 로드
+  const carSpecs = await loadCarSpecs();
+  const carReviews = await loadCarReviews();
+  
+  // carSpecs에서 해당 차량 찾기
+  const carSpec = carSpecs[parseInt(carModelId.split('-')[1]) - 1];
+  if (!carSpec) {
     throw new Error('차량 모델을 찾을 수 없습니다.');
   }
+  
+  // 차량 모델 정보 생성
+  const carModel = {
+    car_model_id: carModelId,
+    car_name: carSpec.car_name,
+    type: carSpec.category || 'SUV',
+    release_year: carSpec.year || 2024
+  };
+  
+  // 차량별 리뷰 정보 (hyundai_car_reviews.json에서)
+  const reviews = carReviews.filter(review => review.car_name === carSpec.car_name);
+  
+  // 차량별 역사 정보 (hyundai_car_history.json에서)
+  const articles = carReviews.filter(review => review.car_name === carSpec.car_name);
 
-  const materials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
-  const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
-  const sales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
-  const reviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
+  // 3D 모델 경로 설정
+  const model3dPath = get3DModelPath(carSpec.car_name);
 
   const mockData = {
     ...carModel,
-    design_materials: materials,
-    engineering_specs: specs,
-    sales_stats: sales,
-    user_reviews: reviews
+    engineering_specs: carSpec || {},
+    user_reviews: reviews,
+    recent_articles: articles,
+    model_3d_path: model3dPath
   };
 
   if (USE_MOCK_DATA) {
@@ -493,61 +462,20 @@ export const getCarModelDetail = async (carModelId) => {
   }
 };
 
-// 디자인 재질 관련 API
-export const getDesignMaterials = async (carModelId, materialType = '', usageArea = '') => {
-  let filteredMaterials = mockDesignMaterials.filter(mat => mat.car_model_id === carModelId);
-  
-  if (materialType) {
-    filteredMaterials = filteredMaterials.filter(mat => mat.material_type === materialType);
-  }
-  if (usageArea) {
-    filteredMaterials = filteredMaterials.filter(mat => mat.usage_area === usageArea);
-  }
-  
-  const mockData = {
-    count: filteredMaterials.length,
-    results: filteredMaterials
-  };
-
-  if (USE_MOCK_DATA) {
-    const params = new URLSearchParams();
-    if (materialType) params.append('material_type', materialType);
-    if (usageArea) params.append('usage_area', usageArea);
-
-    return await simulateHttpRequest(
-      `${API_BASE_URL}/insights/models/${carModelId}/materials/?${params}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      },
-      mockData
-    ).then(response => response.json());
-  }
-
-  try {
-    const params = new URLSearchParams();
-    if (materialType) params.append('material_type', materialType);
-    if (usageArea) params.append('usage_area', usageArea);
-
-    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/materials/?${params}`, {
-      method: 'GET',
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Get design materials error:', error);
-    throw error;
-  }
-};
-
 // 공학적 스펙 관련 API
 export const getEngineeringSpecs = async (carModelId) => {
-  const specs = mockEngineeringSpecs.filter(spec => spec.car_model_id === carModelId);
+  // 실제 assets 데이터에서 차량 스펙 정보 로드
+  const carSpecs = await loadCarSpecs();
+  
+  // carSpecs에서 해당 차량 찾기
+  const carSpec = carSpecs[parseInt(carModelId.split('-')[1]) - 1];
+  if (!carSpec) {
+    throw new Error('차량 모델을 찾을 수 없습니다.');
+  }
+  
   const mockData = {
-    count: specs.length,
-    results: specs
+    count: carSpec ? Object.keys(carSpec).length : 0,
+    results: carSpec || {}
   };
 
   if (USE_MOCK_DATA) {
@@ -575,75 +503,24 @@ export const getEngineeringSpecs = async (carModelId) => {
   }
 };
 
-// 판매 통계 관련 API
-export const getSalesStats = async (carModelId, year = '', month = '', page = 1, pageSize = 12) => {
-  let filteredSales = mockSalesStats.filter(sale => sale.car_model_id === carModelId);
-  
-  if (year) {
-    filteredSales = filteredSales.filter(sale => sale.year === parseInt(year));
-  }
-  if (month) {
-    filteredSales = filteredSales.filter(sale => sale.month === parseInt(month));
-  }
-  
-  const mockData = {
-    count: filteredSales.length,
-    results: filteredSales
-  };
-
-  if (USE_MOCK_DATA) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      page_size: pageSize.toString()
-    });
-    if (year) params.append('year', year);
-    if (month) params.append('month', month);
-
-    return await simulateHttpRequest(
-      `${API_BASE_URL}/insights/models/${carModelId}/sales/?${params}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      },
-      mockData
-    ).then(response => response.json());
-  }
-
-  try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      page_size: pageSize.toString()
-    });
-    if (year) params.append('year', year);
-    if (month) params.append('month', month);
-
-    const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/sales/?${params}`, {
-      method: 'GET',
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Get sales stats error:', error);
-    throw error;
-  }
-};
-
 // 사용자 리뷰 관련 API
-export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentimentScoreMax = '', page = 1, pageSize = 10) => {
-  let filteredReviews = mockUserReviews.filter(review => review.car_model_id === carModelId);
+export const getUserReviews = async (carModelId, page = 1, pageSize = 10) => {
+  // 실제 assets 데이터에서 차량 정보와 리뷰 정보 로드
+  const carSpecs = await loadCarSpecs();
+  const carReviews = await loadCarReviews();
   
-  if (sentimentScoreMin) {
-    filteredReviews = filteredReviews.filter(review => review.sentiment_score >= parseFloat(sentimentScoreMin));
+  // carSpecs에서 해당 차량 찾기
+  const carSpec = carSpecs[parseInt(carModelId.split('-')[1]) - 1];
+  if (!carSpec) {
+    throw new Error('차량 모델을 찾을 수 없습니다.');
   }
-  if (sentimentScoreMax) {
-    filteredReviews = filteredReviews.filter(review => review.sentiment_score <= parseFloat(sentimentScoreMax));
-  }
+  
+  // 해당 차량의 리뷰 정보 필터링
+  const reviews = carReviews.filter(review => review.car_name === carSpec.car_name);
   
   const mockData = {
-    count: filteredReviews.length,
-    results: filteredReviews
+    count: reviews.length,
+    results: reviews
   };
 
   if (USE_MOCK_DATA) {
@@ -651,8 +528,6 @@ export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentime
       page: page.toString(),
       page_size: pageSize.toString()
     });
-    if (sentimentScoreMin) params.append('sentiment_score_min', sentimentScoreMin);
-    if (sentimentScoreMax) params.append('sentiment_score_max', sentimentScoreMax);
 
     return await simulateHttpRequest(
       `${API_BASE_URL}/insights/models/${carModelId}/reviews/?${params}`,
@@ -672,8 +547,6 @@ export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentime
       page: page.toString(),
       page_size: pageSize.toString()
     });
-    if (sentimentScoreMin) params.append('sentiment_score_min', sentimentScoreMin);
-    if (sentimentScoreMax) params.append('sentiment_score_max', sentimentScoreMax);
 
     const response = await apiRequest(`${API_BASE_URL}/insights/models/${carModelId}/reviews/?${params}`, {
       method: 'GET',
@@ -688,8 +561,6 @@ export const getUserReviews = async (carModelId, sentimentScoreMin = '', sentime
 export default {
   getCarModels,
   getCarModelDetail,
-  getDesignMaterials,
   getEngineeringSpecs,
-  getSalesStats,
   getUserReviews
 };

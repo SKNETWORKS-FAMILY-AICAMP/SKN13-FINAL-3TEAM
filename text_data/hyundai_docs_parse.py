@@ -4,6 +4,8 @@ import time
 from dotenv import load_dotenv
 import re
 from pypdf import PdfReader
+from pathlib import Path
+Path("./QA_context").mkdir(parents=True, exist_ok=True)
 
 load_dotenv()
 
@@ -19,7 +21,7 @@ def split_by_topic(text):
                 "2.1 플루이딕 스컬프쳐와 스톰 엣지", "2.2 센슈어스 스포트니스", "3.1 플루이득 스컬프쳐와 스톰엣지 미의식",\
                 "3.2 센슈어스 스포트니스 미의식", "4.1 인지된 미의식과 인식적 환원의 차이", "4.2 플루이딕 스컬프쳐와 스톰 엣지의 신경학적 해석",\
                 "4.3 센슈어스 스포트니스의 신경학적 해석", "4.3.1 파라메트릭 다이나믹스", "4.3.2 파라메트릭 주얼", "4.3.3. 히든라이팅",\
-                "4.3.4 현대자동차 디자인 철학의 신경학적 해석" "REFLECTIONS IN MOTION", "HERITAGE SERIES", "PONY", "COLOR & LIGHT",\
+                "4.3.4 현대자동차 디자인 철학의 신경학적 해석", "REFLECTIONS IN MOTION", "HERITAGE SERIES", "PONY", "COLOR & LIGHT",\
                 "MATERIAL", "A JOURNEY"]
 
     # splitter 기준으로 인덱스 찾기
@@ -40,15 +42,29 @@ def split_by_topic(text):
 # 2. 충실한 답변 생성용 프롬프트
 def make_prompt(article_chunk):
     prompt = f"""
-너는 자동차 기사로부터 학습용 QA(질문-답변) 데이터셋을 만드는 어시스턴트야.
-아래 기사 내용을 바탕으로, 정보가 겹치지 않는 다양한 질문-답변 쌍을 가능한 많이 생성해줘.
-각 질문은 한글로, 답변도 한글로 반드시 기사에 근거해서 작성하되,
-답변이 가능한 한 충실하고 자세하게(2문장 이상, 핵심+배경+수치/예시 등 포함) 만들어줘.
+Instruction:
+너는 자동차 기사로부터 학습용 QA(질문-답변) 데이터셋을 만드는 어시스턴트다.
+아래 <ARTICLE> 내용을 바탕으로, 정보가 겹치지 않는 다양한 질문-답변 쌍을 가능한 많이 생성하라.
 
+규칙:
+- 질문과 답변은 모두 한국어.
+- 각 질문은 한 줄(25자 이내 권장), 각 답변은 한 줄(40자 이내 권장).
+- 답변은 기사에 근거한 사실만. 외부 정보 금지.
+- 중복·동의어 반복 금지. 각 질문은 서로 다른 핵심 정보를 다룰 것.
+- 모호한 지시어(그것/이것/그 회사 등) 금지. 주어를 명시.
+- 예/아니오형은 가급적 피하고, 정의·사실·수치·비교·원인·절차 등 서술형 질문 위주.
+- 각 항목에 근거(EVIDENCE)를 반드시 포함: 기사 인용(최대 40자) 또는 문장 인덱스 표기(예: sent_idx: 12).
+- 출력은 아래 형식 블록을 **그대로 반복**하며, 블록 사이에 빈 줄 1개만 둘 것. 다른 문구/메타데이터 금지.
 
-출력 형식:
-Q: (질문)
-A: (답변)
+출력 형식(반드시 이 블록 형식 그대로 반복):
+Q: 한 줄 질문
+A: 한 줄 정답
+EVIDENCE: 기사 인용(아주 짧게) 또는 문장 인덱스
+
+Q: ...
+A: ...
+EVIDENCE: ...
+
 
 기사:
 {article_chunk}
@@ -126,7 +142,7 @@ def main(file_name):
 # 7. pdf 용 메인 파이프라인
 def main2(file_name):
     # PDF 텍스트 추출
-    text = extract_pdf_text(f"./finetuning/{file_name}.txt")
+    text = extract_pdf_text(f"./finetuning/{file_name}.pdf")
     print(f"총 {len(text)}자 텍스트 로드 완료")
 
     # 세부 내용 기준 기준 청크
@@ -154,7 +170,7 @@ def main2(file_name):
 if __name__ == "__main__":
     file_names = ["현대 디자인 모토", "hyundai_journal_articles", "interview_articles", "new_articles", "preview_articles", "total_articles"]
     file_names2 = ["자동차 차체 형태 디자인이 공기역학 성능에 미치는영향에 대한 연구", "현대 모터스튜디오_디자인 관련 문서", "현대자동차 디자인 철학에 내재하는 미의식의 신경학적 해석"]
-    # for file in file_names:
+    # for file i~n file_names:
     #     main(f"{file}")
     for file in file_names2:
         main2(f"{file}")
