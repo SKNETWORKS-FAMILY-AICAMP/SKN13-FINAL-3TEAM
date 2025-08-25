@@ -1,148 +1,119 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-const ThreeDViewer = ({ carName, className = "" }) => {
+const ThreeDViewer = ({ carName }) => {
   const mountRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const initializedRef = useRef(false);
 
   useEffect(() => {
-    console.log('ThreeDViewer useEffect 실행됨');
-    console.log('carName:', carName);
-    console.log('mountRef.current:', mountRef.current);
-    console.log('mountRef.current?.clientWidth:', mountRef.current?.clientWidth);
-    
-    if (!carName) {
-      console.log('carName이 없어서 early return');
-      return;
-    }
-
-    // 이미 초기화되었다면 중복 실행 방지
-    if (initializedRef.current) {
-      console.log('이미 초기화됨, 중복 실행 방지');
-      return;
-    }
-
-    // ref가 준비될 때까지 기다리기
-    const waitForRef = () => {
-      if (mountRef.current && mountRef.current.clientWidth > 0) {
-        console.log('ref가 준비됨, Three.js 초기화 시작');
-        initializedRef.current = true;
-        initThreeJS();
-      } else {
-        console.log('ref가 아직 준비되지 않음, 100ms 후 재시도');
-        setTimeout(waitForRef, 100);
-      }
-    };
-
-    waitForRef();
-
-    // Cleanup 함수
-    return () => {
-      console.log('ThreeDViewer cleanup 실행');
-      initializedRef.current = false;
-    };
-  }, [carName]);
-
-  const initThreeJS = async () => {
-    try {
-      console.log('Three.js 초기화 시작');
-      
-      // Three.js 모듈들을 동적으로 import
-      const THREE = await import('three');
-      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader');
-      const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls');
-
-      console.log('Three.js 모듈 로드 완료');
-
-      // Scene 생성
+    if (mountRef.current && carName) {
+      // Scene setup
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x1f2937);
+      scene.background = new THREE.Color(0x111827);
 
-      // Camera 생성
-      const camera = new THREE.PerspectiveCamera(
-        45, // FOV를 75에서 45로 줄여서 원근 왜곡 감소
-        mountRef.current.clientWidth / mountRef.current.clientHeight,
-        0.1,
-        1000
-      );
-      camera.position.set(1.5, 1.5, 1.5); // 카메라를 3배 가깝게 조정
+      // Camera setup - 왼쪽 아래에서 올려다보는 각도
+      const camera = new THREE.PerspectiveCamera(45, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000); // FOV를 60에서 45로 줄여서 원근감 감소
+      camera.position.set(-12, -4, 12); // 카메라 거리를 늘려서 원근감 감소
+      camera.lookAt(0, 0, 0);
 
-      // Renderer 생성
+      // Renderer setup
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.enabled = false; // 그림자 비활성화로 입체감 감소
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-      // DOM에 추가
       mountRef.current.appendChild(renderer.domElement);
 
-      // 조명 추가
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      // Lighting - 입체감을 줄이기 위해 조명 조정
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // 전역 조명 강화로 그림자 감소
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4); // 방향성 조명 강도 감소
       directionalLight.position.set(10, 10, 5);
+      directionalLight.castShadow = false; // 그림자 비활성화
       scene.add(directionalLight);
 
-      // Controls 추가
+      // 추가 부드러운 조명
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.3); // 채우기 조명 추가
+      fillLight.position.set(-10, 5, -10);
+      scene.add(fillLight);
+
+      // Controls setup
       const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.maxDistance = 10; // 최대 줌아웃 거리 제한
-      controls.minDistance = 0.5; // 최소 줌인 거리 제한
-
-      // Grid helper 제거 (격자선 안보이게)
-      // const gridHelper = new THREE.GridHelper(10, 10);
-      // scene.add(gridHelper);
-
-      // 3D 모델 로드
-      const loader = new GLTFLoader();
-      const modelPath = `/models/${carName}.glb`;
+      controls.target.set(0, 0, 0);
+      controls.enableZoom = false;
+      controls.enablePan = false;
+      controls.maxDistance = 20; // 최대 거리 증가
+      controls.minDistance = 8; // 최소 거리 증가
+      controls.maxPolarAngle = Math.PI / 2; // 수평선 위로만 회전 가능
+      controls.minPolarAngle = 0; // 수평선 아래로는 회전 불가
       
-      console.log('모델 로드 시작:', modelPath);
-      console.log('차량명:', carName);
+      // 부드러운 회전을 위한 설정
+      controls.enableDamping = true; // 댐핑 활성화로 부드러운 움직임
+      controls.dampingFactor = 0.05; // 댐핑 강도 (낮을수록 부드러움)
+      controls.rotateSpeed = 0.5; // 회전 속도 감소 (기본값 1.0)
+      controls.enableSmoothing = true; // 스무딩 활성화
+      
+      // 초기 각도 설정 - 왼쪽 아래에서 올려다보는 구도 유지
+      controls.azimuthAngle = Math.PI / 4; // 45도 (왼쪽)
+      controls.polarAngle = Math.PI / 3; // 60도 (아래에서 올려다보는 각도)
+      controls.update();
 
-      loader.load(
-        modelPath,
-        (gltf) => {
-          console.log('모델 로드 성공!');
-          console.log('gltf 객체:', gltf);
-          console.log('scene:', gltf.scene);
-          console.log('animations:', gltf.animations);
-          
-          const model = gltf.scene;
-          
-          // 모델 크기 조정
-          const box = new THREE.Box3().setFromObject(model);
-          const center = box.getCenter(new THREE.Vector3());
-          const size = box.getSize(new THREE.Vector3());
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 3 / maxDim;
-          
-          console.log('모델 바운딩 박스:', { center, size, maxDim, scale });
-          
-          model.scale.setScalar(scale);
-          model.position.sub(center.multiplyScalar(scale));
-          
-          scene.add(model);
-          setIsLoading(false);
-          console.log('3D 뷰어 초기화 완료');
-        },
-        (progress) => {
-          console.log('로딩 진행률:', (progress.loaded / progress.total * 100) + '%');
-          console.log('로딩된 바이트:', progress.loaded, '총 바이트:', progress.total);
-        },
-        (error) => {
-          console.error('모델 로드 실패:', error);
-          console.error('에러 타입:', error.type);
-          console.error('에러 메시지:', error.message);
-          console.error('에러 상세:', error);
-          setError(`3D 모델을 불러올 수 없습니다: ${error.message}`);
-          setIsLoading(false);
-        }
-      );
+      // GLTF Loader
+      const loader = new GLTFLoader();
+      
+      // 사용 가능한 GLB 파일 목록
+      const availableModels = {
+        '쏘나타 디 엣지': '/models/쏘나타 디 엣지.glb',
+        '산타페': '/models/산타페.glb',
+        '아이오닉 5': '/models/아이오닉 5.glb',
+        '코나': '/models/코나.glb',
+        '포터2': '/models/포터2.glb'
+      };
+      
+      const modelPath = availableModels[carName];
+      
+      if (!modelPath) {
+        console.warn(`GLB model not available for: ${carName}`);
+        // 모델이 없을 때 기본 차량 모델 사용
+        const defaultModelPath = '/models/쏘나타 디 엣지.glb';
+        loadModel(defaultModelPath);
+      } else {
+        loadModel(modelPath);
+      }
+      
+      function loadModel(path) {
+        loader.load(
+          path,
+          (gltf) => {
+            const model = gltf.scene;
+            
+            // Model scaling and positioning
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 20 / maxDim; // 4에서 8로 증가하여 2배 확대
+            
+            model.scale.setScalar(scale);
+            const scaledCenter = center.clone().multiplyScalar(scale);
+            model.position.sub(scaledCenter);
+            
+            scene.add(model);
+            controls.target.set(0, 0, 0);
+            controls.update();
+          },
+          (progress) => {
+            console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+          },
+          (error) => {
+            console.error('Error loading model:', error);
+            console.error('Model path attempted:', path);
+          }
+        );
+      }
 
-      // 애니메이션 루프
+      // Animation loop
       const animate = () => {
         requestAnimationFrame(animate);
         controls.update();
@@ -150,9 +121,9 @@ const ThreeDViewer = ({ carName, className = "" }) => {
       };
       animate();
 
-      // 리사이즈 핸들러
+      // Handle resize
       const handleResize = () => {
-        if (mountRef.current && camera && renderer) {
+        if (mountRef.current) {
           const width = mountRef.current.clientWidth;
           const height = mountRef.current.clientHeight;
           camera.aspect = width / height;
@@ -163,45 +134,23 @@ const ThreeDViewer = ({ carName, className = "" }) => {
 
       window.addEventListener('resize', handleResize);
 
-    } catch (err) {
-      console.error('Three.js 초기화 실패:', err);
-      setError('3D 뷰어를 초기화할 수 없습니다.');
-      setIsLoading(false);
+      // Cleanup
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if (mountRef.current) {
+          mountRef.current.removeChild(renderer.domElement);
+        }
+        renderer.dispose();
+      };
     }
-  };
-
-  if (isLoading) {
-    return (
-      <div className={`relative ${className}`}>
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-700 rounded-lg z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-white text-sm">3D 모델 로딩 중...</p>
-          </div>
-        </div>
-        <div ref={mountRef} className="w-full h-full min-h-[320px] rounded-lg overflow-hidden bg-gray-700" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`relative ${className}`}>
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-700 rounded-lg z-10">
-          <div className="text-center">
-            <div className="text-red-400 text-4xl mb-4">⚠️</div>
-            <p className="text-white text-sm">{error}</p>
-          </div>
-        </div>
-        <div ref={mountRef} className="w-full h-full min-h-[320px] rounded-lg overflow-hidden bg-gray-700" />
-      </div>
-    );
-  }
+  }, [carName]);
 
   return (
-    <div className={`relative ${className}`}>
-      <div ref={mountRef} className="w-full h-full min-h-[320px] rounded-lg overflow-hidden" />
-    </div>
+    <div 
+      ref={mountRef} 
+      className="w-full h-full"
+      style={{ backgroundColor: '#111827' }}
+    />
   );
 };
 

@@ -29,11 +29,11 @@ export default function Header() {
 
   return (
     <header className="bg-gray-800 rounded-t-lg" style={{ borderBottom: '1px solid #374151' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="w-full px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
           {/* Logo - Left */}
           <div className="flex-shrink-0">
-            <div className="text-white font-bold text-xl">
+            <div className="text-white font-bold text-2xl">
               <span style={{color: '#60a5fa'}}>JACK</span>
               <span>LETTE</span>
             </div>
@@ -42,65 +42,65 @@ export default function Header() {
             </div>
           </div>
           
-                     {/* Navigation Links - Center */}
-           <nav style={{display: 'flex', gap: '48px'}}>
-             <Link 
-               to="/" 
-               className={`text-white hover:text-gray-300 transition-colors font-medium ${
-                 location.pathname === '/' ? 'border-b-2 border-purple-500 pb-1' : ''
-               }`} 
-               style={{color: 'white', textDecoration: 'none'}}
-             >
-               Home
-             </Link>
-             <Link 
-               to="/" 
-               className="text-white hover:text-gray-300 transition-colors font-medium" 
-               style={{color: 'white', textDecoration: 'none'}}
-               onClick={(e) => {
-                 e.preventDefault();
-                 // 현재 페이지가 홈페이지인 경우에만 스크롤
-                 if (window.location.pathname === '/') {
-                   const aboutSection = document.getElementById('about');
-                   if (aboutSection) {
-                     aboutSection.scrollIntoView({ behavior: 'smooth' });
-                   }
-                 } else {
-                   // 다른 페이지에서 홈페이지로 이동 후 스크롤
-                   window.location.href = '/#about';
-                 }
-               }}
-             >
-               About us
-             </Link>
-             <Link 
-               to="/library" 
-               className={`text-white hover:text-gray-300 transition-colors font-medium ${
-                 location.pathname === '/library' ? 'border-b-2 border-purple-500 pb-1' : ''
-               }`} 
-               style={{color: 'white', textDecoration: 'none'}}
-             >
-               Asset Library
-             </Link>
-             <Link 
-               to="/insights" 
-               className={`text-white hover:text-gray-300 transition-colors font-medium ${
-                 location.pathname === '/insights' ? 'border-b-2 border-purple-500 pb-1' : ''
-               }`} 
-               style={{color: 'white', textDecoration: 'none'}}
-             >
-               Insight&Trends
-             </Link>
-             <Link 
-               to="/lab" 
-               className={`text-white hover:text-gray-300 transition-colors font-medium ${
-                 location.pathname === '/lab' ? 'border-b-2 border-purple-500 pb-1' : ''
-               }`} 
-               style={{color: 'white', textDecoration: 'none'}}
-             >
-               Prototype Lab
-             </Link>
-           </nav>
+          {/* Navigation Links - Center */}
+          <nav className="flex gap-12">
+            <Link 
+              to="/" 
+              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
+                location.pathname === '/' ? 'border-b-2 border-purple-500 pb-1' : ''
+              }`} 
+              style={{color: 'white', textDecoration: 'none'}}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/" 
+              className="text-white hover:text-gray-300 transition-colors font-medium text-lg" 
+              style={{color: 'white', textDecoration: 'none'}}
+              onClick={(e) => {
+                e.preventDefault();
+                // 현재 페이지가 홈페이지인 경우에만 스크롤
+                if (window.location.pathname === '/') {
+                  const aboutSection = document.getElementById('about');
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                } else {
+                  // 다른 페이지에서 홈페이지로 이동 후 스크롤
+                  window.location.href = '/#about';
+                }
+              }}
+            >
+              About us
+            </Link>
+            <Link 
+              to="/library" 
+              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
+                location.pathname === '/library' ? 'border-b-2 border-purple-500 pb-1' : ''
+              }`} 
+              style={{color: 'white', textDecoration: 'none'}}
+            >
+              Asset Library
+            </Link>
+            <Link 
+              to="/insights" 
+              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
+                location.pathname === '/insights' ? 'border-b-2 border-purple-500 pb-1' : ''
+              }`} 
+              style={{color: 'white', textDecoration: 'none'}}
+            >
+              Insight&Trends
+            </Link>
+            <Link 
+              to="/lab" 
+              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
+                location.pathname === '/lab' ? 'border-b-2 border-purple-500 pb-1' : ''
+              }`} 
+              style={{color: 'white', textDecoration: 'none'}}
+            >
+              Prototype Lab
+            </Link>
+          </nav>
 
           {/* Action Buttons - Right */}
           <div className="flex items-center space-x-4">

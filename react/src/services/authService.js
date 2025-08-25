@@ -13,10 +13,11 @@ import {
   checkEmailExists
 } from './mockData';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:80/api';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // 사용자 정보 수정 API
 export const updateUserProfile = async (userData) => {
@@ -172,7 +173,7 @@ export const login = async (email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        e_mail: email,
+        email: email,
         password: password,
       }),
     });
@@ -402,7 +403,9 @@ export const refreshToken = async (refreshToken) => {
 
   // 실제 API 호출
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
+    // django 실제 토큰 갱신 주소는 /auth/token/refresh라서 수정.
+    const response = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
+    // const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
