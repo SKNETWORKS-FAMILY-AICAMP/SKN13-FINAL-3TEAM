@@ -1,0 +1,20 @@
+### 환경변수
+.env
+
+### 캐시 파일
+.vite/
+__pycache__/
+.DS_Store
+/build
+/dist
+
+### 데이터
+*.csv
+*.glb
+*.csv
+*.png
+*.jpg
+
+models/
+docker-compose.yml
+Dockerfile

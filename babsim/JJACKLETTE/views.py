@@ -6,9 +6,13 @@ import logging
 import os
 import requests
 import httpx
+import time
 from datetime import datetime
 from pathlib import Path
-from asgiref.sync import async_to_sync
+from typing import List, Optional
+from django.views import View 
+from asgiref.sync import sync_to_async, async_to_sync
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics, status
@@ -28,155 +32,252 @@ from dotenv import load_dotenv
 from .models import *
 from .serializers import *
 from qdrant_client import QdrantClient
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL = "text-embedding-3-large"
-EMBEDDING_DIM = 3072 
-
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-if not OPENAI_API_KEY:
-    logger.warning("OPENAI_API_KEY가 .env 파일에 설정되지 않았습니다. RAG 기능이 비활성화됩니다.")
-
-
-try:
-    BASE_DIR = settings.BASE_DIR  # 보통 manage.py가 있는 경로
-except Exception:
-    # settings에 BASE_DIR이 없다면 views.py 기준으로 추정
-    BASE_DIR = Path(__file__).resolve().parent.parent
-
-ENV_PATH = Path(BASE_DIR) / ".env"
-if ENV_PATH.exists():
-    load_dotenv(dotenv_path=ENV_PATH, override=False)
-else:
-    logger.warning("RAG .env 파일을 찾지 못했습니다: %s", ENV_PATH)
-
-# .env에서 OpenAI 키 로드
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    logger.warning("OPENAI_API_KEY가 .env에서 로드되지 않았습니다. (RAG 임베딩은 건너뜁니다)")
-
+EMBEDDING_MODEL = "BAAI/bge-m3"
+EMBEDDING_DIM = 1024
 
 class StandardResultSetPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+    page_size = 10                          # 기본 페이지 사이즈
+    page_size_query_param = 'page_size'     # 클라이언트가 ?page_size= 로 조절
+    max_page_size = 100                     # 상한
 
 class ChatAPIView(APIView):
+    """
+    사용자 채팅 요청을 처리하는 API 뷰 (동기 버전).
+    1) 키워드 기반 라우팅 우선 처리
+    2) 질문 의도 라우팅(일반 대화 vs RAG)
+    3) 의도에 맞춰 프롬프트 구성
+    4) 추론 서버 호출 후 결과 반환
+    """
     permission_classes = [IsAuthenticated]
 
-    try:
-        TOKENIZER = AutoTokenizer.from_pretrained(settings.EXAONE_MODEL_PATH, trust_remote_code=True)
-        logger.info("ChatAPIView: 토크나이저 로딩 성공")
-    except Exception as e:
-        TOKENIZER = None
-        logger.error("ChatAPIView: 토크나이저 로딩 실패: %s", e, exc_info=True)
+    # --- 상수/설정 ---
+    QDRANT_HOST = getattr(settings, "QDRANT_HOST", "qdrant")
+    QDRANT_PORT = int(getattr(settings, "QDRANT_PORT_REST", 6333))
+    QDRANT_COLLECTION = getattr(settings, "QDRANT_COLLECTION", "babsim_rag_db")
+    RAG_TOP_K = int(getattr(settings, "RAG_TOP_K", 5))
+    INFERENCE_URL = getattr(settings, "INFERENCE_SERVER_URL", "http://inference-server:8001")
+    EMBEDDING_MODEL_NAME = getattr(settings, "EMBEDDING_MODEL_NAME", "BAAI/bge-m3")
+    TOKENIZER_PATH = getattr(settings, "EXAONE_MODEL_PATH", "/app/models/exaone_4.0_1.2b")
 
-    # 자동차 전용 System Prompt
+    # --- 프롬프트 템플릿 ---
     SYSTEM_PROMPT = (
         "당신은 자동차 디자인 트렌드와 역사에 정통한 '자동차 디자인 전문 AI'입니다. "
         "특히 현대자동차의 디자인 철학인 '센슈어스 스포티니스'와 '플루이딕 스컬프처'를 깊이 이해하고 있습니다. "
         "사용자의 질문에 대해, 전문 지식을 바탕으로 시각적이고 창의적인 관점에서 상세하게 설명해주세요."
     )
-    # General fallback System Prompt
     GENERAL_PROMPT = (
-        "당신은 현대자동차와 관련하여 지식이 풍부하고 친절한 AI 비서입니다. "
-        "사용자의 현대자동차 관련 질문에 대해 자연스럽고 도움이 되는 답변을 해주세요."
+        "당신은 친절한 AI 비서입니다. "
+        "스몰톡/일반 질문에는 간결하고 자연스럽게 답하고, 현대자동차 디자인 관련 질문으로 이어질 수 있도록 돕습니다."
         "답변은 항상 한국어로 진행하세요."
     )
+    ROUTING_PROMPT_TEMPLATE = (
+        "당신은 사용자의 질문 의도를 분석하는 라우터 AI입니다. 주어진 질문의 종류를 \"[RAG]\" 또는 \"[GENERAL]\" 중 하나로만 분류하세요.\n\n"
+        "## 지침:\n"
+        "- 현대자동차의 디자인, 철학, 역사, 특정 모델 등 자동차 관련 전문 지식이 필요하면 \"[RAG]\"로 분류합니다.\n"
+        "- 일상적인 대화, 인사, 날씨, 감정 표현 등 자동차와 관련 없는 일반적인 질문은 \"[GENERAL]\"로 분류합니다.\n\n"
+        "--- 예시 ---\n"
+        "질문: \"아이오닉 5의 파라메트릭 픽셀 디자인에 대해 알려줘.\"\n"
+        "분류: \"[RAG]\"\n\n"
+        "질문: \"플루이딕 스컬프처가 뭐야?\"\n"
+        "분류: \"[RAG]\"\n\n"
+        "질문: \"안녕?\"\n"
+        "분류: \"[GENERAL]\"\n\n"
+        "질문: \"오늘 날씨 어때?\"\n"
+        "분류: \"[GENERAL]\"\n\n"
+        "질문: \"사랑이란 무엇일까?\"\n"
+        "분류: \"[GENERAL]\"\n"
+        "--- 여기까지 예시 ---\n\n"
+        "자, 이제 이 질문을 분류하세요.\n"
+        "질문: \"{user_prompt}\"\n"
+        "분류: "
+    )
 
-    QDRANT_HOST = getattr(settings, "QDRANT_HOST", "qdrant")
-    QDRANT_PORT = int(getattr(settings, "QDRANT_PORT_REST", 6333))
-    QDRANT_COLLECTION = "babsim_rag_db"
-    RAG_TOP_K = 5
-    INFERENCE_URL = getattr(settings, "INFERENCE_SERVER_URL", "http://inference-server:8001")
-    EMBEDDING_MODEL = "text-embedding-3-large"
+    TOKENIZER = None
+    EMBEDDER = None
+    try:
+        TOKENIZER = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
+        logger.info("ChatAPIView: 토크나이저 로딩 성공 (%s)", TOKENIZER_PATH)
+    except Exception as e:
+        logger.error("ChatAPIView: 토크나이저 로딩 실패: %s", e, exc_info=True)
+
+    try:
+        EMBEDDER = HuggingFaceBgeEmbeddings(
+            model_name=EMBEDDING_MODEL_NAME,
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        logger.info("ChatAPIView: 임베딩 모델 로딩 성공 (%s)", EMBEDDING_MODEL_NAME)
+    except Exception as e:
+        logger.error("ChatAPIView: 임베딩 모델 로딩 실패: %s", e, exc_info=True)
+
+    def _call_inference_with_retry(
+        self,
+        prompt: str,
+        *,
+        max_new_tokens: Optional[int] = None,
+        timeout: float = 60.0,
+        retries: int = 3,
+        backoff_seconds: float = 0.8,
+    ) -> str:
+        last_err: Optional[Exception] = None
+        for attempt in range(1, retries + 1):
+            if attempt > 1:
+                delay = backoff_seconds * (2 ** (attempt - 2))
+                logger.warning("Inference 재시도 %d/%d, %.1fs 대기...", attempt, retries, delay)
+                time.sleep(delay)
+
+            try:
+                payload = {"prompt": prompt}
+
+                if "라우터 AI" in prompt:
+                    payload["do_sample"] = False
+                # --------------------------------------------------------------------
+
+                if max_new_tokens is not None:
+                    payload["max_new_tokens"] = max_new_tokens
+
+                with httpx.Client(timeout=timeout) as client:
+                    resp = client.post(f"{self.INFERENCE_URL}/generate-text", json=payload)
+                    resp.raise_for_status()
+                    return resp.json().get("generated_text", "").strip()
+
+            except httpx.RequestError as e:
+                last_err = e
+                logger.warning("Inference 호출 실패 (attempt %d/%d): %s", attempt, retries, e)
+            except httpx.HTTPStatusError as e:
+                status_code = e.response.status_code
+                if 500 <= status_code < 600 and attempt < retries:
+                    last_err = e
+                    logger.warning("Inference 5xx 응답 (attempt %d/%d): %s", attempt, retries, e)
+                    continue
+                raise
+
+        assert last_err is not None
+        raise last_err
 
     def post(self, request, *args, **kwargs):
-        if not self.TOKENIZER:
-            return Response({"error": "서버 내부 오류: 토크나이저가 로드되지 않았습니다."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not self.TOKENIZER or not self.EMBEDDER:
+            return Response(
+                {"error": "서버 내부 오류: 필수 모델이 로드되지 않았습니다."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         user_prompt = request.data.get("message")
         session_id = request.data.get("session_id")
 
         if not user_prompt or not session_id:
-            return Response({"error": "세션 ID와 메시지를 모두 입력해주세요."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "세션 ID와 메시지를 모두 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        query_vec, context_str = None, ""
-        if OPENAI_API_KEY:
-            try:
-                oai = OpenAIEmbeddings(api_key=OPENAI_API_KEY, model=self.EMBEDDING_MODEL)
-                query_vec = oai.embed_query(user_prompt)
+        try:
+            GENERAL_KEYWORDS = ["안녕", "누구야", "뭐해", "이름", "날씨", "고마워", "도와줘", "고맙", "땡큐"]
+            intent = "[GENERAL]"  # 기본값을 GENERAL로 미리 설정
 
+            # 정의된 키워드가 질문에 포함되어 있지 않은 경우에만 LLM 라우터를 호출
+            if not any(keyword in user_prompt for keyword in GENERAL_KEYWORDS):
+                logger.info("키워드를 찾지 못해 LLM 라우터를 호출합니다...")
+                routing_prompt = self.ROUTING_PROMPT_TEMPLATE.format(user_prompt=user_prompt)
+                intent_result = self._call_inference_with_retry(
+                    routing_prompt, max_new_tokens=10, timeout=30.0
+                )
+                if "[RAG]" in intent_result:
+                    intent = "[RAG]"
+            # 키워드가 있으면, 기본값인 [GENERAL]을 그대로 사용
+            # -------------------------------------------
+            
+            logger.info("최종 의도 '%s...': %s", user_prompt[:50], intent)
+
+            if intent == "[RAG]":
+                logger.info("RAG 검색을 수행합니다...")
+                query_vec: List[float] = self.EMBEDDER.embed_query(user_prompt)
                 qdrant = QdrantClient(host=self.QDRANT_HOST, port=self.QDRANT_PORT)
                 search_res = qdrant.search(
                     collection_name=self.QDRANT_COLLECTION,
-                    query_vector=query_vec, limit=self.RAG_TOP_K, with_payload=True
+                    query_vector=query_vec,
+                    limit=self.RAG_TOP_K,
+                    with_payload=True,
                 )
-                contexts = [(pt.payload or {}).get("text", "").strip()
-                            for pt in search_res if (pt.payload or {}).get("text", "").strip()]
-                if contexts:
-                    context_str = "\n\n".join(contexts)
-                    logger.info(f"RAG contexts found: {contexts}")
-            except Exception as e:
-                logger.warning("RAG 파이프라인 실패 → 일반 생성으로 전환: %s", e, exc_info=True)
-        else:
-            logger.warning("OPENAI_API_KEY 미설정 → RAG를 건너뜁니다.")
+                contexts = [
+                    (pt.payload or {}).get("page_content", "").strip()
+                    for pt in search_res
+                    if (pt.payload or {}).get("page_content", "").strip()
+                ]
+                context_str = "\n\n".join(contexts) if contexts else "관련 정보를 찾지 못했습니다."
+                RAG_USER_PROMPT_TEMPLATE = """
+                아래의 [컨텍스트]를 바탕으로 사용자의 [질문]에 대해 답변해 주세요.
 
-        # ----- 핵심 로직: contexts 여부에 따른 프롬프트 분기 -----
-        messages = []
-        if context_str:
-            # RAG 모드 (자동차 전용 system prompt + context 포함)
-            rag_prompt_content = (
-                f"아래 컨텍스트를 참고해 질문에 답하세요.\n\n"
-                f"### 컨텍스트:\n{context_str}\n\n### 질문:\n{user_prompt}"
+                [지시사항]
+                1. 답변은 반드시 한국어로만 작성하세요. 영어 단어는 절대 사용하지 마세요.
+                2. [컨텍스트]의 핵심 내용을 세 가지 항목으로 요약하여 불렛 포인트(-)로 정리해 주세요.
+                3. 각 항목은 간결하고 명확한 문장으로 설명해야 합니다.
+                4. 불필요한 서론이나 결론 없이 핵심 요약 내용만 바로 제시해 주세요.
+
+                [컨텍스트]
+                {context}
+
+                [질문]
+                {question}
+                """
+                messages = [
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {
+                        "role": "user",
+                        "content": RAG_USER_PROMPT_TEMPLATE.format(
+                            context=context_str,
+                            question=user_prompt
+                        )
+                    },
+                ]
+            else: # intent == "[GENERAL]"
+                logger.info("일반 응답을 생성합니다...")
+                messages = [
+                    {"role": "system", "content": self.GENERAL_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ]
+
+            chat_text = self.TOKENIZER.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=False
             )
-            messages = [
-                {"role": "system", "content": self.SYSTEM_PROMPT},
-                {"role": "user", "content": rag_prompt_content},
-            ]
-        else:
-            # General fallback 모드
-            messages = [
-                {"role": "system", "content": self.GENERAL_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ]
+            final_prompt = f"{chat_text.rstrip()}\n\n### Assistant:"
+            text_answer = self._call_inference_with_retry(
+                final_prompt, timeout=120.0
+            )
 
-        chat_text = self.TOKENIZER.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=False
-        )
-        final_prompt = f"{chat_text.rstrip()}\n\n### Assistant:"
-
-        # Inference Server 호출
-        try:
-            with httpx.Client(timeout=120.0) as client:
-                resp = client.post(f"{self.INFERENCE_URL}/generate-text",
-                                   json={"prompt": final_prompt})
-                resp.raise_for_status()
-                text_answer = resp.json().get("generated_text", "")
-
-                # 시스템 프롬프트가 혹시라도 포함되면 제거
-                if self.SYSTEM_PROMPT in text_answer:
-                    text_answer = text_answer.replace(self.SYSTEM_PROMPT, "").strip()
-                if self.GENERAL_PROMPT in text_answer:
-                    text_answer = text_answer.replace(self.GENERAL_PROMPT, "").strip()
+        except httpx.RequestError as e:
+            logger.exception("Inference 서버 통신 중 예외 발생: %s", str(e))
+            return Response(
+                {"error": "AI 모델 서버와 통신 중 오류가 발생했습니다."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         except Exception as e:
-            logger.exception("Inference 서버 통신 중 예외 발생")
-            return Response({"error": f"AI 모델 서버와 통신 중 오류가 발생했습니다: {str(e)}"},
-                            status=500)
+            logger.exception("전체 파이프라인 처리 중 예외 발생: %s", str(e))
+            return Response(
+                {"error": "요청 처리 중 오류가 발생했습니다."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-        # 로그 저장 및 최종 응답
         try:
             session = ChatSession.objects.get(session_id=session_id, user=request.user)
-            PromptLog.objects.create(session=session, user_prompt=user_prompt, ai_response=text_answer)
+            PromptLog.objects.create(
+                session=session, user_prompt=user_prompt, ai_response=text_answer
+            )
+        except ChatSession.DoesNotExist:
+            logger.error("DB 저장 실패: 세션 ID(%s)를 찾을 수 없습니다.", session_id)
         except Exception as e:
-            logger.exception("DB 저장 실패")
+            logger.error("DB 저장 중 예외 발생: %s", e, exc_info=True)
 
-        return Response({"success": True, "response": text_answer, "generatedResults": []},
-                        status=200)
-    
+        # 5) 최종 응답
+        return Response(
+            {"success": True, "response": text_answer, "generatedResults": []},
+            status=status.HTTP_200_OK,
+        )
+
         # except httpx.RequestError as e:
         #     logger.error(f"Inference 서버 연결 실패: {e}")
         #     return Response(
@@ -247,9 +348,12 @@ class ChatSessionListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ChatSessionSerializer
     pagination_class = StandardResultSetPagination
+
     def get_queryset(self):
         return self.request.user.chat_sessions.all().order_by('-started_at')
-    def perform_create(self, serializer): serializer.save(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
     
 class ChatSessionEndView(generics.UpdateAPIView):
     """2.3 챗봇 세션 종료"""
@@ -257,6 +361,7 @@ class ChatSessionEndView(generics.UpdateAPIView):
     serializer_class = ChatSessionSerializer # 응답용
     lookup_field = 'session_id'
     def get_queryset(self): return self.request.user.chat_sessions.all()
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.ended_at = datetime.now()
