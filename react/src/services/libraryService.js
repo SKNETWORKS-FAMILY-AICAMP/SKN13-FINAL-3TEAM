@@ -2,7 +2,7 @@ import { createMockResponse } from './mockData';
 import { apiRequest } from './authService';
 
 const API_BASE_URL = 'http://localhost:8000/api';
-const USE_MOCK_DATA = true; // 실제 Django 서버 연동을 위해 false로 설정
+const USE_MOCK_DATA = false;
 
 // 새로운 테이블 구조에 맞는 목업 데이터
 const mockAssets = [

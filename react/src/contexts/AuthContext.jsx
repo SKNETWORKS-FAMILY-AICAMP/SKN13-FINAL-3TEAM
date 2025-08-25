@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getUserProfile, logout, getToken } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { isAuthenticated as checkIsAuthenticated, getUserProfile, logout as logoutService} from '../services/authService';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -15,17 +15,16 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 초기 인증 상태 확인
   useEffect(() => {
     const checkAuthStatus = async () => {
+      setLoading(true);
       try {
-        if (getToken()) {
+        if (checkIsAuthenticated()) {
           const result = await getUserProfile();
           if (result.success) {
             setUser(result.user);
           } else {
-            // 토큰이 있지만 유효하지 않은 경우
-            await logout();
+            await logoutService();
             setUser(null);
           }
         }
@@ -36,29 +35,29 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     checkAuthStatus();
   }, []);
 
-  const login = (userData) => {
+  const login = useCallback((userData) => {
     setUser(userData);
-  };
+  }, []);
 
-  const logoutUser = async () => {
-    await logout();
+  const logout = useCallback(async () => {
+    await logoutService();
     setUser(null);
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     login,
-    logout: logoutUser,
-  };
+    logout,
+    isAuthenticated: !!user,
+  }), [user, loading, login, logoutUser]);
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
-}; 
+};

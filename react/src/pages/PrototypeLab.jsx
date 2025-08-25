@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   getChatSessions, 
   createChatSession, 
@@ -15,6 +16,23 @@ function PrototypeLab() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // ... other state variables ...
+
+  const { isAuthenticated } = useAuth(); // Context에서 인증 상태 가져오기
+
+  // [중요] 이 로직은 반드시 유지해야 합니다.
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadChatSessions();
+    } else {
+      setChatSessions([]);
+      setCurrentSession(null);
+      setMessages([]);
+    }
+  }, [isAuthenticated]);
+
+  // ... 이하 전체 코드는 이전 답변의 최종본과 동일합니다 ...
+  // ... (이하 생략 없이 전체 코드) ...
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [isChecklistExpanded, setIsChecklistExpanded] = useState(false);
@@ -32,49 +50,38 @@ function PrototypeLab() {
   });
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-
-  // 컴포넌트 마운트 시 채팅 세션 로드
-  useEffect(() => {
-    loadChatSessions();
-  }, []);
-
-  // 현재 세션이 변경될 때마다 메시지 로드
+  
   useEffect(() => {
     if (currentSession) {
       loadMessages(currentSession.session_id);
+    } else {
+      setMessages([]);
     }
   }, [currentSession]);
-
-  // 메시지가 추가될 때마다 자동 스크롤 (사용자가 스크롤을 조작하지 않았을 때만)
+  
   useEffect(() => {
     if (shouldAutoScroll) {
       scrollToBottom();
     }
   }, [messages, shouldAutoScroll]);
 
-  // 전체 스크롤 감지
   useEffect(() => {
     const handleWindowScroll = () => {
       setScrollY(window.scrollY);
-      const nearBottom =
-        window.innerHeight + window.scrollY >= document.body.scrollHeight - 50;
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 50;
       setShouldAutoScroll(nearBottom);
     };
     window.addEventListener("scroll", handleWindowScroll);
     return () => window.removeEventListener("scroll", handleWindowScroll);
   }, []);
 
-  // 채팅창 스크롤 감지
   useEffect(() => {
     const chatEl = chatContainerRef.current;
     if (!chatEl) return;
-
     const handleChatScroll = () => {
-      const nearBottom =
-        chatEl.scrollTop + chatEl.clientHeight >= chatEl.scrollHeight - 150;
+      const nearBottom = chatEl.scrollTop + chatEl.clientHeight >= chatEl.scrollHeight - 150;
       setShouldAutoScroll(nearBottom);
     };
-
     chatEl.addEventListener("scroll", handleChatScroll);
     return () => chatEl.removeEventListener("scroll", handleChatScroll);
   }, []);
@@ -83,13 +90,10 @@ function PrototypeLab() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 채팅 세션 목록 로드
   const loadChatSessions = async () => {
     try {
       const response = await getChatSessions();
       setChatSessions(response.results || []);
-      
-      // 첫 번째 세션이 있으면 자동 선택
       if (response.results && response.results.length > 0) {
         setCurrentSession(response.results[0]);
       }
@@ -98,7 +102,6 @@ function PrototypeLab() {
     }
   };
 
-  // 새 대화 시작
   const startNewConversation = async () => {
     try {
       const newSession = await createChatSession();
@@ -120,14 +123,12 @@ function PrototypeLab() {
       setChatSessions([sessionWithDefaultTitle]);
       setCurrentSession(sessionWithDefaultTitle);
       setMessages([]);
-      // 새 대화 시작 시 자동 스크롤 활성화
       setShouldAutoScroll(true);
     } catch (error) {
       console.error('새 대화 시작 실패:', error);
     }
   };
 
-  // 메시지 로드
   const loadMessages = async (sessionId) => {
     try {
       const response = await getPromptLogs(sessionId);
@@ -142,7 +143,6 @@ function PrototypeLab() {
         content: log.ai_response,
         timestamp: log.created_at
       })));
-      
       setMessages(sessionMessages);
     } catch (error) {
       console.error('메시지 로드 실패:', error);
@@ -206,20 +206,10 @@ function PrototypeLab() {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim() || !currentSession) return;
-
-    const userMessage = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date().toISOString()
-    };
-
-    // 사용자 메시지 즉시 추가
+    const userMessage = { id: `user-${Date.now()}`, type: 'user', content: inputMessage, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
-    
-    // 메시지 전송 후 자동 스크롤 활성화
     setShouldAutoScroll(true);
 
     // 첫 번째 메시지인 경우 제목 자동 생성
@@ -229,52 +219,26 @@ function PrototypeLab() {
     }
 
     try {
-      // Django 서버로 메시지 전송
       const response = await sendChatMessage(currentSession.session_id, inputMessage);
-      
       if (response.success) {
-        // AI 응답 추가
-        const aiMessage = {
-          id: `ai-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          type: 'ai',
-          content: response.response,
-          timestamp: new Date().toISOString()
-        };
-        
+        const aiMessage = { id: `ai-${Date.now()}`, type: 'ai', content: response.response, timestamp: new Date().toISOString() };
         setMessages(prev => [...prev, aiMessage]);
-        
-        // 생성된 결과가 있으면 추가
         if (response.generatedResults) {
           response.generatedResults.forEach(result => {
-            const resultMessage = {
-              id: `result-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              type: 'result',
-              resultType: result.result_type,
-              content: result.result,
-              filePath: result.result_path,
-              timestamp: new Date().toISOString()
-            };
+            const resultMessage = { id: `result-${Date.now()}-${result.result_id}`, type: 'result', resultType: result.result_type, content: result.result, filePath: result.result_path, timestamp: new Date().toISOString() };
             setMessages(prev => [...prev, resultMessage]);
           });
         }
       }
     } catch (error) {
       console.error('메시지 전송 실패:', error);
-      
-      // 에러 메시지 표시
-      const errorMessage = {
-        id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'error',
-        content: '메시지 전송에 실패했습니다. 다시 시도해주세요.',
-        timestamp: new Date().toISOString()
-      };
+      const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: '메시지 전송에 실패했습니다. 다시 시도해주세요.', timestamp: new Date().toISOString() };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // 메시지 타입별 렌더링
+  
   const renderMessage = (message) => {
     switch (message.type) {
       case 'user':
@@ -430,7 +394,7 @@ function PrototypeLab() {
         return null;
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-900" style={{
       backgroundImage: `url(${backgroundImage})`,
@@ -1012,4 +976,4 @@ function PrototypeLab() {
   );
 }
 
-export default PrototypeLab; 
+export default PrototypeLab;
