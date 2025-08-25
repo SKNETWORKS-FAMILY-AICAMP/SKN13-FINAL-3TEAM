@@ -3,7 +3,7 @@ import { apiRequest } from './authService';
 import httpLogger from '../utils/httpLogger';
 
 const API_BASE_URL = 'http://localhost:8000/api';
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // 목업 데이터 - 실제 파일 경로 사용
 const mockChatSessions = [
@@ -86,13 +86,13 @@ export const getChatSessions = async (page = 1, pageSize = 10) => {
   }
 };
 
-export const createChatSession = async (title = null) => {
+export const createChatSession = async () => {
   const newSession = {
     session_id: `session-${generateUniqueId()}`,
     user_id: 'user-1',
     started_at: new Date().toISOString(),
     ended_at: null,
-    title: title || `새로운 대화 ${new Date().toLocaleString()}`
+    title: `새로운 대화 ${new Date().toLocaleString()}`
   };
   
   if (USE_MOCK_DATA) {
@@ -115,37 +115,6 @@ export const createChatSession = async (title = null) => {
   }
 };
 
-// 세션 제목 수정 API
-export const updateSessionTitle = async (sessionId, title) => {
-  if (USE_MOCK_DATA) {
-    console.log('🔄 목업 모드: 세션 제목 수정');
-    const session = mockChatSessions.find(s => s.session_id === sessionId);
-    if (session) {
-      session.title = title;
-      return {
-        message: '세션 제목이 수정되었습니다.',
-        session: {
-          session_id: sessionId,
-          title: title,
-          updated_at: new Date().toISOString()
-        }
-      };
-    }
-    throw new Error('세션을 찾을 수 없습니다.');
-  }
-
-  try {
-    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/title/`, {
-      method: 'PUT',
-      body: JSON.stringify({ title })
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Update session title error:', error);
-    throw error;
-  }
-};
-
 export const endChatSession = async (sessionId) => {
   const session = mockChatSessions.find(s => s.session_id === sessionId);
   if (session) {
@@ -154,21 +123,18 @@ export const endChatSession = async (sessionId) => {
 
   if (USE_MOCK_DATA) {
     console.log('🔄 목업 모드: 채팅 세션 종료');
-    const promptCount = mockPromptLogs.filter(log => log.session_id === sessionId).length;
     return {
-      message: '챗봇 세션이 종료되었습니다.',
-      session: {
-        session_id: sessionId,
-        ended_at: session.ended_at,
-        total_prompts: promptCount,
-        total_duration: '1시간' // 임시 값
-      }
+      message: '세션이 종료되었습니다.',
+      session: session
     };
   }
 
   try {
     const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/end/`, {
-      method: 'PUT'
+      method: 'PUT',
+      body: JSON.stringify({
+        ended_at: new Date().toISOString()
+      })
     });
     return await response.json();
   } catch (error) {
@@ -290,37 +256,7 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 export const sendChatMessage = async (sessionId, message) => {
   console.log('💬 챗봇 메시지 전송:', { sessionId, message });
   
-  // 목업 모드일 때는 Django 서버 연결 시도하지 않음
-  if (USE_MOCK_DATA) {
-    console.log('🔄 목업 모드: 목업 응답 생성');
-    
-    // 목업 응답 생성
-    const mockResponse = generateMockResponse(message);
-    
-    // 프롬프트 로그 생성
-    const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
-    
-    // 생성 결과가 있으면 저장
-    if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
-      for (const result of mockResponse.generatedResults) {
-        await createGeneratedResult(
-          promptLog.prompt_id,
-          result.result_type,
-          result.result_path,
-          result.result
-        );
-      }
-    }
-    
-    return {
-      success: true,
-      response: mockResponse.aiResponse,
-      generatedResults: mockResponse.generatedResults || [],
-      promptLog: promptLog
-    };
-  }
-  
-  // 실제 서버 모드일 때만 Django 서버 연결 시도
+  // Django 서버로 메시지 전송
   try {
     const response = await apiRequest(`${API_BASE_URL}/chat/message/`, {
       method: 'POST',
@@ -360,6 +296,37 @@ export const sendChatMessage = async (sessionId, message) => {
     }
   } catch (error) {
     console.error('❌ Django 서버 연동 실패:', error);
+    
+    // Django 서버가 연결되지 않은 경우 목업 응답 사용
+    if (USE_MOCK_DATA) {
+      console.log('🔄 목업 응답으로 대체');
+      
+      // 목업 응답 생성
+      const mockResponse = generateMockResponse(message);
+      
+      // 프롬프트 로그 생성
+      const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
+      
+      // 생성 결과가 있으면 저장
+      if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
+        for (const result of mockResponse.generatedResults) {
+          await createGeneratedResult(
+            promptLog.prompt_id,
+            result.result_type,
+            result.result_path,
+            result.result
+          );
+        }
+      }
+      
+      return {
+        success: true,
+        response: mockResponse.aiResponse,
+        generatedResults: mockResponse.generatedResults || [],
+        promptLog: promptLog
+      };
+    }
+    
     throw error;
   }
 };
@@ -431,7 +398,6 @@ const generateMockResponse = (message) => {
 export default {
   getChatSessions,
   createChatSession,
-  updateSessionTitle,
   endChatSession,
   getPromptLogs,
   createPromptLog,

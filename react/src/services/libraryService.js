@@ -2,7 +2,7 @@ import { createMockResponse } from './mockData';
 import { apiRequest } from './authService';
 
 const API_BASE_URL = 'http://localhost:8000/api';
-const USE_MOCK_DATA = true; // 실제 Django 서버 연동을 위해 false로 설정
+const USE_MOCK_DATA = false;
 
 // 새로운 테이블 구조에 맞는 목업 데이터
 const mockAssets = [
@@ -126,7 +126,7 @@ const mockComments = [
 // 사용자별 좋아요 상태 관리
 const userLikes = new Map();
 
-// HTTP 요청 시뮬레이션 함수 (목업 모드용)
+// HTTP 요청 시뮬레이션 함수
 const simulateHttpRequest = async (url, options, mockData) => {
   console.log('🌐 HTTP 요청 시뮬레이션:', {
     url,
@@ -135,8 +135,17 @@ const simulateHttpRequest = async (url, options, mockData) => {
     body: options.body
   });
 
-  // 목업 모드에서는 실제 HTTP 요청을 보내지 않음
-  console.log('🔄 목업 모드: 실제 HTTP 요청 건너뛰기');
+  // 실제 fetch 요청을 보내지만 목업 응답을 반환
+  try {
+    const response = await fetch(url, options);
+    console.log('📡 실제 HTTP 요청 전송됨:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url
+    });
+  } catch (error) {
+    console.log('❌ 네트워크 오류 (예상됨 - Django 서버가 실행되지 않음):', error.message);
+  }
 
   // 목업 응답 반환
   const mockResponse = await createMockResponse(mockData);
@@ -149,40 +158,39 @@ import { searchImageByTitle } from './unsplashService.js';
 
 // 자산 라이브러리 관련 API
 export const getAssets = async (page = 1, pageSize = 6, search = '', searchType = 'all') => {
-  if (USE_MOCK_DATA) {
-    // 목업 모드: 기존 로직 유지
-    let filteredAssets = [...mockAssets];
-    
-    if (search) {
-      if (searchType === 'title') {
-        filteredAssets = mockAssets.filter(asset => 
-          asset.title.toLowerCase().includes(search.toLowerCase())
-        );
-      } else if (searchType === 'summary') {
-        filteredAssets = mockAssets.filter(asset => 
-          asset.summary.toLowerCase().includes(search.toLowerCase())
-        );
-      } else {
-        // 전체 검색 (제목 + 요약)
-        filteredAssets = mockAssets.filter(asset => 
-          asset.title.toLowerCase().includes(search.toLowerCase()) ||
-          asset.summary.toLowerCase().includes(search.toLowerCase())
-        );
-      }
+  let filteredAssets = [...mockAssets];
+  
+  if (search) {
+    if (searchType === 'title') {
+      filteredAssets = mockAssets.filter(asset => 
+        asset.title.toLowerCase().includes(search.toLowerCase())
+      );
+    } else if (searchType === 'summary') {
+      filteredAssets = mockAssets.filter(asset => 
+        asset.summary.toLowerCase().includes(search.toLowerCase())
+      );
+    } else {
+      // 전체 검색 (제목 + 요약)
+      filteredAssets = mockAssets.filter(asset => 
+        asset.title.toLowerCase().includes(search.toLowerCase()) ||
+        asset.summary.toLowerCase().includes(search.toLowerCase())
+      );
     }
-    
-    // 페이지네이션 적용
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedAssets = filteredAssets.slice(startIndex, endIndex);
-    
-    const mockData = {
-      count: filteredAssets.length,
-      next: page * pageSize < filteredAssets.length ? page + 1 : null,
-      previous: page > 1 ? page - 1 : null,
-      results: paginatedAssets
-    };
+  }
+  
+  // 페이지네이션 적용
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedAssets = filteredAssets.slice(startIndex, endIndex);
+  
+  const mockData = {
+    count: filteredAssets.length,
+    next: page * pageSize < filteredAssets.length ? page + 1 : null,
+    previous: page > 1 ? page - 1 : null,
+    results: paginatedAssets
+  };
 
+  if (USE_MOCK_DATA) {
     const params = new URLSearchParams({
       page: page.toString(),
       page_size: pageSize.toString()
@@ -203,10 +211,7 @@ export const getAssets = async (page = 1, pageSize = 6, search = '', searchType 
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드
   try {
-    console.log('🔍 Django 서버에서 자산 목록 조회 중...');
-    
     const params = new URLSearchParams({
       page: page.toString(),
       page_size: pageSize.toString()
@@ -217,12 +222,9 @@ export const getAssets = async (page = 1, pageSize = 6, search = '', searchType 
     const response = await apiRequest(`${API_BASE_URL}/library/assets/?${params}`, {
       method: 'GET',
     });
-    
-    const data = await response.json();
-    console.log('✅ Django 서버 응답:', data);
-    return data;
+    return await response.json();
   } catch (error) {
-    console.error('❌ Django 서버 자산 조회 실패:', error);
+    console.error('Get assets error:', error);
     throw error;
   }
 };
@@ -230,49 +232,52 @@ export const getAssets = async (page = 1, pageSize = 6, search = '', searchType 
 export const uploadAsset = async (documents, title, summary, category, coverPhoto = null) => {
   console.log('🚀 자산 업로드 시작:', { title, category, hasCoverPhoto: !!coverPhoto });
   
-  if (USE_MOCK_DATA) {
-    // 목업 모드: 기존 로직 유지
-    let imgPath;
-    
-    if (coverPhoto) {
-      imgPath = URL.createObjectURL(coverPhoto);
-      console.log('📸 사용자 업로드 커버 사진 사용:', imgPath);
-    } else {
-      console.log('🔍 Unsplash 이미지 검색 시작...');
-      try {
-        imgPath = await searchImageByTitle(title);
-        console.log('✅ Unsplash 이미지 검색 완료:', imgPath);
-      } catch (error) {
-        console.error('❌ Unsplash 이미지 검색 실패:', error);
-        imgPath = `https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop&auto=format&q=80`;
-        console.log('🔄 기본 이미지 사용:', imgPath);
-      }
+  // 커버 사진이 있으면 사용하고, 없으면 Unsplash에서 제목 관련 이미지 검색
+  let imgPath;
+  
+  if (coverPhoto) {
+    // 사용자가 업로드한 커버 사진을 사용
+    imgPath = URL.createObjectURL(coverPhoto);
+    console.log('📸 사용자 업로드 커버 사진 사용:', imgPath);
+  } else {
+    // Unsplash에서 제목 관련 이미지 검색
+    console.log('🔍 Unsplash 이미지 검색 시작...');
+    try {
+      imgPath = await searchImageByTitle(title);
+      console.log('✅ Unsplash 이미지 검색 완료:', imgPath);
+    } catch (error) {
+      console.error('❌ Unsplash 이미지 검색 실패:', error);
+      // 기본 이미지 사용
+      imgPath = `https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop&auto=format&q=80`;
+      console.log('🔄 기본 이미지 사용:', imgPath);
     }
-    
-    const newAsset = {
-      lib_id: `lib-${Date.now()}`,
-      user_id: 'user-1',
-      title: title,
-      summary: summary,
-      documents: documents.name,
-      pdf_path: `/src/assets/asset_library/${documents.name}`,
-      img_path: imgPath,
-      upload_date: new Date().toISOString().split('T')[0],
-      likes: 0,
-      comment_count: 0,
-      category: category
-    };
-    mockAssets.push(newAsset);
+  }
+  
+  const newAsset = {
+    lib_id: `lib-${Date.now()}`,
+    user_id: 'user-1',
+    title: title,
+    summary: summary,
+    documents: documents.name,
+    pdf_path: `/src/assets/asset_library/${documents.name}`,
+    img_path: imgPath,
+    upload_date: new Date().toISOString().split('T')[0],
+    likes: 0,
+    comment_count: 0,
+    category: category
+  };
+  mockAssets.push(newAsset);
 
-    console.log('✅ 새 자산 생성 완료:', {
-      lib_id: newAsset.lib_id,
-      title: newAsset.title,
-      category: newAsset.category,
-      img_path: newAsset.img_path
-    });
+  console.log('✅ 새 자산 생성 완료:', {
+    lib_id: newAsset.lib_id,
+    title: newAsset.title,
+    category: newAsset.category,
+    img_path: newAsset.img_path
+  });
 
-    const mockData = newAsset;
+  const mockData = newAsset;
 
+  if (USE_MOCK_DATA) {
     const formData = new FormData();
     if (documents) formData.append('documents', documents);
     if (coverPhoto) formData.append('cover_photo', coverPhoto);
@@ -293,48 +298,34 @@ export const uploadAsset = async (documents, title, summary, category, coverPhot
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드: 단일 POST 요청으로 통합
   try {
-    console.log('🚀 Django 서버에 파일 업로드 중...');
-    
-    // FormData로 파일과 메타데이터를 함께 전송
     const formData = new FormData();
-    formData.append('documents', documents);
+    if (documents) formData.append('documents', documents);
+    if (coverPhoto) formData.append('cover_photo', coverPhoto);
     formData.append('title', title);
     formData.append('summary', summary);
     formData.append('category', category);
-    
-    if (coverPhoto) {
-      formData.append('cover_photo', coverPhoto);
-      console.log('📸 커버 사진 포함 업로드');
-    }
 
-    // Django 서버에서 S3 업로드 및 메타데이터 저장을 모두 처리
     const response = await apiRequest(`${API_BASE_URL}/library/assets/`, {
       method: 'POST',
       body: formData
     });
-
-    const result = await response.json();
-    console.log('✅ 자산 업로드 완료:', result);
-    
-    return result;
+    return await response.json();
   } catch (error) {
-    console.error('❌ Django 서버 자산 업로드 실패:', error);
+    console.error('Upload asset error:', error);
     throw error;
   }
 };
 
 // 댓글 관련 API
 export const getComments = async (libId) => {
-  if (USE_MOCK_DATA) {
-    // 목업 모드
-    const assetComments = mockComments.filter(comment => comment.lib_id === libId);
-    const mockData = {
-      count: assetComments.length,
-      results: assetComments
-    };
+  const assetComments = mockComments.filter(comment => comment.lib_id === libId);
+  const mockData = {
+    count: assetComments.length,
+    results: assetComments
+  };
 
+  if (USE_MOCK_DATA) {
     return await simulateHttpRequest(
       `${API_BASE_URL}/library/assets/${libId}/comments/`,
       {
@@ -348,7 +339,6 @@ export const getComments = async (libId) => {
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드
   try {
     const response = await apiRequest(`${API_BASE_URL}/library/assets/${libId}/comments/`, {
       method: 'GET',
@@ -361,28 +351,27 @@ export const getComments = async (libId) => {
 };
 
 export const createComment = async (libId, comment) => {
+  const newComment = {
+    comment_id: `comment-${Date.now()}`,
+    lib_id: libId,
+    user_id: 'user-1',
+    username: '현재사용자',
+    comments: comment,
+    created_at: new Date().toISOString(),
+    likes: 0,
+    user_liked: false
+  };
+  mockComments.push(newComment);
+
+  // 댓글 수 증가
+  const asset = mockAssets.find(a => a.lib_id === libId);
+  if (asset) {
+    asset.comment_count += 1;
+  }
+
+  const mockData = newComment;
+
   if (USE_MOCK_DATA) {
-    // 목업 모드
-    const newComment = {
-      comment_id: `comment-${Date.now()}`,
-      lib_id: libId,
-      user_id: 'user-1',
-      username: '현재사용자',
-      comments: comment,
-      created_at: new Date().toISOString(),
-      likes: 0,
-      user_liked: false
-    };
-    mockComments.push(newComment);
-
-    // 댓글 수 증가
-    const asset = mockAssets.find(a => a.lib_id === libId);
-    if (asset) {
-      asset.comment_count += 1;
-    }
-
-    const mockData = newComment;
-
     return await simulateHttpRequest(
       `${API_BASE_URL}/library/comments/`,
       {
@@ -400,7 +389,6 @@ export const createComment = async (libId, comment) => {
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드
   try {
     const response = await apiRequest(`${API_BASE_URL}/library/comments/`, {
       method: 'POST',
@@ -418,24 +406,25 @@ export const createComment = async (libId, comment) => {
 
 // 좋아요 관련 API
 export const toggleAssetLike = async (libId) => {
+  const asset = mockAssets.find(a => a.lib_id === libId);
+  if (!asset) return;
+
+  const userId = 'user-1'; // 실제로는 현재 로그인한 사용자 ID
+  const likeKey = `${userId}-${libId}`;
+  
+  if (userLikes.has(likeKey)) {
+    // 좋아요 취소
+    userLikes.delete(likeKey);
+    asset.likes = Math.max(0, asset.likes - 1);
+  } else {
+    // 좋아요 추가
+    userLikes.set(likeKey, true);
+    asset.likes += 1;
+  }
+
+  const mockData = { likes: asset.likes, user_liked: userLikes.has(likeKey) };
+
   if (USE_MOCK_DATA) {
-    // 목업 모드
-    const asset = mockAssets.find(a => a.lib_id === libId);
-    if (!asset) return;
-
-    const userId = 'user-1';
-    const likeKey = `${userId}-${libId}`;
-    
-    if (userLikes.has(likeKey)) {
-      userLikes.delete(likeKey);
-      asset.likes = Math.max(0, asset.likes - 1);
-    } else {
-      userLikes.set(likeKey, true);
-      asset.likes += 1;
-    }
-
-    const mockData = { likes: asset.likes, user_liked: userLikes.has(likeKey) };
-
     return await simulateHttpRequest(
       `${API_BASE_URL}/library/assets/${libId}/like/`,
       {
@@ -449,7 +438,6 @@ export const toggleAssetLike = async (libId) => {
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드
   try {
     const response = await apiRequest(`${API_BASE_URL}/library/assets/${libId}/like/`, {
       method: 'POST'
@@ -462,26 +450,27 @@ export const toggleAssetLike = async (libId) => {
 };
 
 export const toggleCommentLike = async (commentId) => {
+  const comment = mockComments.find(c => c.comment_id === commentId);
+  if (!comment) return;
+
+  const userId = 'user-1'; // 실제로는 현재 로그인한 사용자 ID
+  const likeKey = `${userId}-${commentId}`;
+  
+  if (userLikes.has(likeKey)) {
+    // 좋아요 취소
+    userLikes.delete(likeKey);
+    comment.likes = Math.max(0, comment.likes - 1);
+    comment.user_liked = false;
+  } else {
+    // 좋아요 추가
+    userLikes.set(likeKey, true);
+    comment.likes += 1;
+    comment.user_liked = true;
+  }
+
+  const mockData = { likes: comment.likes, user_liked: comment.user_liked };
+
   if (USE_MOCK_DATA) {
-    // 목업 모드
-    const comment = mockComments.find(c => c.comment_id === commentId);
-    if (!comment) return;
-
-    const userId = 'user-1';
-    const likeKey = `${userId}-${commentId}`;
-    
-    if (userLikes.has(likeKey)) {
-      userLikes.delete(likeKey);
-      comment.likes = Math.max(0, comment.likes - 1);
-      comment.user_liked = false;
-    } else {
-      userLikes.set(likeKey, true);
-      comment.likes += 1;
-      comment.user_liked = true;
-    }
-
-    const mockData = { likes: comment.likes, user_liked: comment.user_liked };
-
     return await simulateHttpRequest(
       `${API_BASE_URL}/library/comments/${commentId}/like/`,
       {
@@ -495,7 +484,6 @@ export const toggleCommentLike = async (commentId) => {
     ).then(response => response.json());
   }
 
-  // 실제 Django API 모드
   try {
     const response = await apiRequest(`${API_BASE_URL}/library/comments/${commentId}/like/`, {
       method: 'POST'
@@ -507,136 +495,11 @@ export const toggleCommentLike = async (commentId) => {
   }
 };
 
-// 자산 삭제 API
-export const deleteAsset = async (assetId) => {
-  if (USE_MOCK_DATA) {
-    // 목업 모드
-    const assetIndex = mockAssets.findIndex(a => a.lib_id === assetId);
-    if (assetIndex === -1) {
-      throw new Error('자산을 찾을 수 없습니다.');
-    }
-    
-    // 관련 댓글도 삭제
-    const commentIndices = mockComments
-      .map((comment, index) => comment.lib_id === assetId ? index : -1)
-      .filter(index => index !== -1)
-      .reverse(); // 역순으로 삭제하여 인덱스 변화 방지
-    
-    commentIndices.forEach(index => mockComments.splice(index, 1));
-    
-    // 자산 삭제
-    mockAssets.splice(assetIndex, 1);
-    
-    console.log('✅ 자산 삭제 완료:', assetId);
-    return { message: '자산이 성공적으로 삭제되었습니다.' };
-  }
-
-  // 실제 Django API 모드
-  try {
-    const response = await apiRequest(`${API_BASE_URL}/library/assets/${assetId}/`, {
-      method: 'DELETE'
-    });
-    return { message: '자산이 성공적으로 삭제되었습니다.' };
-  } catch (error) {
-    console.error('Delete asset error:', error);
-    throw error;
-  }
-};
-
-// 자산 수정 API
-export const updateAsset = async (assetId, updateData) => {
-  if (USE_MOCK_DATA) {
-    // 목업 모드
-    const asset = mockAssets.find(a => a.lib_id === assetId);
-    if (!asset) {
-      throw new Error('자산을 찾을 수 없습니다.');
-    }
-    
-    // 업데이트할 필드만 수정
-    Object.keys(updateData).forEach(key => {
-      if (key in asset) {
-        asset[key] = updateData[key];
-      }
-    });
-    
-    console.log('✅ 자산 수정 완료:', assetId);
-    return {
-      message: '자산이 성공적으로 수정되었습니다.',
-      asset: asset
-    };
-  }
-
-  // 실제 Django API 모드
-  try {
-    const formData = new FormData();
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined) {
-        if (key === 'documents' || key === 'cover_photo') {
-          formData.append(key, updateData[key]);
-        } else {
-          formData.append(key, updateData[key]);
-        }
-      }
-    });
-
-    const response = await apiRequest(`${API_BASE_URL}/library/assets/${assetId}/`, {
-      method: 'PUT',
-      body: formData
-    });
-    
-    const result = await response.json();
-    console.log('✅ 자산 수정 완료:', result);
-    return result;
-  } catch (error) {
-    console.error('Update asset error:', error);
-    throw error;
-  }
-};
-
-// 댓글 삭제 API
-export const deleteComment = async (commentId) => {
-  if (USE_MOCK_DATA) {
-    // 목업 모드
-    const commentIndex = mockComments.findIndex(c => c.comment_id === commentId);
-    if (commentIndex === -1) {
-      throw new Error('댓글을 찾을 수 없습니다.');
-    }
-    
-    const comment = mockComments[commentIndex];
-    const asset = mockAssets.find(a => a.lib_id === comment.lib_id);
-    
-    // 댓글 삭제
-    mockComments.splice(commentIndex, 1);
-    
-    // 자산의 댓글 수 감소
-    if (asset) {
-      asset.comment_count = Math.max(0, asset.comment_count - 1);
-    }
-    
-    console.log('✅ 댓글 삭제 완료:', commentId);
-    return { message: '댓글이 성공적으로 삭제되었습니다.' };
-  }
-
-  // 실제 Django API 모드
-  try {
-    const response = await apiRequest(`${API_BASE_URL}/library/comments/${commentId}/`, {
-      method: 'DELETE'
-    });
-    return { message: '댓글이 성공적으로 삭제되었습니다.' };
-  } catch (error) {
-    console.error('Delete comment error:', error);
-    throw error;
-  }
-};
-
 export default {
   getAssets,
   uploadAsset,
   getComments,
   createComment,
   toggleAssetLike,
-  toggleCommentLike,
-  deleteAsset,
-  updateAsset,
-  deleteComment
+  toggleCommentLike
 };

@@ -13,10 +13,10 @@ import {
   checkEmailExists
 } from './mockData';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // 사용자 정보 수정 API
 export const updateUserProfile = async (userData) => {
@@ -99,12 +99,12 @@ export const updateUserProfile = async (userData) => {
 };
 
 // 토큰 저장
-const setToken = (token) => {
+export const setToken = (token) => {
   localStorage.setItem('access_token', token);
 };
 
 // refresh token 저장
-const setRefreshToken = (refreshToken) => {
+export const setRefreshToken = (refreshToken) => {
   localStorage.setItem('refresh_token', refreshToken);
 };
 
@@ -354,7 +354,7 @@ export const getUserProfile = async () => {
 
   // 실제 API 호출
   try {
-    const response = await fetch(`${API_BASE_URL}/users/profile/`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/profile/`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
