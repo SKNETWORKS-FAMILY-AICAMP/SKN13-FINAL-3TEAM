@@ -1,121 +1,127 @@
-# inference/main.py
+import asyncio
 import logging
 import os
-import uuid
 import torch
+import re
 from contextlib import asynccontextmanager
+from typing import Optional
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from diffusers import StableDiffusion3Pipeline
+from pydantic import BaseModel, Field
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import PeftModel
 
 # --- 설정 ---
 logging.basicConfig(level=logging.INFO)
+
+BASE_MODEL_PATH = os.getenv("BASE_MODEL_PATH", "/app/models/exaone_4.0_1.2b")
+ADAPTER_PATH = os.getenv("ADAPTER_PATH", "/app/models/llm_finetuned_model")
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info(f"Using device: {DEVICE}")
 
-SLLM_MODEL_PATH = "./models/EXAONE-4.0-1.2B"
-TXT2IMG_MODEL_PATH = "./models/stable-diffusion-3.5-medium"
-# 모델 바꾸고 실행
-
-# 서버의 생명주기 동안 모델을 담아둘 글로벌 딕셔너리
 models = {}
 
-# --- FastAPI Lifespan 이벤트 ---
+# --- FastAPI Lifespan 이벤트 (서버 시작 시 모델 로드) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    서버가 시작될 때 모델을 로드하고, 서버가 종료될 때 메모리를 정리합니다.
-    이 방식을 사용하면 매 요청마다 모델을 로드할 필요가 없어 응답 속도가 매우 빨라집니다.
-    """
-    logging.info(f"Using device: {DEVICE}")
-    logging.info("--- SKIPPING MODEL LOAD FOR TEST ---") # 테스트를 위해 모델 로드를 건너뛴다는 로그
-
-    # # 1. Text-to-Image 모델 로드 (Stable Diffusion)
-    # logging.info(f"Loading Text-to-Image model from {TXT2IMG_MODEL_PATH}...")
-    # txt2img_pipe = StableDiffusion3Pipeline.from_pretrained(
-    #     TXT2IMG_MODEL_PATH, torch_dtype=torch.float16
-    # )
-    # models["text_to_image"] = txt2img_pipe.to(DEVICE)
-    # logging.info("Text-to-Image model loaded successfully.")
-
-    # # 2. Text Generation 모델 로드 (EXAONE)
-    # logging.info(f"Loading Text Generation model from {SLLM_MODEL_PATH}...")
-    # sllm_tokenizer = AutoTokenizer.from_pretrained(SLLM_MODEL_PATH)
-    # sllm_model = AutoModelForCausalLM.from_pretrained(
-    #     SLLM_MODEL_PATH,
-    #     torch_dtype=torch.float16, # VRAM 사용량을 줄이기 위해 float16 사용
-    #     low_cpu_mem_usage=True     # CPU 메모리 사용량 최적화
-    # )
-    # models["text_gen_tokenizer"] = sllm_tokenizer
-    # models["text_gen_model"] = sllm_model.to(DEVICE)
-    # logging.info("Text Generation model loaded successfully.")
-    
-    yield # 이 시점에서 FastAPI 애플리케이션이 요청을 받기 시작합니다.
-
-    # --- 서버 종료 시 실행될 코드 ---
-    logging.info("Clearing models at shutdown...")
+    global models
+    logging.info("--- 서버 시작: 모델 로드를 시작합니다. ---")
+    try:
+        base_model = AutoModelForCausalLM.from_pretrained(
+            BASE_MODEL_PATH,
+            torch_dtype=torch.bfloat16,
+            device_map="auto",
+            trust_remote_code=True,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_PATH, trust_remote_code=True)
+        logging.info("Base model and tokenizer loaded successfully.")
+        
+        logging.info(f"Applying adapter from {ADAPTER_PATH}...")
+        peft_model = PeftModel.from_pretrained(base_model, ADAPTER_PATH)
+        
+        models["text_gen_model"] = peft_model.eval()
+        models["text_gen_tokenizer"] = tokenizer
+        logging.info("--- 텍스트 생성 모델(베이스+어댑터) 로드 완료 ---")
+    except Exception as e:
+        logging.error(f"모델 로딩 중 심각한 오류 발생: {e}", exc_info=True)
+        models.clear()
+    yield
+    logging.info("--- 서버 종료: 모델을 메모리에서 해제합니다. ---")
     models.clear()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-    logging.info("Shutdown complete.")
 
-# FastAPI 앱에 lifespan 관리자 적용
 app = FastAPI(lifespan=lifespan)
 
-# --- 요청/응답 모델 ---
+# --- Pydantic 모델 ---
 class TextGenerationRequest(BaseModel):
     prompt: str
+    max_new_tokens: int = Field(default=512)
+    temperature: Optional[float] = Field(default=0.7)
+    top_p: Optional[float] = Field(default=0.9)
+    top_k: Optional[int] = Field(default=50)
+    repetition_penalty: Optional[float] = Field(default=1.2)
 
-class ImageGenerationRequest(BaseModel):
-    prompt: str
+class TextGenerationResponse(BaseModel):
+    generated_text: str
 
 # --- API 엔드포인트 ---
-@app.get("/")
+@app.get("/health")
 async def health_check():
-    """서버가 정상적으로 실행 중인지 확인하는 엔드포인트"""
-    return {"status": "ok", "message": "Inference server is running."}
+    if "text_gen_model" in models and models["text_gen_model"] is not None:
+        return {"status": "ok", "message": "Inference server is running and model is loaded."}
+    else:
+        raise HTTPException(status_code=503, detail="Model is not ready or failed to load.")
 
-@app.post("/generate-text")
+def _generate_text_sync(prompt: str, generation_params: dict) -> str:
+    tokenizer = models["text_gen_tokenizer"]
+    model = models["text_gen_model"]
+    inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
+    
+    with torch.no_grad():
+        outputs = model.generate(**inputs, **generation_params)
+    
+    full_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    assistant_marker = "### Assistant:"
+    if assistant_marker in prompt:
+         if assistant_marker in full_text:
+             answer = full_text.split(assistant_marker)[-1].strip()
+         elif full_text.strip().startswith(prompt.strip()):
+             answer = full_text.strip()[len(prompt.strip()):].strip()
+         else:
+             answer = full_text
+    else:
+        answer = full_text
+
+    answer = re.sub(r'^당신은 자동차 디자인 트렌드.*?설명해주세요\.\s*', '', answer, flags=re.DOTALL).strip()
+
+    if "당신은 자동차 디자인 전문 AI" in answer:
+        answer = answer.replace("당신은 자동차 디자인 전문 AI", "").strip()
+
+    return answer
+
+@app.post("/generate-text", response_model=TextGenerationResponse)
 async def generate_text(request: TextGenerationRequest):
-    """미리 로드된 EXAONE 모델을 사용하여 텍스트를 생성합니다."""
-    # try:
-    #     logging.info(f"Generating text for prompt: '{request.prompt[:50]}...'")
-    #     tokenizer = models.get("text_gen_tokenizer")
-    #     model = models.get("text_gen_model")
-    #     if tokenizer is None or model is None:
-    #         raise HTTPException(status_code=503, detail="Model is not ready.")
-            
-    #     inputs = tokenizer(request.prompt, return_tensors="pt").to(DEVICE)
-    #     outputs = model.generate(**inputs, max_length=100)
-    #     generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    #     return {"generated_text": generated_text}
-
-    # except Exception as e:
-    #     logging.error(f"Text generation error: {e}")
-    #     raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/generate-image")
-async def generate_image(request: ImageGenerationRequest):
-    """미리 로드된 Stable Diffusion 모델을 사용하여 이미지를 생성합니다."""
-    # try:
-    #     logging.info(f"Generating image for prompt: '{request.prompt[:50]}...'")
-    #     pipe = models.get("text_to_image")
-    #     if pipe is None:
-    #         raise HTTPException(status_code=503, detail="Model is not ready.")
-
-    #     image = pipe(request.prompt).images[0]
+    if "text_gen_model" not in models:
+        raise HTTPException(status_code=503, detail="Model is not ready.")
+    try:
+        logging.info(f"Generating text for prompt: '{request.prompt[:100]}...'")
         
-    #     image_filename = f"{uuid.uuid4()}.png"
-    #     save_dir = "/app/generated_images"
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     image_path = os.path.join(save_dir, image_filename)
-    #     image.save(image_path)
+        generation_params = {
+            "max_new_tokens": request.max_new_tokens,
+            "temperature": request.temperature,
+            "top_p": request.top_p,
+            "top_k": request.top_k,
+            "repetition_penalty": request.repetition_penalty,
+            "do_sample": True,
+            "pad_token_id": models["text_gen_tokenizer"].eos_token_id,
+            "eos_token_id": models["text_gen_tokenizer"].eos_token_id,
+        }
         
-    #     logging.info(f"Image saved to {image_path}")
-    #     return {"image_path": image_path}
-
-    # except Exception as e:
-    #     logging.error(f"Image generation error: {e}")
-    #     raise HTTPException(status_code=500, detail=str(e))
+        generated_text = await asyncio.to_thread(
+            _generate_text_sync, request.prompt, generation_params
+        )
+        return TextGenerationResponse(generated_text=generated_text)
+    except Exception as e:
+        logging.error(f"Text generation error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

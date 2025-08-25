@@ -5,7 +5,13 @@ services:
     build:
       context: . # Dockerfile이 있는 현재 디렉토리
       dockerfile: Dockerfile
-    # command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 # Dockerfile CMD 대체 가능
+    command: >
+      sh -c "
+        apk add --no-cache netcat-openbsd &&
+        chmod +x /wait-for-it.sh &&
+        /wait-for-it.sh inference-server:8001 --
+        gunicorn config.wsgi:application --bind 0.0.0.0:8000 --timeout 180
+      "
     volumes:
       - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트 (개발 시 코드 변경 반영)
       - /app/node_modules # frontend/node_modules는 호스트에서 제외 (volume으로 덮어쓰지 않음)
@@ -15,8 +21,9 @@ services:
     env_file:
       - .env # .env 파일에서 환경 변수 로드
     depends_on:
-      - postgres # PostgreSQL 컨테이너에 의존성 설정
-      - qdrant # Qdrant 컨테이너에 의존성 설정
+      - postgres
+      - qdrant # Qdrant 컨테이너에 의존성 설정e
+      - inference-server
 
   # Nginx 서비스
   nginx:
@@ -25,7 +32,7 @@ services:
       - "80:80" # 호스트의 80번 포트를 컨테이너의 80번 포트에 매핑
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro # Nginx 설정 파일 마운트
-      - ./frontend/build:/usr/share/nginx/html:ro      # React 빌드 결과물 마운트
+      - ./react/build:/usr/share/nginx/html:ro      # React 빌드 결과물 마운트
     depends_on:
       - django_gunicorn # Django Gunicorn 서비스에 의존성 설정
 
@@ -63,7 +70,18 @@ services:
       - ./models:/app/models:ro
     ports:
       - "8001:8001"
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
     # GPU를 사용하기 위한 필수 설정
+    environment:
+      - BASE_MODEL_PATH=/app/models/exaone_4.0_1.2b
+      - ADAPTER_PATH=/app/models/llm_finetuned_model
     deploy:
       resources:
         reservations:

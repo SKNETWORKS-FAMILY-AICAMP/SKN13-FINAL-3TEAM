@@ -1,2 +1,9 @@
 .env
 models/
+/build
+/dist
+/node_modules
+*.csv
+__pycache__/
+docker-compose.yml
+Dockerfile

@@ -2,10 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    # 1. 관리자 페이지 경로
     path("admin/", admin.site.urls),
     
-    path("", include("JJACKLETTE.urls")),
+    path('api/', include('JJACKLETTE.urls')),
     
     path('auth/', include('dj_rest_auth.urls')),
     

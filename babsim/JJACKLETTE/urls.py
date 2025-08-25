@@ -19,6 +19,7 @@ urlpatterns = [
 
     # --- 2. 챗봇 세션 (Chat Session) ---
     path('chat/sessions/', views.ChatSessionListCreateView.as_view(), name='chat-session-list-create'),
+    path('chat/message/', views.ChatAPIView.as_view(), name='chat-message'),
     path('chat/sessions/<uuid:session_id>/end/', views.ChatSessionEndView.as_view(), name='chat-session-end'),
     
     # --- 3. 프롬프트 로그 (Prompt Log) ---
@@ -38,9 +39,9 @@ urlpatterns = [
     path('insights/models/<uuid:car_model_id>/', views.InsightTrendsDetailView.as_view(), name='insight-trends-detail'),
     
     # --- 8, 9, 10, 11. 차량 상세 정보 ---
-    path('insights/models/<uuid:car_model_id>/materials/', views.DesignMaterialListView.as_view(), name='design-material-list'),
+    # path('insights/models/<uuid:car_model_id>/materials/', views.DesignMaterialListView.as_view(), name='design-material-list'),
     path('insights/models/<uuid:car_model_id>/specs/', views.EngineeringSpecListView.as_view(), name='engineering-spec-list'),
-    path('insights/models/<uuid:car_model_id>/sales/', views.SalesStatListView.as_view(), name='sales-stat-list'),
+    # path('insights/models/<uuid:car_model_id>/sales/', views.SalesStatListView.as_view(), name='sales-stat-list'),
     path('insights/models/<uuid:car_model_id>/reviews/', views.UserReviewListView.as_view(), name='user-review-list'),
     
 ]

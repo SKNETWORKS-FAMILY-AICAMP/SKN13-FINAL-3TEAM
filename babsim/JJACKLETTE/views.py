@@ -2,8 +2,14 @@
 # 클라이언트(React.js)로부터 요청을 받아 serializers.py를 통해 데이터를 처리하고,
 # models.py를 통해 PostgreSQL과 상호작용하며, services.py의 비즈니스 로직을 호출
 
+import logging
+import os
 import requests
+import httpx
 from datetime import datetime
+from pathlib import Path
+from asgiref.sync import async_to_sync
+from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -15,59 +21,188 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from transformers import AutoTokenizer
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
+from dotenv import load_dotenv
 from .models import *
 from .serializers import *
+from qdrant_client import QdrantClient
+from langchain_openai import OpenAIEmbeddings
+logger = logging.getLogger(__name__)
+
+EMBEDDING_MODEL = "text-embedding-3-large"
+EMBEDDING_DIM = 3072 
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+if not OPENAI_API_KEY:
+    logger.warning("OPENAI_API_KEY가 .env 파일에 설정되지 않았습니다. RAG 기능이 비활성화됩니다.")
+
+
+try:
+    BASE_DIR = settings.BASE_DIR  # 보통 manage.py가 있는 경로
+except Exception:
+    # settings에 BASE_DIR이 없다면 views.py 기준으로 추정
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
+ENV_PATH = Path(BASE_DIR) / ".env"
+if ENV_PATH.exists():
+    load_dotenv(dotenv_path=ENV_PATH, override=False)
+else:
+    logger.warning("RAG .env 파일을 찾지 못했습니다: %s", ENV_PATH)
+
+# .env에서 OpenAI 키 로드
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    logger.warning("OPENAI_API_KEY가 .env에서 로드되지 않았습니다. (RAG 임베딩은 건너뜁니다)")
+
 
 class StandardResultSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-INFERENCE_SERVER_URL = "http://inference-server:8001"
-
 class ChatAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        user_prompt = request.data.get('message')
-        session_id = request.data.get('session_id')
+    try:
+        TOKENIZER = AutoTokenizer.from_pretrained(settings.EXAONE_MODEL_PATH, trust_remote_code=True)
+        logger.info("ChatAPIView: 토크나이저 로딩 성공")
+    except Exception as e:
+        TOKENIZER = None
+        logger.error("ChatAPIView: 토크나이저 로딩 실패: %s", e, exc_info=True)
+
+    # 자동차 전용 System Prompt
+    SYSTEM_PROMPT = (
+        "당신은 자동차 디자인 트렌드와 역사에 정통한 '자동차 디자인 전문 AI'입니다. "
+        "특히 현대자동차의 디자인 철학인 '센슈어스 스포티니스'와 '플루이딕 스컬프처'를 깊이 이해하고 있습니다. "
+        "사용자의 질문에 대해, 전문 지식을 바탕으로 시각적이고 창의적인 관점에서 상세하게 설명해주세요."
+    )
+    # General fallback System Prompt
+    GENERAL_PROMPT = (
+        "당신은 현대자동차와 관련하여 지식이 풍부하고 친절한 AI 비서입니다. "
+        "사용자의 현대자동차 관련 질문에 대해 자연스럽고 도움이 되는 답변을 해주세요."
+        "답변은 항상 한국어로 진행하세요."
+    )
+
+    QDRANT_HOST = getattr(settings, "QDRANT_HOST", "qdrant")
+    QDRANT_PORT = int(getattr(settings, "QDRANT_PORT_REST", 6333))
+    QDRANT_COLLECTION = "babsim_rag_db"
+    RAG_TOP_K = 5
+    INFERENCE_URL = getattr(settings, "INFERENCE_SERVER_URL", "http://inference-server:8001")
+    EMBEDDING_MODEL = "text-embedding-3-large"
+
+    def post(self, request, *args, **kwargs):
+        if not self.TOKENIZER:
+            return Response({"error": "서버 내부 오류: 토크나이저가 로드되지 않았습니다."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        user_prompt = request.data.get("message")
+        session_id = request.data.get("session_id")
 
         if not user_prompt or not session_id:
-            return Response({"error": "세션 ID와 메시지를 모두 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "세션 ID와 메시지를 모두 입력해주세요."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
+        query_vec, context_str = None, ""
+        if OPENAI_API_KEY:
+            try:
+                oai = OpenAIEmbeddings(api_key=OPENAI_API_KEY, model=self.EMBEDDING_MODEL)
+                query_vec = oai.embed_query(user_prompt)
+
+                qdrant = QdrantClient(host=self.QDRANT_HOST, port=self.QDRANT_PORT)
+                search_res = qdrant.search(
+                    collection_name=self.QDRANT_COLLECTION,
+                    query_vector=query_vec, limit=self.RAG_TOP_K, with_payload=True
+                )
+                contexts = [(pt.payload or {}).get("text", "").strip()
+                            for pt in search_res if (pt.payload or {}).get("text", "").strip()]
+                if contexts:
+                    context_str = "\n\n".join(contexts)
+                    logger.info(f"RAG contexts found: {contexts}")
+            except Exception as e:
+                logger.warning("RAG 파이프라인 실패 → 일반 생성으로 전환: %s", e, exc_info=True)
+        else:
+            logger.warning("OPENAI_API_KEY 미설정 → RAG를 건너뜁니다.")
+
+        # ----- 핵심 로직: contexts 여부에 따른 프롬프트 분기 -----
+        messages = []
+        if context_str:
+            # RAG 모드 (자동차 전용 system prompt + context 포함)
+            rag_prompt_content = (
+                f"아래 컨텍스트를 참고해 질문에 답하세요.\n\n"
+                f"### 컨텍스트:\n{context_str}\n\n### 질문:\n{user_prompt}"
+            )
+            messages = [
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": rag_prompt_content},
+            ]
+        else:
+            # General fallback 모드
+            messages = [
+                {"role": "system", "content": self.GENERAL_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ]
+
+        chat_text = self.TOKENIZER.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=False
+        )
+        final_prompt = f"{chat_text.rstrip()}\n\n### Assistant:"
+
+        # Inference Server 호출
         try:
-            # 1. 실제 LLM 호출
-            text_answer = ai_services.generate_text(user_prompt)
+            with httpx.Client(timeout=120.0) as client:
+                resp = client.post(f"{self.INFERENCE_URL}/generate-text",
+                                   json={"prompt": final_prompt})
+                resp.raise_for_status()
+                text_answer = resp.json().get("generated_text", "")
 
-            # 2. 실제 Stable Diffusion 호출
-            generated_image = ai_services.generate_image(text_answer)   
-
-            # 3. 이미지 저장 및 URL 받기
-            image_url = ai_services.save_image_and_get_url(generated_image)
-
-            # 4. 대화 기록 저장
-            session = ChatSession.objects.get(session_id=session_id, user_id=request.user)
-            prompt_log = PromptLog.objects.create(
-                session_id=session, user_prompt=user_prompt, ai_response=text_answer
-            )
-            GeneratedResult.objects.create(
-                prompt_id=prompt_log, result_type='image', result_path=image_url, result=text_answer
-            )
-
-            # 5. 최종 응답 반환
-            return Response({
-                "text_answer": text_answer,
-                "image_url": image_url
-            }, status=status.HTTP_200_OK)
-
+                # 시스템 프롬프트가 혹시라도 포함되면 제거
+                if self.SYSTEM_PROMPT in text_answer:
+                    text_answer = text_answer.replace(self.SYSTEM_PROMPT, "").strip()
+                if self.GENERAL_PROMPT in text_answer:
+                    text_answer = text_answer.replace(self.GENERAL_PROMPT, "").strip()
         except Exception as e:
-            print(f"AI 모델 처리 중 오류 발생: {e}")
-            return Response({"error": "AI 모델 처리 중 오류가 발생했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-# -----------------------------------------------------------------------
+            logger.exception("Inference 서버 통신 중 예외 발생")
+            return Response({"error": f"AI 모델 서버와 통신 중 오류가 발생했습니다: {str(e)}"},
+                            status=500)
+
+        # 로그 저장 및 최종 응답
+        try:
+            session = ChatSession.objects.get(session_id=session_id, user=request.user)
+            PromptLog.objects.create(session=session, user_prompt=user_prompt, ai_response=text_answer)
+        except Exception as e:
+            logger.exception("DB 저장 실패")
+
+        return Response({"success": True, "response": text_answer, "generatedResults": []},
+                        status=200)
+    
+        # except httpx.RequestError as e:
+        #     logger.error(f"Inference 서버 연결 실패: {e}")
+        #     return Response(
+        #         {"error": f"inference 서버 연결 실패: {e}"},
+        #         status=status.HTTP_502_BAD_GATEWAY,
+        #     )
+        # except httpx.HTTPStatusError as e:
+        #     code = getattr(e.response, "status_code", "unknown")
+        #     logger.error(f"Inference 서버 오류: {code}")
+        #     return Response(
+        #         {"error": f"inference 서버 오류: {code}"},
+        #         status=status.HTTP_502_BAD_GATEWAY,
+        #     )
+        # except ChatSession.DoesNotExist:
+        #     return Response(
+        #         {"error": "유효하지 않은 세션 ID입니다."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+        # except Exception as e:
+        #     logger.exception("AI 모델 처리 중 오류 발생")
+        #     return Response(
+        #         {"error": f"AI 모델 처리 중 오류가 발생했습니다: {str(e)}"},
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     )
+# ---------------------------------------------------------------------
         
-# --- 공통 응답 (변경 없음) ---
 def ok(data=None, code=200): return Response(data or {}, status=code)
 def created(data=None): return Response(data or {}, status=201)
 
