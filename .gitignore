@@ -1,0 +1,9 @@
+# 환경변수
+.env
+
+# 캐시파일
+__pycache__/
+*.DS_Store
+
+# 데이터셋
+*.arrow
