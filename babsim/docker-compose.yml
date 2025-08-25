@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Django + Gunicorn 서비스
@@ -10,8 +9,7 @@ services:
     volumes:
       - .:/app # 호스트의 현재 디렉토리를 컨테이너의 /app에 마운트 (개발 시 코드 변경 반영)
       - /app/node_modules # frontend/node_modules는 호스트에서 제외 (volume으로 덮어쓰지 않음)
-      - ./models:/app/models:ro
-
+      - ./mediafiles:/app/mediafiles
     expose:
       - "8000" # Nginx에서 접근할 포트
     env_file:
@@ -54,6 +52,26 @@ services:
     ports: # (선택 사항) 호스트에서 Qdrant UI/API에 직접 접근하려면 주석 해제
       - "6333:6333"
       - "6334:6334"
+
+  inference-server:
+    build:
+      context: ./inference
+      dockerfile: Dockerfile
+    volumes:
+      # 생성된 이미지를 Django와 공유하기 위한 볼륨
+      - ./mediafiles:/app/generated_images
+      - ./models:/app/models:ro
+    ports:
+      - "8001:8001"
+    # GPU를 사용하기 위한 필수 설정
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
 
 # Docker 볼륨 정의 (데이터 영속성을 위함)
 volumes:

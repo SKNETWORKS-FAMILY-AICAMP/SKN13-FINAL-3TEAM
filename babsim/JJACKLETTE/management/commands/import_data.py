@@ -1,130 +1,146 @@
-# babsim/JJACKLETTE/management/commands/import_data.py
-
-import json
 import csv
+import json
 import os
+import logging
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from JJACKLETTE.models import InsightTrends, UserReview, EngineeringSpec
-from django.conf import settings
+
+# 로거 설정
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'text_data/DB/ 폴더에서 자동차 관련 데이터를 가져와 DB에 저장합니다.'
+    help = 'CSV 및 JSON 파일들을 읽어 DB 데이터를 임포트합니다.'
 
-    def handle_insight_trends(self):
+    def _clean_spec_value(self, value_str: str | None) -> int | None:
         """
-        리뷰와 스펙 데이터에 등장하는 모든 차종 정보를 먼저 InsightTrends 모델에 저장합니다.
-        (다른 데이터들이 이 모델을 참조해야 하므로 가장 먼저 실행되어야 합니다.)
+        문자열 형태의 스펙 값에서 숫자만 추출하여 정수형으로 변환합니다.
+        값이 비어있거나 숫자 변환에 실패하면 None을 반환합니다.
         """
-        self.stdout.write("1. InsightTrends 데이터 생성 시작...")
-        
-        # 리뷰 파일에서 차종 정보 추출
-        review_file_path = os.path.join(settings.BASE_DIR, 'text_data', 'DB', 'hyundai_car_reviews.json')
-        with open(review_file_path, 'r', encoding='utf-8') as f:
-            reviews_data = json.load(f)
-        
-        car_names = {item['car_name'] for item in reviews_data}
+        if not value_str:
+            return None
+        try:
+            # 문자열에서 숫자가 아닌 문자를 모두 제거
+            cleaned_val = ''.join(filter(str.isdigit, value_str))
+            return int(cleaned_val) if cleaned_val else None
+        except (ValueError, TypeError):
+            logger.warning(f"'{value_str}'를 숫자로 변환할 수 없어 None으로 처리합니다.")
+            self.stdout.write(self.style.WARNING(f"경고: '{value_str}'를 숫자로 변환할 수 없습니다. None으로 처리합니다."))
+            return None
 
-        # 스펙 파일에서 차종 정보 추출
-        spec_dir_path = os.path.join(settings.BASE_DIR, 'text_data', 'DB', 'car_specs')
-        for filename in os.listdir(spec_dir_path):
-            if filename.endswith('.csv'):
-                car_names.add(filename[:-4])
+    def handle_specs(self):
+        """car_specs 폴더 내 CSV 파일들을 읽어 InsightTrends 및 EngineeringSpec 테이블에 저장합니다."""
+        dir_path = os.path.join(settings.BASE_DIR, 'text_data', 'DB', 'car_specs')
+        self.stdout.write(self.style.SUCCESS(f"1. '{dir_path}'에서 CSV 스펙 데이터 임포트를 시작합니다..."))
 
-        count = 0
-        for car_name in car_names:
-            # 중복 방지: car_name이 이미 없으면 새로 생성
-            _, created = InsightTrends.objects.get_or_create(
+        if not os.path.isdir(dir_path):
+            self.stdout.write(self.style.ERROR(f"오류: '{dir_path}' 폴더를 찾을 수 없습니다."))
+            return
+
+        spec_map = {
+            'length': '전장 (mm)',
+            'width': '전폭 (mm)',
+            'height': '전고 (mm)',
+            'wheel_base': '축거 (mm)',
+            'front_track': '윤거 (전) (mm)',
+            'rear_track': '윤거 (후) (mm)',
+            'seating_capacity': '승차정원',
+            'weight': '공차중량 (kg)',
+            'fuel_tank': '연료탱크 (ℓ)',
+        }
+
+        car_count, spec_count = 0, 0
+        for filename in os.listdir(dir_path):
+            if not filename.lower().endswith(".csv"):
+                continue
+
+            car_name = os.path.splitext(filename)[0]
+            file_path = os.path.join(dir_path, filename)
+
+            car_model, created = InsightTrends.objects.get_or_create(
                 car_name=car_name,
-                defaults={
-                    # 나머지 정보는 기본값 또는 임시값으로 설정
-                    'type': 'Sedan', # 임시값
-                    'release_year': 2024 # 임시값
-                }
+                defaults={'type': 'Unknown', 'release_year': 2025}
             )
             if created:
-                count += 1
-        self.stdout.write(self.style.SUCCESS(f"총 {count}개의 새로운 차종(InsightTrends) 정보가 추가되었습니다."))
+                car_count += 1
+                self.stdout.write(f"  > 새로운 차종 '{car_name}'을(를) 추가했습니다.")
 
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # 헤더 행 건너뛰기
+                    csv_data = {row[0].strip(): row[1].strip() for row in reader if len(row) >= 2}
+            except FileNotFoundError:
+                self.stdout.write(self.style.ERROR(f"오류: 파일을 찾을 수 없습니다 - {file_path}"))
+                continue
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"오류: '{file_path}' 파일 읽기 중 문제 발생: {e}"))
+                continue
+
+            spec_defaults = {
+                field_name: self._clean_spec_value(csv_data.get(csv_key))
+                for field_name, csv_key in spec_map.items()
+            }
+            
+            _, created = EngineeringSpec.objects.get_or_create(
+                car_model=car_model,
+                defaults=spec_defaults
+            )
+            if created:
+                spec_count += 1
+
+        self.stdout.write(self.style.SUCCESS(f"\n총 {car_count}개의 새로운 차종이 추가되었습니다."))
+        self.stdout.write(self.style.SUCCESS(f"총 {spec_count}개의 엔지니어링 스펙이 추가되었습니다."))
+        self.stdout.write(self.style.SUCCESS("CSV 스펙 임포트가 완료되었습니다.\n"))
 
     def handle_reviews(self):
-        """hyundai_car_reviews.json 파일에서 리뷰 데이터를 임포트합니다."""
+        """hyundai_car_reviews.json 파일에서 UserReview 모델에 데이터를 임포트합니다."""
         file_path = os.path.join(settings.BASE_DIR, 'text_data', 'DB', 'hyundai_car_reviews.json')
-        self.stdout.write(f"2. '{file_path}'에서 리뷰 데이터 임포트 시작...")
+        self.stdout.write(self.style.SUCCESS(f"2. '{file_path}'에서 리뷰 데이터 임포트를 시작합니다..."))
         
+        if not os.path.exists(file_path):
+            self.stdout.write(self.style.ERROR(f"오류: '{file_path}' 파일을 찾을 수 없습니다."))
+            return
+
+        car_models_map = {car.car_name: car for car in InsightTrends.objects.all()}
+
+        db_car_names = list(car_models_map.keys())
+        db_car_names.sort(key=len, reverse=True)
+
         with open(file_path, 'r', encoding='utf-8') as f:
             reviews_data = json.load(f)
 
         count = 0
+        skipped_count = 0
         for item in reviews_data:
-            # 리뷰를 저장하기 전에, 이 리뷰가 속한 차종(InsightTrends)이 DB에 있는지 확인
-            try:
-                car_model = InsightTrends.objects.get(car_name=item['car_name'])
+            json_car_name = item['car_name']
+            matched_car_name = None
+
+            for db_name in db_car_names:
+                if db_name in json_car_name:
+                    matched_car_name = db_name
+                    break 
+            
+            if matched_car_name:
+                car_model_instance = car_models_map[matched_car_name]
                 
-                # 중복 방지
                 _, created = UserReview.objects.get_or_create(
-                    # review_id는 UUID로 자동 생성되므로, 다른 필드로 중복을 확인해야 합니다.
-                    # 여기서는 car_model과 review 내용이 같으면 중복으로 간주합니다.
-                    car_model_id=car_model,
-                    mentioned_features=item['review'][:255], # 임시로 리뷰 내용 앞부분을 사용
-                    defaults={
-                        'sentiment_score': 0.8, # 임시값
-                    }
+                    car_model=car_model_instance,
+                    mentioned_features=item['review'],
+                    defaults={'sentiment_score': 0.8} 
                 )
                 if created:
                     count += 1
-            except InsightTrends.DoesNotExist:
-                self.stdout.write(self.style.WARNING(f"경고: '{item['car_name']}' 차종을 찾을 수 없어 리뷰를 건너뜁니다."))
+            else:
+                self.stdout.write(self.style.WARNING(f"경고: JSON의 '{json_car_name}'에 해당하는 차종을 DB에서 찾을 수 없어 리뷰를 건너뜁니다."))
+                skipped_count += 1
         
-        self.stdout.write(self.style.SUCCESS(f"총 {count}개의 새로운 리뷰가 성공적으로 임포트되었습니다."))
-
-
-    def handle_specs(self):
-        """car_specs 폴더의 모든 CSV 파일에서 스펙 데이터를 임포트합니다."""
-        dir_path = os.path.join(settings.BASE_DIR, 'text_data', 'DB', 'car_specs')
-        self.stdout.write(f"3. '{dir_path}'에서 스펙 데이터 임포트 시작...")
-        
-        count = 0
-        for filename in os.listdir(dir_path):
-            if filename.endswith('.csv'):
-                car_name_from_file = filename[:-4]
-                
-                try:
-                    # 스펙을 저장하기 전에, 이 스펙이 속한 차종(InsightTrends)이 DB에 있는지 확인
-                    car_model = InsightTrends.objects.get(car_name=car_name_from_file)
-                    file_path = os.path.join(dir_path, filename)
-                    
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        reader = csv.reader(f)
-                        next(reader) # 헤더 행 건너뛰기
-                        
-                        for row in reader:
-                            spec_name = row[0]
-                            # EngineeringSpec 모델 필드에 맞춰 데이터 할당
-                            if spec_name == '공차중량':
-                                # ' kg' 제거하고 숫자로 변환
-                                weight_value = int(row[1].replace(',', '').replace(' kg', ''))
-                                _, created = EngineeringSpec.objects.get_or_create(
-                                    car_model_id=car_model,
-                                    weight=weight_value,
-                                    defaults={
-                                        # 나머지 정보는 기본값 또는 임시값으로 설정
-                                        'cd_value': 0.28,
-                                        'material_al_ratio': 0.15,
-                                        'wheel_base': 2900,
-                                        'pedestrian_safety_score': 4.5,
-                                        'sensor_ready': True
-                                    }
-                                )
-                                if created:
-                                    count += 1
-
-                except InsightTrends.DoesNotExist:
-                    self.stdout.write(self.style.WARNING(f"경고: '{car_name_from_file}' 차종을 찾을 수 없어 스펙을 건너뜁니다."))
-
-        self.stdout.write(self.style.SUCCESS(f"총 {count}개의 새로운 엔지니어링 스펙이 성공적으로 임포트되었습니다."))
+        self.stdout.write(self.style.SUCCESS(f"\n총 {count}개의 새로운 리뷰가 성공적으로 임포트되었습니다."))
+        if skipped_count > 0:
+            self.stdout.write(self.style.WARNING(f"총 {skipped_count}개의 리뷰를 건너뛰었습니다."))
 
     def handle(self, *args, **kwargs):
-        # 데이터 관계(ForeignKey) 때문에 반드시 이 순서대로 실행해야 합니다.
-        self.handle_insight_trends()
-        self.handle_reviews()
+        """메인 핸들러: 스펙과 리뷰 임포트를 순차적으로 실행합니다."""
         self.handle_specs()
+        self.handle_reviews()
+        self.stdout.write(self.style.SUCCESS("\n모든 데이터 임포트 작업이 완료되었습니다."))

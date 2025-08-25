@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getAssets, uploadAsset, getComments, createComment, toggleAssetLike, toggleCommentLike } from '../services/libraryService';
+import backgroundImage from '../assets/AssetLibrary_background.png';
 
 function AssetLibrary() {
   const [assets, setAssets] = useState([]);
@@ -142,64 +143,63 @@ function AssetLibrary() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Background Glow Effect */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-96 h-96 rounded-full" style={{
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.2) 50%, transparent 100%)',
-              filter: 'blur(60px)'
-            }}></div>
+      <section className="relative py-24 lg:py-32" style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '60vh'
+      }}>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-6xl font-bold text-white mb-6">Asset Library</h1>
+          <p className="text-gray-300 text-xl mb-8">
+            A starting point of inspiration that sparks a designer's imagination.
+          </p>
+          <div className="text-gray-400 space-y-2 mb-8">
+            <p>디자인 리소스를 한눈에 모아보고 조합하세요.</p>
+            <p>자동차 디자인에 필요한 이미지, 컬러 팔레트, 파츠 요소 등을 태그 기반으로 쉽게 탐색할 수 있습니다.</p>
           </div>
           
-          {/* Content */}
-          <div className="relative z-10">
-            <h1 className="text-6xl font-bold text-white mb-6">Asset Library</h1>
-            <p className="text-gray-300 text-xl mb-8">
-              A starting point of inspiration that sparks a designer's imagination.
-            </p>
-            <div className="text-gray-400 space-y-2 mb-8">
-              <p>디자인 리소스를 한눈에 모아보고 조합하세요.</p>
-              <p>자동차 디자인에 필요한 이미지, 컬러 팔레트, 파츠 요소 등을 태그 기반으로 쉽게 탐색할 수 있습니다.</p>
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="flex flex-col max-w-md mx-auto space-y-3">
+            <div className="flex space-x-2">
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="px-3 py-3 bg-white border border-gray-300 rounded-l-lg text-gray-900 focus:outline-none focus:border-blue-500"
+              >
+                <option value="all">전체 검색</option>
+                <option value="title">제목만</option>
+                <option value="summary">요약만</option>
+              </select>
+                      <input
+        type="text"
+        name="search"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="검색어를 입력하세요"
+        className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+      />
+              <button 
+                type="submit"
+                className="px-6 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
+              >
+                Search
+              </button>
             </div>
-            
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex flex-col max-w-md mx-auto space-y-3">
-              <div className="flex space-x-2">
-                <select
-                  value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
-                  className="px-3 py-3 bg-white border border-gray-300 rounded-l-lg text-gray-900 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="all">전체 검색</option>
-                  <option value="title">제목만</option>
-                  <option value="summary">요약만</option>
-                </select>
-                        <input
-          type="text"
-          name="search"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="검색어를 입력하세요"
-          className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-        />
-                <button 
-                  type="submit"
-                  className="px-6 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
+          </form>
 
-            {/* Upload Button */}
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              + 자산 업로드
-            </button>
-          </div>
+          {/* Upload Button */}
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            + 자산 업로드
+          </button>
         </div>
       </section>
 
@@ -207,7 +207,11 @@ function AssetLibrary() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Assets Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '32px'
+          }}>
             {isLoading ? (
               <div className="col-span-full text-center text-white">로딩 중...</div>
             ) : assets.length === 0 ? (

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -18,80 +19,157 @@ class DesignMaterial(models.Model):
     car_model_id = models.ForeignKey('InsightTrends', on_delete=models.CASCADE)
     material_type = models.CharField(max_length=100)
     usage_area = models.CharField(max_length=100)
+=======
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import BaseUserManager
+from django.db import models
+import uuid
 
-# 2. engineering_spec
-class EngineeringSpec(models.Model):
-    spec_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    car_model_id = models.ForeignKey('InsightTrends', on_delete=models.CASCADE)
-    cd_value = models.FloatField()
-    weight = models.IntegerField()
-    material_al_ratio = models.FloatField()
-    wheel_base = models.IntegerField()
-    pedestrian_safety_score = models.FloatField()
-    sensor_ready = models.BooleanField()
+# [추가] CustomUserManager 클래스를 Users 모델 위에 추가합니다.
+# 이 클래스는 'username' 대신 'email'을 사용하여 사용자를 생성하는 방법을 Django에 알려줍니다.
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+>>>>>>> 43f5a95cbd1ec8665d26ac5a1ee1136fee08aef5
 
-# 3. sales_stat
-class SalesStat(models.Model):
-    car_model_id = models.ForeignKey('InsightTrends', on_delete=models.CASCADE)
-    year = models.IntegerField()
-    month = models.IntegerField()
-    units_sold = models.IntegerField()
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
 
-    class Meta: # 같은 차종, 같은 연월에 두 번 이상 판매 데이터가 들어갈 수 없다는 비즈니스 로직을 보장하기 위한 것
-        unique_together = (('car_model_id', 'year', 'month'),)
+        return self.create_user(email, password, **extra_fields)
 
-# 4. user_review
-class UserReview(models.Model):
-    review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    car_model_id = models.ForeignKey('InsightTrends', on_delete=models.CASCADE)
-    sentiment_score = models.FloatField()
-    mentioned_features = models.TextField(blank=True, null=True)
-
-# 5. insight_trends
+# insight_trends
 class InsightTrends(models.Model):
     car_model_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     car_name = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
     release_year = models.IntegerField()
 
+<<<<<<< HEAD
 # 7. chat_session
+=======
+# engineering_spec
+class EngineeringSpec(models.Model):
+    car_model = models.OneToOneField('InsightTrends', on_delete=models.CASCADE) # <--- 따옴표 확인
+    length = models.IntegerField(null=True, blank=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    wheel_base = models.IntegerField(null=True, blank=True)
+    front_track = models.IntegerField(null=True, blank=True)
+    rear_track = models.IntegerField(null=True, blank=True)
+    seating_capacity = models.IntegerField(null=True, blank=True)
+    weight = models.IntegerField(null=True, blank=True)
+    fuel_tank = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        # self.car_model.car_name 대신 self.car_model.car_name으로 접근
+        return f"{self.car_model.car_name} Specs"
+
+# design_material
+class DesignMaterial(models.Model):
+    material_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='design_materials')
+    material_type = models.CharField(max_length=100)
+    usage_area = models.CharField(max_length=100)
+
+# sales_stat
+class SalesStat(models.Model):
+    id = models.AutoField(primary_key=True)
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='sales_stats')
+    year = models.IntegerField()
+    month = models.IntegerField()
+    units_sold = models.IntegerField()
+    class Meta:
+        unique_together = ('car_model', 'year', 'month')
+
+# user_review
+class UserReview(models.Model):
+    review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='user_reviews')
+    sentiment_score = models.FloatField()
+    mentioned_features = models.TextField(blank=True, null=True)
+
+# ------------------------------------------------------------------------------------------------
+# insight_trends 내의 기능 위에 먼저 정의
+
+# users (Custom User Model)
+class Users(AbstractUser):
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # [수정] email 필드를 unique하게 설정합니다.
+    email = models.EmailField(unique=True)
+    # [수정] username 필드를 사용하지 않도록 None으로 설정합니다.
+    username = None
+
+    # [수정] Django 인증 시스템이 username 대신 email을 ID로 사용하도록 설정합니다.
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    # [추가] 위에서 만든 UserManager를 이 모델의 공식 관리자로 지정합니다.
+    objects = UserManager()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    user_prompt = models.TextField(null=True, blank=True)
+    ai_response = models.TextField(null=True, blank=True)
+
+# chat_session
+>>>>>>> 43f5a95cbd1ec8665d26ac5a1ee1136fee08aef5
 class ChatSession(models.Model):
+    """챗봇 세션 모델"""
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+<<<<<<< HEAD
     user = models.ForeignKey(  # ← 변경: 필드명 user로 정리 + AUTH_USER_MODEL 사용
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_sessions"
     )
     title = models.CharField(max_length=200, blank=True)  # ← 변경: 세션 제목(선택)
     # user_id = models.ForeignKey('Users', on_delete=models.CASCADE)
+=======
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_sessions")
+>>>>>>> 43f5a95cbd1ec8665d26ac5a1ee1136fee08aef5
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True) # 변경: 세션 상태 플래그
 
-# 8. prompt_log
+# prompt_log
 class PromptLog(models.Model):
     prompt_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    session_id = models.ForeignKey('ChatSession', on_delete=models.CASCADE)
+    session = models.ForeignKey('ChatSession', on_delete=models.CASCADE, related_name="prompt_logs")
     user_prompt = models.TextField()
     ai_response = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-# 9. generated_result
+# generated_result
 class GeneratedResult(models.Model):
     result_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    prompt_id = models.ForeignKey('PromptLog', on_delete=models.CASCADE)
-    result_type = models.CharField(max_length=50)
-    result_path = models.CharField(max_length=255)
+    prompt = models.ForeignKey('PromptLog', on_delete=models.CASCADE, related_name="generated_results")
+    result_type = models.CharField(max_length=50, choices=[('text', 'Text'), ('image', 'Image'), ('3d', '3D'), ('4d', '4D')])
+    result_path = models.CharField(max_length=255, blank=True)
     result = models.TextField(blank=True, null=True)
 
-# 10. asset_library
+# asset_library
 class AssetLibrary(models.Model):
     lib_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey('Users', on_delete=models.CASCADE)
-    documents = models.TextField(blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="asset_libraries")
+    documents = models.FileField(upload_to='assets/documents/') # FileField로 변경하여 파일 직접 저장
     img_path = models.CharField(max_length=255, blank=True, null=True)
 
-# 11. library_comments
+# library_comments
 class LibraryComments(models.Model):
     comment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    lib_id = models.ForeignKey('AssetLibrary', on_delete=models.CASCADE)
-    user_id = models.ForeignKey('Users', on_delete=models.CASCADE)
+    library_asset = models.ForeignKey('AssetLibrary', on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="library_comments")
     comments = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
