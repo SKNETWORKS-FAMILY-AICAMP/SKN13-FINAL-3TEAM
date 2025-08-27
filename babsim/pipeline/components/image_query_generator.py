@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 from ..config import config
-from ..models.exaone_llm_model import exaone_llm_model
+from ..llm_provider import kanana_llm_model
 
 class ImageQueryGenerator:
     """이미지 생성 쿼리 생성 컴포넌트"""
@@ -26,7 +26,7 @@ class ImageQueryGenerator:
             prompt = self._create_query_generation_prompt(form_data, chat_history)
             
             # LLM을 사용하여 쿼리 생성
-            query = exaone_llm_model.generate_response(prompt, max_length=512)
+            query = kanana_llm_model.generate_response(prompt, max_length=512)
             
             return query.strip()
         

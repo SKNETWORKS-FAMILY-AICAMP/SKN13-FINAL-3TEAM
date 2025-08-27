@@ -1,6 +1,6 @@
 from typing import Dict, Any
 from ..config import config
-from ..models.exaone_llm_model import exaone_llm_model
+from ..llm_provider import kanana_llm_model
 
 class IntentClassifier:
     """의도 분류 컴포넌트"""
@@ -16,7 +16,7 @@ class IntentClassifier:
             prompt = self.prompt_template.format(user_query=user_query)
             
             # LLM을 사용하여 의도 분류
-            response = exaone_llm_model.generate_response(prompt, max_length=100)
+            response = kanana_llm_model.generate_response(prompt, max_length=100)
             
             # 응답 정제
             intent = self._extract_intent(response)

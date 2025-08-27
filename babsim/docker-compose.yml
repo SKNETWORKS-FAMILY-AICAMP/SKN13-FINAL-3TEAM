@@ -76,8 +76,39 @@ services:
       retries: 10
       start_period: 30s
     environment:
+<<<<<<< HEAD
       - BASE_MODEL_PATH=/app/models/exaone_4.0_1.2b
       - ADAPTER_PATH=/app/models/llm_finetuned_model
+=======
+      # === vLLM API 설정 ===
+      # 방법 1: nginx를 통한 프록시 (SSH 터널링 필요)
+      - VLLM_API_BASE=http://nginx/vllm
+      # 방법 2: RunPod 공개 IP 직접 연결 (SSH 터널링 불필요)
+      # - VLLM_API_BASE=http://your-runpod-public-ip:8000
+      - VLLM_MODEL_NAME=kakaocorp/kanana-1.5-8b-instruct-2505
+      - VLLM_ADAPTER_NAME=ki-student/kanana-finetuned-model-v1
+      
+      # === SSH 터널링 설정 (필요시 설정) ===
+      # - SSH_TUNNEL_HOST=username@your-runpod-public-ip
+      # - SSH_TUNNEL_PORT=22
+      # - SSH_PRIVATE_KEY_PATH=/path/to/private/key
+      
+      # === vLLM API 인증 (필요시 설정) ===
+      # - VLLM_API_KEY=your_api_key_here
+
+      # # - BASE_MODEL_PATH=/app/models/kanana-1.5-8b-instruct-2505
+      # # - ADAPTER_PATH=/app/models/kanana_finetuned_model
+      # - HF_BASE_REPO=kakaocorp/kanana-1.5-8b-instruct-2505    
+      # - HF_BASE_REV=main               
+      # - HF_ADPT_REPO=ki-student/kanana-finetuned-model-v1             
+      # - HF_ADPT_REV=main               
+      # # === 캐시/전송 최적화 ===
+      # - HF_HOME=/cache/huggingface
+      # - HF_HUB_ENABLE_HF_TRANSFER=1
+      # # === 양자화 폴백 스위치(원하면 제어) ===
+      # - DISABLE_4BIT=false
+      # - DISABLE_8BIT=false
+>>>>>>> ef242ce ([ki] except model serving)
 
 # 볼륨 설정
 volumes:

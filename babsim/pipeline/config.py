@@ -7,8 +7,8 @@ load_dotenv()
 class Config:
     """파이프라인 설정 클래스"""
     
-    # 모델 설정 (Exaone 모델 사용)
-    LLM_MODEL = "exaone_4.0_1.2b"  # Exaone 모델 사용
+    # 모델 설정 (Kanana 모델 사용)
+    LLM_MODEL = "kanana-1.5-8b-instruct-2505"  # Kanana 모델 사용
     EMBEDDING_MODEL = "BAAI/bge-m3" 
     
     # Vector DB 설정 (JJACKLETTE와 동일)

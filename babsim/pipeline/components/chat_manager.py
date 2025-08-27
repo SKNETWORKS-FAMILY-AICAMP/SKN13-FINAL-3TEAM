@@ -3,7 +3,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 from ..config import config
-from ..models.exaone_llm_model import exaone_llm_model
+from ..llm_provider import kanana_llm_model
 
 class ChatManager:
     """Multi-turn 대화 관리 컴포넌트"""
@@ -104,7 +104,7 @@ class ChatManager:
                         formatted.append(str(msg))
                 return "\n".join(formatted)
         
-        return LangChainChatModel(exaone_llm_model)
+        return LangChainChatModel(kanana_llm_model)
 
     def _convert_to_langchain_messages(self, messages: List[Dict[str, str]]):
         """Django 메시지를 LangChain 메시지로 변환"""

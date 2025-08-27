@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from ..config import config
-from ..models.exaone_llm_model import exaone_llm_model
+from ..llm_provider import kanana_llm_model
 
 class RAGGenerator:
     """RAG 기반 답변 생성 컴포넌트 (babsim Vector DB 사용)"""
@@ -29,7 +29,7 @@ class RAGGenerator:
             prompt = self._build_prompt(user_query, context, chat_history)
             
             # LLM을 사용하여 답변 생성
-            response = exaone_llm_model.generate_response(prompt, max_length=1024)
+            response = kanana_llm_model.generate_response(prompt, max_length=1024)
             
             # Multi-turn 대화를 위한 후속 질문 추가
             follow_up_question = self._generate_follow_up_question(user_query, response)
@@ -138,7 +138,7 @@ class RAGGenerator:
 """
         
         try:
-            follow_up = exaone_llm_model.generate_response(follow_up_prompt, max_length=100)
+            follow_up = kanana_llm_model.generate_response(follow_up_prompt, max_length=100)
             return f"추가 질문이 있으시면 언제든 말씀해 주세요. 예를 들어: {follow_up.strip()}"
         except:
             return "추가 질문이 있으시면 언제든 말씀해 주세요."

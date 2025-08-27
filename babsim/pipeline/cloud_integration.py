@@ -7,6 +7,7 @@ CPU 환경에서 클라우드 서비스를 활용하는 방법
 import os
 import requests
 import json
+import torch
 from typing import Dict, Any, List
 from abc import ABC, abstractmethod
 
