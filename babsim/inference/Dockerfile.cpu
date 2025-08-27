@@ -1,0 +1,29 @@
+# Mac CPU 환경 전용 Dockerfile
+FROM python:3.10-slim
+
+# 필수 시스템 패키지 설치
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# requirements.txt 복사 및 설치
+COPY requirements.txt /app/
+
+# CUDA 전용 대신 CPU 전용 PyTorch 설치를 강제
+RUN pip install --no-cache-dir torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
+
+# 나머지 의존성 설치
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 설치된 transformers 버전 확인
+RUN echo "VERIFYING TRANSFORMERS VERSION:" && pip list | grep transformers
+
+# 소스코드 복사
+COPY . /app/
+
+# FastAPI 서버 실행
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

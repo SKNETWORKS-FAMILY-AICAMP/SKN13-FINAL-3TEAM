@@ -157,10 +157,17 @@ def main():
     client = QdrantClient(host=HOST, port=PORT)
     try:
         logging.info(f"'{COLLECTION_NAME}' 컬렉션을 초기화하고 재생성합니다.")
-        client.recreate_collection(
+        
+        # 1. 기존 컬렉션이 있으면 삭제
+        if client.collection_exists(collection_name=COLLECTION_NAME):
+            client.delete_collection(collection_name=COLLECTION_NAME)
+
+        # 2. 새 컬렉션 생성
+        client.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=models.VectorParams(size=EMBEDDING_DIM, distance=models.Distance.COSINE),
+            vectors_config=models.VectorParams(size=EMBEDDING_DIM, distance=models.Distance.COSINE)
         )
+        
         logging.info("페이로드 인덱스를 생성합니다.")
         for field in ("source", "doc_id", "section", "content_hash"):
             try:

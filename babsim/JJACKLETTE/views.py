@@ -33,6 +33,7 @@ from .models import *
 from .serializers import *
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from pipeline.services import babsim_pipeline_service
 
 logger = logging.getLogger(__name__)
 
@@ -160,12 +161,6 @@ class ChatAPIView(APIView):
         raise last_err
 
     def post(self, request, *args, **kwargs):
-        if not self.TOKENIZER or not self.EMBEDDER:
-            return Response(
-                {"error": "서버 내부 오류: 필수 모델이 로드되지 않았습니다."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
         user_prompt = request.data.get("message")
         session_id = request.data.get("session_id")
 
@@ -176,107 +171,56 @@ class ChatAPIView(APIView):
             )
 
         try:
-            GENERAL_KEYWORDS = ["안녕", "누구야", "뭐해", "이름", "날씨", "고마워", "도와줘", "고맙", "땡큐"]
-            intent = "[GENERAL]"  # 기본값을 GENERAL로 미리 설정
-
-            # 정의된 키워드가 질문에 포함되어 있지 않은 경우에만 LLM 라우터를 호출
-            if not any(keyword in user_prompt for keyword in GENERAL_KEYWORDS):
-                logger.info("키워드를 찾지 못해 LLM 라우터를 호출합니다...")
-                routing_prompt = self.ROUTING_PROMPT_TEMPLATE.format(user_prompt=user_prompt)
-                intent_result = self._call_inference_with_retry(
-                    routing_prompt, max_new_tokens=10, timeout=30.0
-                )
-                if "[RAG]" in intent_result:
-                    intent = "[RAG]"
-            # 키워드가 있으면, 기본값인 [GENERAL]을 그대로 사용
-            # -------------------------------------------
+            # 사용자 이메일 가져오기
+            user_email = request.user.email if request.user.is_authenticated else "anonymous@example.com"
             
-            logger.info("최종 의도 '%s...': %s", user_prompt[:50], intent)
-
-            if intent == "[RAG]":
-                logger.info("RAG 검색을 수행합니다...")
-                query_vec: List[float] = self.EMBEDDER.embed_query(user_prompt)
-                qdrant = QdrantClient(host=self.QDRANT_HOST, port=self.QDRANT_PORT)
-                search_res = qdrant.search(
-                    collection_name=self.QDRANT_COLLECTION,
-                    query_vector=query_vec,
-                    limit=self.RAG_TOP_K,
-                    with_payload=True,
+            # Pipeline 서비스를 사용하여 메시지 처리
+            logger.info("Pipeline을 사용하여 메시지 처리 시작: %s", user_prompt[:50])
+            
+            result = babsim_pipeline_service.process_user_message(user_email, user_prompt)
+            
+            if 'error' in result:
+                logger.error("Pipeline 처리 실패: %s", result['error'])
+                return Response(
+                    {"error": result['error']},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-                contexts = [
-                    (pt.payload or {}).get("page_content", "").strip()
-                    for pt in search_res
-                    if (pt.payload or {}).get("page_content", "").strip()
-                ]
-                context_str = "\n\n".join(contexts) if contexts else "관련 정보를 찾지 못했습니다."
-                RAG_USER_PROMPT_TEMPLATE = """
-                아래의 [컨텍스트]를 바탕으로 사용자의 [질문]에 대해 답변해 주세요.
+            
+            # 기존 세션과 연결하여 DB 저장
+            try:
+                session = ChatSession.objects.get(session_id=session_id, user=request.user)
+                PromptLog.objects.create(
+                    session=session, 
+                    user_prompt=user_prompt, 
+                    ai_response=result['response']
+                )
+                logger.info("DB 저장 성공: 세션 ID %s", session_id)
+            except ChatSession.DoesNotExist:
+                logger.error("DB 저장 실패: 세션 ID(%s)를 찾을 수 없습니다.", session_id)
+            except Exception as e:
+                logger.error("DB 저장 중 예외 발생: %s", e, exc_info=True)
 
-                [지시사항]
-                1. 답변은 반드시 한국어로만 작성하세요. 영어 단어는 절대 사용하지 마세요.
-                2. [컨텍스트]의 핵심 내용을 세 가지 항목으로 요약하여 불렛 포인트(-)로 정리해 주세요.
-                3. 각 항목은 간결하고 명확한 문장으로 설명해야 합니다.
-                4. 불필요한 서론이나 결론 없이 핵심 요약 내용만 바로 제시해 주세요.
+            # 응답 데이터 구성
+            response_data = {
+                "success": True, 
+                "response": result['response'],
+                "intent": result.get('intent', ''),
+                "is_form_complete": result.get('is_form_complete', False),
+                "image_query": result.get('image_query', ''),
+                "generatedResults": []
+            }
+            
+            logger.info("Pipeline 처리 완료: 의도=%s, 폼완성=%s", 
+                       result.get('intent', ''), result.get('is_form_complete', False))
+            
+            return Response(response_data, status=status.HTTP_200_OK)
 
-                [컨텍스트]
-                {context}
-
-                [질문]
-                {question}
-                """
-                messages = [
-                    {"role": "system", "content": self.SYSTEM_PROMPT},
-                    {
-                        "role": "user",
-                        "content": RAG_USER_PROMPT_TEMPLATE.format(
-                            context=context_str,
-                            question=user_prompt
-                        )
-                    },
-                ]
-            else: # intent == "[GENERAL]"
-                logger.info("일반 응답을 생성합니다...")
-                messages = [
-                    {"role": "system", "content": self.GENERAL_PROMPT},
-                    {"role": "user", "content": user_prompt},
-                ]
-
-            chat_text = self.TOKENIZER.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=False
-            )
-            final_prompt = f"{chat_text.rstrip()}\n\n### Assistant:"
-            text_answer = self._call_inference_with_retry(
-                final_prompt, timeout=120.0
-            )
-
-        except httpx.RequestError as e:
-            logger.exception("Inference 서버 통신 중 예외 발생: %s", str(e))
-            return Response(
-                {"error": "AI 모델 서버와 통신 중 오류가 발생했습니다."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
         except Exception as e:
-            logger.exception("전체 파이프라인 처리 중 예외 발생: %s", str(e))
+            logger.exception("Pipeline 처리 중 예외 발생: %s", str(e))
             return Response(
                 {"error": "요청 처리 중 오류가 발생했습니다."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-        try:
-            session = ChatSession.objects.get(session_id=session_id, user=request.user)
-            PromptLog.objects.create(
-                session=session, user_prompt=user_prompt, ai_response=text_answer
-            )
-        except ChatSession.DoesNotExist:
-            logger.error("DB 저장 실패: 세션 ID(%s)를 찾을 수 없습니다.", session_id)
-        except Exception as e:
-            logger.error("DB 저장 중 예외 발생: %s", e, exc_info=True)
-
-        # 5) 최종 응답
-        return Response(
-            {"success": True, "response": text_answer, "generatedResults": []},
-            status=status.HTTP_200_OK,
-        )
 
         # except httpx.RequestError as e:
         #     logger.error(f"Inference 서버 연결 실패: {e}")
