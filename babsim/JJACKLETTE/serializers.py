@@ -9,6 +9,8 @@ from .models import *
 
 # 사용자 상세 정보 (ERD의 모든 필드 포함)
 class UserDetailSerializer(serializers.ModelSerializer):
+    # e_mail = serializers.EmailField(source='email')
+    # user_name = serializers.CharField(source='first_name')
     class Meta:
         model = Users
         fields = (
@@ -19,6 +21,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 # 회원가입 데이터 처리
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    # user_name = serializers.CharField(write_only=True, required=True)
+    # e_mail = serializers.EmailField(source='email', required=True)
     password_confirm = serializers.CharField(write_only=True, required=True)
     
     class Meta:
@@ -40,18 +44,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             user_name=validated_data['user_name']
         )
+        user.save()
         return user
 
 # 로그인
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        user_data = UserDetailSerializer(self.user).data
-        user_data['e_mail'] = user_data.pop('email')
-
+        # user_data = UserDetailSerializer(self.user).data
+        # user_data['e_mail'] = user_data.pop('email')
         data.update({
             "message": "로그인 성공",
-            "user": user_data,
+            # "user": user_data,
+            "user": UserDetailSerializer(self.user).data,
             "access_token": data.pop('access'),
             "refresh_token": data.pop('refresh')
         })
@@ -60,17 +65,27 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 # 로그아웃
 class LogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
-    def validate(self, attrs):
+    # def validate(self, attrs):
+    #     try:
+    #         self.token = RefreshToken(attrs['refresh_token'])
+    #     except Exception:
+    #         raise serializers.ValidationError("유효하지 않거나 만료된 리프레시 토큰입니다.")
+    #     return attrs
+    # def save(self, **kwargs):
+    #     self.token.blacklist()
+    def validate_refresh_token(self, value):
         try:
-            self.token = RefreshToken(attrs['refresh_token'])
+            self.token = RefreshToken(value)
         except Exception:
-            raise serializers.ValidationError("유효하지 않거나 만료된 리프레시 토큰입니다.")
-        return attrs
+            raise serializers.ValidationError("유효하지 않은 리프레시 토큰입니다.")
+        return value
     def save(self, **kwargs):
         self.token.blacklist()
 
 # 사용자 정보 수정
 class UserUpdateSerializer(serializers.ModelSerializer):
+    # user_name = serializers.CharField(source='first_name', required=False)
+    # e_mail = serializers.EmailField(source='email', required=False)
     class Meta:
         model = Users
         fields = ('user_name', 'phone_number', 'company', 'department', 'position', 'profile_image', 'background_image')

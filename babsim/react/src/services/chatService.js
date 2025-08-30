@@ -3,7 +3,7 @@ import { apiRequest } from './authService';
 import httpLogger from '../utils/httpLogger';
 
 // const API_BASE_URL = 'http://localhost:8000/api';
-const API_BASE_URL = 'http://localhost:80/api';
+const API_BASE_URL = '/api';
 const USE_MOCK_DATA = false;
 
 // 목업 데이터 - 실제 파일 경로 사용

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
     # 3rd
@@ -165,14 +166,35 @@ AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
 # CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
 
 # Hugging Face 모델은 폴더명을 지정합니다.
-CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b'
+KANANA_MODEL_PATH = os.getenv("KANANA_MODEL_PATH", str(BASE_DIR / "models" / "kanana-1.5-8b-instruct-2505"))
+# SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
+
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
+
+# CURRENT_MODEL_FOLDER_NAME = 'kanana-1.5-8b-instruct-2505'
+# CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
+
+# Hugging Face 모델은 폴더명을 지정합니다.
+CURRENT_MODEL_FOLDER_NAME = 'kanana-1.5-8b-instruct-2505'
 
 CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
 
 # Custom User Model
 AUTH_USER_MODEL = 'JJACKLETTE.Users'
 
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
 
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -201,18 +223,19 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", # React 개발 서버 주소
     "http://localhost:5173", # Vite 기본 포트
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173"
-    # "http://localhost", # Nginx를 통한 접근 (배포 환경)
+    "http://127.0.0.1:5173",
+    "http://localhost", # Nginx를 통한 접근 (배포 환경)
     # "http://your.domain.com", # 배포 시 실제 도메인
 
 ]
 
-# CSRF_TRUSTED_ORIGINS = [       # ← 추가: 폼/쿠키 기반 호출 시 필요
-#     "http://localhost:3000",
-#     "http://localhost:5173",
-#     "http://127.0.0.1:3000",
-#     "http://127.0.0.1:5173",
-# ]
+CSRF_TRUSTED_ORIGINS = [       # ← 추가: 폼/쿠키 기반 호출 시 필요
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost", # Nginx를 통한 접근
+]
 
 CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True
 
@@ -228,8 +251,12 @@ QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
 QDRANT_PORT_GRPC = int(os.getenv('QDRANT_PORT', '6334'))
 QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
 
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+
 # allauth가 여러 사이트를 관리할 수 있도록 설정
-SITE_ID = 1
+SITE_ID = 5
+LOGIN_REDIRECT_URL = '/api/oauth/callback/' # allauth, 로그인 후 커스텀 OAuth 콜백으로 리디렉션
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/api/oauth/callback/' # 소셜 로그인 후 리디렉션
 
 # dj-rest-auth가 JWT 토큰을 사용하도록 설정
 REST_AUTH = {
@@ -238,11 +265,22 @@ REST_AUTH = {
 }
 
 # 이메일 관련 설정 (구글이 이미 인증했으므로 별도 인증은 불필요)
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# allauth가 중간 확인 페이지 없이 바로 구글로 리디렉션하도록 설정
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# OAuth 로그인 완료 후 자동으로 Django 세션 설정
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_STORE_TOKENS = True
 
 # 구글 소셜 로그인 설정
 SOCIALACCOUNT_PROVIDERS = {
@@ -253,10 +291,17 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': { # 인증 요청 시 파라미터
             'access_type': 'online',
-        }
+        },
     }
 }
-
 INFERENCE_SERVER_URL = os.getenv("INFERENCE_SERVER_URL", "http://inference-server:8001")
 
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = os.getenv('ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 
+# RunPod vLLM API Endpoint
+VLLM_API_URL = os.getenv("VLLM_API_URL")
+VLLM_MODEL_NAME = os.getenv("VLLM_MODEL_NAME")

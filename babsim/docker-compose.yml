@@ -15,6 +15,7 @@ services:
       - .:/app
       - /app/node_modules
       - ./mediafiles:/app/mediafiles
+      - static_volume:/app/staticfiles
     expose:
       - "8000"
     env_file:
@@ -32,6 +33,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./react/build:/usr/share/nginx/html:ro
+      - static_volume:/app/staticfiles:ro
     depends_on:
       - django_gunicorn
 
@@ -66,7 +68,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./mediafiles:/app/generated_images
-      - ./models:/app/models:ro
+      # - ./models:/app/models:ro
+      - hf_cache:/cache/huggingface
     ports:
       - "8001:8001"
     healthcheck:
@@ -76,10 +79,6 @@ services:
       retries: 10
       start_period: 30s
     environment:
-<<<<<<< HEAD
-      - BASE_MODEL_PATH=/app/models/exaone_4.0_1.2b
-      - ADAPTER_PATH=/app/models/llm_finetuned_model
-=======
       # === vLLM API 설정 ===
       # 방법 1: nginx를 통한 프록시 (SSH 터널링 필요)
       - VLLM_API_BASE=http://nginx/vllm
@@ -108,9 +107,10 @@ services:
       # # === 양자화 폴백 스위치(원하면 제어) ===
       # - DISABLE_4BIT=false
       # - DISABLE_8BIT=false
->>>>>>> ef242ce ([ki] except model serving)
 
 # 볼륨 설정
 volumes:
   postgres_data:
   qdrant_data:
+  static_volume:
+  hf_cache:

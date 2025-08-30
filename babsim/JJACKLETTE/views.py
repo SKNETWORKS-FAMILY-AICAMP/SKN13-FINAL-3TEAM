@@ -33,6 +33,7 @@ from .models import *
 from .serializers import *
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from pipeline.llm_provider import generate_vllm_response
 
 logger = logging.getLogger(__name__)
 
@@ -96,23 +97,23 @@ class ChatAPIView(APIView):
         "분류: "
     )
 
-    TOKENIZER = None
-    EMBEDDER = None
-    try:
-        TOKENIZER = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
-        logger.info("ChatAPIView: 토크나이저 로딩 성공 (%s)", TOKENIZER_PATH)
-    except Exception as e:
-        logger.error("ChatAPIView: 토크나이저 로딩 실패: %s", e, exc_info=True)
+    # TOKENIZER = None
+    # EMBEDDER = None
+    # try:
+    #     TOKENIZER = AutoTokenizer.from_pretrained(TOKENIZER_PATH, trust_remote_code=True)
+    #     logger.info("ChatAPIView: 토크나이저 로딩 성공 (%s)", TOKENIZER_PATH)
+    # except Exception as e:
+    #     logger.error("ChatAPIView: 토크나이저 로딩 실패: %s", e, exc_info=True)
 
-    try:
-        EMBEDDER = HuggingFaceBgeEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
-        )
-        logger.info("ChatAPIView: 임베딩 모델 로딩 성공 (%s)", EMBEDDING_MODEL_NAME)
-    except Exception as e:
-        logger.error("ChatAPIView: 임베딩 모델 로딩 실패: %s", e, exc_info=True)
+    # try:
+    #     EMBEDDER = HuggingFaceBgeEmbeddings(
+    #         model_name=EMBEDDING_MODEL_NAME,
+    #         model_kwargs={'device': 'cpu'},
+    #         encode_kwargs={'normalize_embeddings': True}
+    #     )
+    #     logger.info("ChatAPIView: 임베딩 모델 로딩 성공 (%s)", EMBEDDING_MODEL_NAME)
+    # except Exception as e:
+    #     logger.error("ChatAPIView: 임베딩 모델 로딩 실패: %s", e, exc_info=True)
 
     def _call_inference_with_retry(
         self,
@@ -215,7 +216,7 @@ class ChatAPIView(APIView):
                 [지시사항]
                 1. 답변은 반드시 한국어로만 작성하세요. 영어 단어는 절대 사용하지 마세요.
                 2. [컨텍스트]의 핵심 내용을 세 가지 항목으로 요약하여 불렛 포인트(-)로 정리해 주세요.
-                3. 각 항목은 간결하고 명확한 문장으로 설명해야 합니다.
+                3. 각 항목은 간결하고 명확한 문장으로 설명해야 합니다. 
                 4. 불필요한 서론이나 결론 없이 핵심 요약 내용만 바로 제시해 주세요.
 
                 [컨텍스트]
@@ -278,30 +279,6 @@ class ChatAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
-        # except httpx.RequestError as e:
-        #     logger.error(f"Inference 서버 연결 실패: {e}")
-        #     return Response(
-        #         {"error": f"inference 서버 연결 실패: {e}"},
-        #         status=status.HTTP_502_BAD_GATEWAY,
-        #     )
-        # except httpx.HTTPStatusError as e:
-        #     code = getattr(e.response, "status_code", "unknown")
-        #     logger.error(f"Inference 서버 오류: {code}")
-        #     return Response(
-        #         {"error": f"inference 서버 오류: {code}"},
-        #         status=status.HTTP_502_BAD_GATEWAY,
-        #     )
-        # except ChatSession.DoesNotExist:
-        #     return Response(
-        #         {"error": "유효하지 않은 세션 ID입니다."},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
-        # except Exception as e:
-        #     logger.exception("AI 모델 처리 중 오류 발생")
-        #     return Response(
-        #         {"error": f"AI 모델 처리 중 오류가 발생했습니다: {str(e)}"},
-        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     )
 # ---------------------------------------------------------------------
         
 def ok(data=None, code=200): return Response(data or {}, status=code)
@@ -393,7 +370,7 @@ class LibraryCommentListCreateView(generics.ListCreateAPIView):
 
 # --- 7-11. 인사이트 ---
 class InsightTrendsListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = InsightTrendsSerializer
     queryset = InsightTrends.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -402,19 +379,18 @@ class InsightTrendsListView(generics.ListAPIView):
     pagination_class = StandardResultSetPagination
 
 class InsightTrendsDetailView(generics.RetrieveAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = InsightTrendsDetailSerializer
     queryset = InsightTrends.objects.all().prefetch_related('engineering_specs', 'user_reviews', 'recent_articles')
     lookup_field = 'car_model_id'
 
 class EngineeringSpecListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = EngineeringSpecSerializer
     def get_queryset(self): return EngineeringSpec.objects.filter(car_model_id=self.kwargs['car_model_id'])
 
 class UserReviewListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserReviewSerializer
-    def get_queryset(self): return UserReview.objects.filter(car_model_id=self.kwargs['car_model_id'])
-
-    
+    def get_queryset(self): 
+        return UserReview.objects.filter(car_model_id=self.kwargs['car_model_id'])

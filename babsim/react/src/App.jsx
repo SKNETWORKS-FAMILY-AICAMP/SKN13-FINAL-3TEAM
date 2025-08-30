@@ -11,6 +11,7 @@ import PrototypeLab from './pages/PrototypeLab';
 import Chatbot from './pages/Chatbot';
 import Profile from './pages/Profile';
 import MyWorkspace from './pages/MyWorkspace';
+import OAuthCallback from './pages/OAuthCallback';
 import './App.css';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/library" element={
             <ProtectedRoute>
               <AssetLibrary />

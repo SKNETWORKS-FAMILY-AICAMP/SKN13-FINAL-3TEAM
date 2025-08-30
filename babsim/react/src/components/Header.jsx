@@ -109,7 +109,7 @@ export default function Header() {
               <div className="flex items-center space-x-4">
                 <div className="text-white text-sm">
                   <div className="font-medium">{user?.user_name}</div>
-                  <div className="text-gray-400">{user?.e_mail}</div>
+                  <div className="text-gray-400">{user?.email}</div>
                 </div>
                 
                 {/* 세 개의 점 메뉴 버튼 */}

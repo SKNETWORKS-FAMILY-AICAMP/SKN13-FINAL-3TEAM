@@ -1,12 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-// useNavigate를 제거하고, loginService를 직접 사용하지 않습니다.
-import { 
-  isAuthenticated as checkIsAuthenticated, 
-  getUserProfile, 
-  logout as logoutService
-} from '../services/authService';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { isAuthenticated, getUserProfile, logout } from '../services/authService';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -20,16 +15,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 초기 인증 상태 확인
   useEffect(() => {
     const checkAuthStatus = async () => {
-      setLoading(true);
       try {
-        if (checkIsAuthenticated()) {
+        if (isAuthenticated()) {
           const result = await getUserProfile();
           if (result.success) {
             setUser(result.user);
           } else {
-            await logoutService();
+            // 토큰이 있지만 유효하지 않은 경우
+            await logout();
             setUser(null);
           }
         }
@@ -40,31 +36,33 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
+
     checkAuthStatus();
   }, []);
 
-  // [수정] Login 컴포넌트가 전달해준 user 데이터로 상태만 설정하는 간단한 역할로 되돌립니다.
-  const login = (userData) => {
-    setUser(userData);
-  };
+  const login = useCallback((userData) => {
+    return new Promise((resolve) => {
+      setUser(userData);
+      resolve();
+    });
+  }, []);
 
-  const logout = async () => {
-    await logoutService();
+  const logoutUser = useCallback(async () => {
+    await logout();
     setUser(null);
-    // 페이지 이동 로직은 이 함수를 호출하는 컴포넌트(예: Header)가 담당하게 됩니다.
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     login,
-    logout,
+    logout: logoutUser,
     isAuthenticated: !!user,
-  };
+  }), [user, loading, login, logoutUser]);
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
-};
+}; 

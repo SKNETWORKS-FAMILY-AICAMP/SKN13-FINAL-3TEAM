@@ -41,12 +41,12 @@ class Command(BaseCommand):
             'length': '전장 (mm)',
             'width': '전폭 (mm)',
             'height': '전고 (mm)',
-            'wheel_base': '축거 (mm)',
-            'front_track': '윤거 (전) (mm)',
-            'rear_track': '윤거 (후) (mm)',
+            'wheelbase': '축거 (mm)',  # wheel_base -> wheelbase 로 모델 필드명에 맞게 수정
+            # 'front_track': '윤거 (전) (mm)', # 모델에 없는 필드이므로 주석 처리
+            # 'rear_track': '윤거 (후) (mm)', # 모델에 없는 필드이므로 주석 처리
             'seating_capacity': '승차정원',
             'weight': '공차중량 (kg)',
-            'fuel_tank': '연료탱크 (ℓ)',
+            # 'fuel_tank': '연료탱크 (ℓ)', # 모델에 없는 필드이므로 주석 처리
         }
 
         car_count, spec_count = 0, 0
@@ -114,10 +114,13 @@ class Command(BaseCommand):
         skipped_count = 0
         for item in reviews_data:
             json_car_name = item['car_name']
+            # 띄어쓰기, 대소문자 등 노멀라이즈하여 매칭 시도
+            normalized_json_name = json_car_name.lower().replace(" ", "")
             matched_car_name = None
 
             for db_name in db_car_names:
-                if db_name in json_car_name:
+                normalized_db_name = db_name.lower().replace(" ", "")
+                if normalized_db_name in normalized_json_name:
                     matched_car_name = db_name
                     break 
             
@@ -126,8 +129,7 @@ class Command(BaseCommand):
                 
                 _, created = UserReview.objects.get_or_create(
                     car_model=car_model_instance,
-                    mentioned_features=item['review'],
-                    defaults={'sentiment_score': 0.8} 
+                    review=item['review']
                 )
                 if created:
                     count += 1

@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from ..config import config
-from ..llm_provider import kanana_llm_model
+# from ..llm_provider import kanana_llm_model
 
 class RAGGenerator:
     """RAG 기반 답변 생성 컴포넌트 (babsim Vector DB 사용)"""

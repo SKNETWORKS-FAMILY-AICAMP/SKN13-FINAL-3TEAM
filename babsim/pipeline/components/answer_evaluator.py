@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 from typing import Dict
-from ..llm_provider import kanana_llm_model
+# from ..llm_provider import kanana_llm_model
 
 class AnswerEvaluator:
     def analyze(self, user_query: str, answer: str, context_hint: str = "") -> Dict[str, object]:

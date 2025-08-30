@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 from ..config import config
-from ..llm_provider import kanana_llm_model
+# from ..llm_provider import kanana_llm_model
 
 class ImageQueryGenerator:
     """이미지 생성 쿼리 생성 컴포넌트"""

@@ -64,11 +64,11 @@ const ThreeDViewer = ({ carName }) => {
       
       // 사용 가능한 GLB 파일 목록
       const availableModels = {
-        '쏘나타 디 엣지': '/models/쏘나타 디 엣지.glb',
-        '산타페': '/models/산타페.glb',
-        '아이오닉 5': '/models/아이오닉 5.glb',
-        '코나': '/models/코나.glb',
-        '포터2': '/models/포터2.glb'
+        '쏘나타 디 엣지': 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/%EC%8F%98%EB%82%98%ED%83%80+%EB%94%94+%EC%97%A3%EC%A7%80.glb',
+    '산타페': 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/%EC%82%B0%ED%83%80%ED%8E%98.glb',
+    '아이오닉 5': 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+5.glb',
+    '코나': 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/%EC%BD%94%EB%82%98.glb',
+    '포터2': 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/%ED%8F%AC%ED%84%B02.glb'
       };
       
       const modelPath = availableModels[carName];
@@ -76,7 +76,7 @@ const ThreeDViewer = ({ carName }) => {
       if (!modelPath) {
         console.warn(`GLB model not available for: ${carName}`);
         // 모델이 없을 때 기본 차량 모델 사용
-        const defaultModelPath = '/models/쏘나타 디 엣지.glb';
+        const defaultModelPath = 'https://babsim-media.s3.ap-southeast-2.amazonaws.com/models/쏘나타 디 엣지.glb';
         loadModel(defaultModelPath);
       } else {
         loadModel(modelPath);

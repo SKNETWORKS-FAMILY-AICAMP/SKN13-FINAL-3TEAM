@@ -1,14 +1,12 @@
 import asyncio
 import logging
 import os
-import torch
-import re
+import requests
+import json
 from contextlib import asynccontextmanager
 from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from peft import PeftModel
 
 # --- 설정 ---
 logging.basicConfig(
@@ -17,149 +15,117 @@ logging.basicConfig(
 )
 logger = logging.getLogger("inference")
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-logger.info(f"Using device: {DEVICE}")
+# --- vLLM API 설정 ---
+# nginx를 통해 vLLM API에 접근 (포트 번호 불필요)
+VLLM_API_BASE = os.getenv("VLLM_API_BASE", "http://nginx/vllm")  # nginx를 통한 vLLM API 접근
+VLLM_MODEL_NAME = os.getenv("VLLM_MODEL_NAME", "kakaocorp/kanana-1.5-8b-instruct-2505")
+VLLM_ADAPTER_NAME = os.getenv("VLLM_ADAPTER_NAME", "ki-student/kanana-finetuned-model-v1")  # LoRA 어댑터
 
-# --- HF Hub 환경변수 (우선) ---
-HF_BASE_REPO = os.getenv("HF_BASE_REPO", None)      # 예: your-org/kanana-1.5-8b-instruct-2505
-HF_BASE_REV  = os.getenv("HF_BASE_REV",  None)      # 예: main (없으면 None)
-HF_ADPT_REPO = os.getenv("HF_ADPT_REPO", None)      # 예: your-org/kanana_finetuned_model
-HF_ADPT_REV  = os.getenv("HF_ADPT_REV",  None)
-HF_TOKEN     = os.getenv("HUGGINGFACE_TOKEN", None) 
-
-# --- 로컬 경로 (폴백) ---
-BASE_MODEL_PATH = os.getenv("BASE_MODEL_PATH", None)  # 예: /app/models/kanana-1.5-8b-instruct-2505
-ADAPTER_PATH    = os.getenv("ADAPTER_PATH", None)     # 예: /app/models/kanana_finetuned_model
-
-# --- 폴백 제어 스위치 ---
-DISABLE_4BIT = os.getenv("DISABLE_4BIT", "false").lower() in ("1", "true", "yes")
-DISABLE_8BIT = os.getenv("DISABLE_8BIT", "false").lower() in ("1", "true", "yes")
+# --- SSH 터널링 및 인증 설정 ---
+SSH_TUNNEL_HOST = os.getenv("SSH_TUNNEL_HOST", None)  # SSH 호스트 (예: username@hostname)
+SSH_TUNNEL_PORT = os.getenv("SSH_TUNNEL_PORT", "22")  # SSH 포트
+SSH_PRIVATE_KEY_PATH = os.getenv("SSH_PRIVATE_KEY_PATH", None)  # SSH 개인키 경로
+VLLM_API_KEY = os.getenv("VLLM_API_KEY", None)  # vLLM API 키 (필요한 경우)
 
 # --- 핸들 저장소 ---
 models = {}
 
-# ---------------------- 경로/레포 선택 유틸 ----------------------
-def _src_base() -> str:
-    """
-    HF 레포 ID가 있으면 그걸 우선 사용, 없으면 로컬 경로를 사용.
-    """
-    src = HF_BASE_REPO or BASE_MODEL_PATH
-    if not src:
-        raise RuntimeError("No base model source provided. Set HF_BASE_REPO or BASE_MODEL_PATH.")
-    return src
-
-def _src_adapter() -> str:
-    src = HF_ADPT_REPO or ADAPTER_PATH
-    if not src:
-        raise RuntimeError("No adapter source provided. Set HF_ADPT_REPO or ADAPTER_PATH.")
-    return src
-
-# ---------------------- 로더들 ----------------------
-def _load_tokenizer() -> AutoTokenizer:
-    src = _src_base()
-    logger.info(f"Loading tokenizer from: {src} (rev={HF_BASE_REV})")
-    tok = AutoTokenizer.from_pretrained(
-        src,
-        trust_remote_code=True,
-        revision=HF_BASE_REV,
-        token=HF_TOKEN
-    )
-    if tok.pad_token_id is None:
-        tok.pad_token_id = tok.eos_token_id
-        logger.warning("tokenizer.pad_token_id not set; defaulting to eos_token_id.")
-    return tok
-
-def _load_base_model_4bit() -> AutoModelForCausalLM:
-    logger.info("Attempting 4-bit load with BitsAndBytesConfig(nf4, double-quant, bf16 compute).")
-    bnb_cfg = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-    )
-    model = AutoModelForCausalLM.from_pretrained(
-        _src_base(),
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
-        trust_remote_code=True,
-        quantization_config=bnb_cfg,
-        low_cpu_mem_usage=False,
-        revision=HF_BASE_REV,
-        token=HF_TOKEN
-    )
-    return model
-
-def _load_base_model_8bit() -> AutoModelForCausalLM:
-    logger.info("Attempting 8-bit load as fallback.")
-    bnb_cfg = BitsAndBytesConfig(
-        load_in_8bit=True,
-        llm_int8_enable_fp32_cpu_offload=False,
-    )
-    model = AutoModelForCausalLM.from_pretrained(
-        _src_base(),
-        torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
-        device_map="auto",
-        trust_remote_code=True,
-        quantization_config=bnb_cfg,
-        low_cpu_mem_usage=False,
-        revision=HF_BASE_REV,
-        token=HF_TOKEN
-    )
-    return model
-
-def _load_base_model_fp16() -> AutoModelForCausalLM:
-    logger.info("Attempting fp16/fp32 load as last resort.")
-    model = AutoModelForCausalLM.from_pretrained(
-        _src_base(),
-        torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
-        device_map="auto",
-        trust_remote_code=True,
-        low_cpu_mem_usage=False,
-        revision=HF_BASE_REV,
-        token=HF_TOKEN
-    )
-    return model
-
-def _apply_peft_adapter(base_model: AutoModelForCausalLM) -> PeftModel:
-    src = _src_adapter()
-    logger.info(f"Applying PEFT adapter from: {src} (rev={HF_ADPT_REV})")
-    peft_model = PeftModel.from_pretrained(
-        base_model,
-        src,
-        is_trainable=False,
-        revision=HF_ADPT_REV,
-        token=HF_TOKEN
-    )
-    return peft_model
-
-def _safe_load_model_with_fallbacks():
-    last_err = None
-
-    if not DISABLE_4BIT:
-        try:
-            model = _load_base_model_4bit()
-            logger.info("Base model loaded in 4-bit.")
-            return model
-        except Exception as e:
-            last_err = e
-            logger.warning(f"4-bit load failed: {e.__class__.__name__}: {e}")
-
-    if not DISABLE_8BIT:
-        try:
-            model = _load_base_model_8bit()
-            logger.info("Base model loaded in 8-bit.")
-            return model
-        except Exception as e:
-            last_err = e
-            logger.warning(f"8-bit load failed: {e.__class__.__name__}: {e}")
-
+# ---------------------- vLLM API 유틸리티 ----------------------
+def _check_vllm_health() -> bool:
+    """vLLM API 서버 상태 확인"""
     try:
-        model = _load_base_model_fp16()
-        logger.info("Base model loaded in fp16/fp32.")
-        return model
+        response = requests.get(f"{VLLM_API_BASE}/health", timeout=5)
+        return response.status_code == 200
     except Exception as e:
-        logger.error("All model load attempts failed.", exc_info=True)
-        raise e if last_err is None else last_err
+        logger.warning(f"vLLM API health check failed: {e}")
+        return False
+
+def _generate_with_vllm(prompt: str, max_tokens: int = 512, temperature: float = 0.7) -> str:
+    """vLLM API를 사용하여 텍스트 생성 (LoRA 어댑터 지원)"""
+    try:
+        payload = {
+            "model": VLLM_MODEL_NAME,
+            "prompt": prompt,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "stream": False,
+            "adapter_name": VLLM_ADAPTER_NAME  # LoRA 어댑터 사용
+        }
+        
+        # 인증 헤더 설정
+        headers = {}
+        if VLLM_API_KEY:
+            headers["Authorization"] = f"Bearer {VLLM_API_KEY}"
+        
+        response = requests.post(
+            f"{VLLM_API_BASE}/v1/completions",
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["text"]
+        else:
+            logger.error(f"vLLM API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="vLLM API 호출 실패")
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"vLLM API request failed: {e}")
+        raise HTTPException(status_code=500, detail="vLLM API 연결 실패")
+
+def _chat_with_vllm(messages: list, max_tokens: int = 512, temperature: float = 0.7) -> str:
+    """vLLM API를 사용하여 채팅 응답 생성 (LoRA 어댑터 지원)"""
+    try:
+        payload = {
+            "model": VLLM_MODEL_NAME,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "stream": False,
+            "adapter_name": VLLM_ADAPTER_NAME  # LoRA 어댑터 사용
+        }
+        
+        # 인증 헤더 설정
+        headers = {}
+        if VLLM_API_KEY:
+            headers["Authorization"] = f"Bearer {VLLM_API_KEY}"
+        
+        response = requests.post(
+            f"{VLLM_API_BASE}/v1/chat/completions",
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            logger.error(f"vLLM API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500, detail="vLLM API 호출 실패")
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"vLLM API request failed: {e}")
+        raise HTTPException(status_code=500, detail="vLLM API 연결 실패")
+
+# ---------------------- 모델 초기화 (vLLM 사용) ----------------------
+def _initialize_vllm_connection():
+    """vLLM API 연결 초기화 및 상태 확인"""
+    logger.info("=== vLLM API 연결 초기화 ===")
+    
+    if not _check_vllm_health():
+        logger.warning("vLLM API 서버가 응답하지 않습니다. 환경변수 VLLM_API_BASE를 확인하세요.")
+        logger.info(f"현재 설정된 VLLM_API_BASE: {VLLM_API_BASE}")
+        logger.info(f"사용할 모델: {VLLM_MODEL_NAME}")
+        return False
+    
+    logger.info("vLLM API 서버 연결 성공!")
+    logger.info(f"API 엔드포인트: {VLLM_API_BASE}")
+    logger.info(f"베이스 모델: {VLLM_MODEL_NAME}")
+    logger.info(f"LoRA 어댑터: {VLLM_ADAPTER_NAME}")
+    return True
 
 # ---------------------- Lifespan ----------------------
 @asynccontextmanager
@@ -167,25 +133,23 @@ async def lifespan(app: FastAPI):
     global models
     logger.info("--- 서버 시작: 모델 로드를 시작합니다. ---")
     try:
-        tokenizer = _load_tokenizer()
-        base_model = _safe_load_model_with_fallbacks()
-        peft_model = _apply_peft_adapter(base_model)
-        peft_model.eval()
+        # vLLM API 연결 초기화
+        if not _initialize_vllm_connection():
+            raise RuntimeError("vLLM API 연결 실패. 환경변수 VLLM_API_BASE를 확인하세요.")
 
-        models["text_gen_model"] = peft_model
-        models["text_gen_tokenizer"] = tokenizer
+        # vLLM API 사용을 위한 모델 핸들 저장
+        models["text_gen_model"] = _generate_with_vllm # 현재는 텍스트 생성만 지원
+        models["text_gen_tokenizer"] = None # vLLM API는 토크나이저가 필요 없음
 
-        logger.info("--- 텍스트 생성 모델(베이스+어댑터) 로드 완료 ---")
+        logger.info("--- 텍스트 생성 모델(vLLM) 로드 완료 ---")
     except Exception as e:
         logger.error(f"모델 로딩 중 심각한 오류 발생: {e}", exc_info=True)
         models.clear()
 
     yield
 
-    logger.info("--- 서버 종료: 모델을 메모리에서 해제합니다. ---")
+    logger.info("--- 서버 종료: vLLM API 연결을 정리합니다. ---")
     models.clear()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -201,40 +165,47 @@ class TextGenerationRequest(BaseModel):
 class TextGenerationResponse(BaseModel):
     generated_text: str
 
-# ---------------------- 추론 ----------------------
+# ---------------------- 추론 (vLLM API 사용) ----------------------
 def _generate_text_sync(prompt: str, generation_params: dict) -> str:
-    tok = models["text_gen_tokenizer"]
-    model = models["text_gen_model"]
-
-    inputs = tok(prompt, return_tensors="pt")
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
-
-    with torch.no_grad():
-        outputs = model.generate(**inputs, **generation_params)
-
-    full_text = tok.decode(outputs[0], skip_special_tokens=True)
-
-    ans = full_text
-    if full_text.strip().startswith(prompt.strip()):
-        ans = full_text[len(prompt):].strip()
-
-    ans = re.sub(r'^당신은 자동차 디자인 트렌드.*?설명해주세요\.\s*', '', ans, flags=re.DOTALL).strip()
-    if "당신은 자동차 디자인 전문 AI" in ans:
-        ans = ans.replace("당신은 자동차 디자인 전문 AI", "").strip()
-
-    return ans
+    """vLLM API를 사용하여 텍스트 생성"""
+    try:
+        # vLLM API 호출
+        generated_text = _generate_with_vllm(
+            prompt=prompt,
+            max_tokens=generation_params.get("max_new_tokens", 512),
+            temperature=generation_params.get("temperature", 0.7)
+        )
+        
+        # 응답 텍스트 정리
+        ans = generated_text.strip()
+        
+        # 프롬프트가 응답에 포함된 경우 제거
+        if ans.startswith(prompt.strip()):
+            ans = ans[len(prompt):].strip()
+        
+        # 특정 패턴 제거
+        import re
+        ans = re.sub(r'^당신은 자동차 디자인 트렌드.*?설명해주세요\.\s*', '', ans, flags=re.DOTALL).strip()
+        if "당신은 자동차 디자인 전문 AI" in ans:
+            ans = ans.replace("당신은 자동차 디자인 전문 AI", "").strip()
+        
+        return ans
+        
+    except Exception as e:
+        logger.error(f"vLLM API 호출 중 오류 발생: {e}")
+        raise e
 
 # ---------------------- 엔드포인트 ----------------------
 @app.get("/health")
 async def health_check():
     if "text_gen_model" in models and models["text_gen_model"] is not None:
-        return {"status": "ok", "message": "Inference server is running and model is loaded."}
-    raise HTTPException(status_code=503, detail="Model is not ready or failed to load.")
+        return {"status": "ok", "message": "Inference server is running and vLLM API is connected."}
+    raise HTTPException(status_code=503, detail="vLLM API is not ready or failed to connect.")
 
 @app.post("/generate-text", response_model=TextGenerationResponse)
 async def generate_text(request: TextGenerationRequest):
     if "text_gen_model" not in models:
-        raise HTTPException(status_code=503, detail="Model is not ready.")
+        raise HTTPException(status_code=503, detail="vLLM API가 준비되지 않았습니다.")
 
     try:
         logger.info(f"Generating text for prompt: '{request.prompt[:100]}...'")
@@ -244,9 +215,6 @@ async def generate_text(request: TextGenerationRequest):
             "top_p": request.top_p,
             "top_k": request.top_k,
             "repetition_penalty": request.repetition_penalty,
-            "do_sample": True,
-            "pad_token_id": models["text_gen_tokenizer"].pad_token_id,
-            "eos_token_id": models["text_gen_tokenizer"].eos_token_id,
         }
         generated_text = await asyncio.to_thread(
             _generate_text_sync, request.prompt, generation_params

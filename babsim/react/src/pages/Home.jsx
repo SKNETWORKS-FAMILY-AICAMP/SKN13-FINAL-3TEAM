@@ -28,7 +28,7 @@ function Home() {
       {/* 로그인 상태 표시 (테스트용) */}
       {isAuthenticated && (
         <div className="bg-green-600 text-white p-4 text-center">
-          로그인됨: {user?.user_name} ({user?.e_mail})
+          로그인됨: {user?.user_name} ({user?.email})
         </div>
       )}
       

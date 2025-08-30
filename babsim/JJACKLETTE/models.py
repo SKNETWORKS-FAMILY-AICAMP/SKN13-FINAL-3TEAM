@@ -3,15 +3,14 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 import uuid
 
-# --- 사용자 모델 관리자 ---
+# [추가] CustomUserManager 클래스를 Users 모델 위에 추가합니다.
+# 이 클래스는 'username' 대신 'email'을 사용하여 사용자를 생성하는 방법을 Django에 알려줍니다.
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
-        # user_name을 extra_fields에서 추출하여 모델 생성 시 사용합니다.
-        user_name = extra_fields.pop('user_name', '')
-        user = self.model(email=email, user_name=user_name, **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -19,6 +18,11 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
         return self.create_user(email, password, **extra_fields)
 
 # 1. Users (사용자 정보)
@@ -36,7 +40,8 @@ class Users(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='계정 생성일자')
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['user_name']
+    REQUIRED_FIELDS = []
+    # REQUIRED_FIELDS = ['user_name']
 
     objects = UserManager()
 

@@ -9,11 +9,14 @@ torchvision==0.20.0
 torchaudio==2.5.0
 
 # === Hugging Face Ecosystem ===
-git+https://github.com/lgai-exaone/transformers@add-exaone4
-peft
-accelerate
-bitsandbytes==0.43.1
+peft==0.17.1
+accelerate==1.10.1
 diffusers==0.29.2
+hf-transfer
+
+# === Quantization Libraries ===
+# ARM64 환경에서도 bitsandbytes 사용 가능 (최신 버전)
+bitsandbytes>=0.41.0
 
 # === Tokenizer Libraries ===
 sentencepiece==0.2.0

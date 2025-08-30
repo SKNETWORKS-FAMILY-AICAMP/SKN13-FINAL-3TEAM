@@ -3,7 +3,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 from ..config import config
-from ..llm_provider import kanana_llm_model
+# from ..llm_provider import kanana_llm_model
 
 class ChatManager:
     """Multi-turn 대화 관리 컴포넌트"""

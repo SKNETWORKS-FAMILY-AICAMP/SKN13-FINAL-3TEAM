@@ -1,6 +1,6 @@
 from __future__ import annotations
 import re
-from ..llm_provider import kanana_llm_model
+# from ..llm_provider import kanana_llm_model
 
 class QueryRewriter:
     def hyde_expand_and_rewrite(self, user_query: str):

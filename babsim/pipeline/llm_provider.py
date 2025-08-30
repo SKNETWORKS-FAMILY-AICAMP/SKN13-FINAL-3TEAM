@@ -11,49 +11,8 @@ def _env(path_key: str, default: Optional[str] = None) -> Optional[str]:
 
 class _KananaChat:
     def __init__(self):
-        base = _env("KANANA_BASE_MODEL_PATH")
-        finetuned = _env("KANANA_FINETUNED_PATH")
-
-        if not base:
-            raise RuntimeError("KANANA_BASE_MODEL_PATH 가 설정되지 않았거나 경로가 존재하지 않습니다.")
-
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-
-        self.tokenizer = AutoTokenizer.from_pretrained(base, trust_remote_code=True, use_fast=True)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            base,
-            torch_dtype=self.torch_dtype,
-            low_cpu_mem_usage=True,
-            device_map="auto" if torch.cuda.is_available() else None,
-            trust_remote_code=True,
-        )
-
-        # 파인튜닝(LoRA or full) 자동 감지
-        if finetuned:
-            adapter_cfg = os.path.join(finetuned, "adapter_config.json")
-            try:
-                if os.path.exists(adapter_cfg):
-                    # LoRA 어댑터
-                    self.model = PeftModel.from_pretrained(self.model, finetuned)
-                else:
-                    # 전량 파인튜닝 가중치 디렉터리 시도
-                    self.model = AutoModelForCausalLM.from_pretrained(
-                        finetuned,
-                        torch_dtype=self.torch_dtype,
-                        low_cpu_mem_usage=True,
-                        device_map="auto" if torch.cuda.is_available() else None,
-                        trust_remote_code=True,
-                    )
-            except Exception:
-                # 문제가 있으면 베이스만 사용
-                pass
-
-        self.model.eval()
-        self.gen_cfg = GenerationConfig(
-            do_sample=True, temperature=0.7, top_p=0.9,
-            repetition_penalty=1.05, max_new_tokens=512,
-        )
+        # 로컬 모델 로딩 로직을 제거하여 앱 시작 시 에러 방지
+        pass
 
     def _build_prompt(self, prompt: str) -> str:
         system = "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."
@@ -61,16 +20,86 @@ class _KananaChat:
 
     @torch.inference_mode()
     def generate_response(self, prompt: str, max_length: int = 512) -> str:
-        text = self._build_prompt(prompt)
-        inputs = self.tokenizer(text, return_tensors="pt").to(self.model.device)
+        # 기존 로컬 추론 대신, vLLM 서버를 호출하는 함수를 사용
+        return generate_vllm_response(prompt, max_length=max_length)
 
-        cfg = self.gen_cfg
-        cfg.max_new_tokens = max_length
+import requests
+from django.conf import settings
 
-        output_ids = self.model.generate(**inputs, generation_config=cfg)
-        out = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
-        if out.startswith(text):
-            out = out[len(text):].strip()
-        return out.strip()
+def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
+    """
+    RunPod의 vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
+    """
+    api_url = settings.VLLM_API_URL
+    model_name = settings.VLLM_MODEL_NAME
 
-kanana_llm_model = _KananaChat()
+    headers = {"Content-Type": "application/json"}
+    
+    # OpenAI 호환 API 형식에 맞게 데이터 구성
+    data = {
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": max_length,
+        "temperature": 0.7,
+    }
+
+    try:
+        response = requests.post(api_url, headers=headers, json=data, timeout=120) # 120초 타임아웃
+        response.raise_for_status()  # 200 OK가 아닌 경우 예외 발생
+
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        return content.strip()
+
+    except requests.exceptions.RequestException as e:
+        # 네트워크 오류 또는 HTTP 오류 처리
+        print(f"vLLM API 호출 오류: {e}")
+        return "모델 응답을 가져오는 데 실패했습니다."
+    except (KeyError, IndexError) as e:
+        # 응답 JSON 구조가 예상과 다를 경우 처리
+        print(f"vLLM API 응답 처리 오류: {e}")
+        return "모델 응답을 처리하는 데 실패했습니다."
+
+
+# kanana_llm_model = _KananaChat()
+
+def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
+    """
+    RunPod의 vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
+    """
+    api_url = settings.VLLM_API_URL
+    model_name = settings.VLLM_MODEL_NAME
+
+    headers = {"Content-Type": "application/json"}
+    
+    # OpenAI 호환 API 형식에 맞게 데이터 구성
+    data = {
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": max_length,
+        "temperature": 0.7,
+    }
+
+    try:
+        response = requests.post(api_url, headers=headers, json=data, timeout=120) # 120초 타임아웃
+        response.raise_for_status()  # 200 OK가 아닌 경우 예외 발생
+
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        return content.strip()
+
+    except requests.exceptions.RequestException as e:
+        # 네트워크 오류 또는 HTTP 오류 처리
+        print(f"vLLM API 호출 오류: {e}")
+        return "모델 응답을 가져오는 데 실패했습니다."
+    except (KeyError, IndexError) as e:
+        # 응답 JSON 구조가 예상과 다를 경우 처리
+        print(f"vLLM API 응답 처리 오류: {e}")
+        return "모델 응답을 처리하는 데 실패했습니다."
+

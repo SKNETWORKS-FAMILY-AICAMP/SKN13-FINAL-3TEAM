@@ -14,7 +14,7 @@ import {
 } from './mockData';
 
 // const API_BASE_URL = 'http://localhost:8000/api';
-const API_BASE_URL = 'http://localhost:80/api';
+const API_BASE_URL = '/api';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
 const USE_MOCK_DATA = false;
@@ -100,12 +100,12 @@ export const updateUserProfile = async (userData) => {
 };
 
 // 토큰 저장
-const setToken = (token) => {
+export const setToken = (token) => {
   localStorage.setItem('access_token', token);
 };
 
 // refresh token 저장
-const setRefreshToken = (refreshToken) => {
+export const setRefreshToken = (refreshToken) => {
   localStorage.setItem('refresh_token', refreshToken);
 };
 

@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 # babsim 모델 import
-from JJACKLETTE.models import Users, ChatSession, PromptLog, GeneratedResult
+from JJACKLETTE.models import Users, ChatSession, PromptLog
 
 # 파이프라인 import
 from .text_pipeline import text_pipeline
@@ -79,15 +79,13 @@ class BabsimPipelineService:
         logger.info(f"프롬프트 로그 저장: {prompt_log.prompt_id}")
         return prompt_log
     
-    def save_generated_result(self, prompt_log: PromptLog, result_type: str, result: str) -> GeneratedResult:
-        """생성 결과 저장"""
-        generated_result = GeneratedResult.objects.create(
-            prompt=prompt_log,
-            result_type=result_type,
-            result=result
-        )
-        logger.info(f"생성 결과 저장: {generated_result.result_id}")
-        return generated_result
+    def save_generated_result(self, prompt_log: PromptLog, result_type: str, result: str) -> PromptLog:
+        """생성 결과 저장 (PromptLog 모델에 직접 저장)"""
+        prompt_log.result_type = result_type
+        prompt_log.result_path = result
+        prompt_log.save()
+        logger.info(f"생성 결과 저장: {prompt_log.prompt_id}")
+        return prompt_log
     
     def get_chat_history_for_pipeline(self, session: ChatSession) -> List[Dict[str, str]]:
         """Django 모델의 대화 기록을 파이프라인용 형식으로 변환"""
