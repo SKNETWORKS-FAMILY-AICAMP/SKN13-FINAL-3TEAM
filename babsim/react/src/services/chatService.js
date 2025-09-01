@@ -322,7 +322,7 @@ export const sendChatMessage = async (sessionId, message) => {
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {
-    const response = await apiRequest(`${API_BASE_URL}/chat/message/`, {
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/message/`, {
       method: 'POST',
       body: JSON.stringify({
         session_id: sessionId,

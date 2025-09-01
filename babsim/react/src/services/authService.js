@@ -99,6 +99,46 @@ export const updateUserProfile = async (userData) => {
   }
 };
 
+// 프로필 이미지 업로드 API
+export const uploadProfileImage = async (file) => {
+  // 실제 API 호출
+  try {
+    const formData = new FormData();
+    formData.append('profile_image', file);
+
+    const response = await apiRequest(`${API_BASE_URL}/auth/profile/upload-image/`, {
+      method: 'POST',
+      headers: {
+        // FormData를 사용할 때는 Content-Type을 명시하지 않아야 브라우저가 자동으로 multipart/form-data를 설정합니다.
+        // 'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${getToken()}`, // 토큰은 필요
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return {
+        success: true,
+        image_url: data.image_url,
+        message: data.message || '이미지 업로드 성공',
+      };
+    } else {
+      return {
+        success: false,
+        error: data.message || '이미지 업로드에 실패했습니다.',
+      };
+    }
+  } catch (error) {
+    console.error('Upload profile image error:', error);
+    return {
+      success: false,
+      error: '이미지 업로드 중 오류가 발생했습니다.',
+    };
+  }
+};
+
 // 토큰 저장
 export const setToken = (token) => {
   localStorage.setItem('access_token', token);
