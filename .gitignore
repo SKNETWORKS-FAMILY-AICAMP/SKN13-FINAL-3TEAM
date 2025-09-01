@@ -5,6 +5,19 @@
 .vite/
 __pycache__/
 .DS_Store
+/build
+/dist
 
 ### 데이터
 *.csv
+<<<<<<< HEAD
+=======
+*.glb
+*.csv
+*.png
+*.jpg
+
+models/
+docker-compose.yml
+Dockerfile
+>>>>>>> 4f4706290581dc16ab4ac0168b3073b2ab256ccd

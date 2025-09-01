@@ -1,17 +1,22 @@
-# FastAPI & Server
+# === Web Framework ===
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
+pydantic==2.7.4
 
-# PyTorch (CUDA 12.1 for RTX 40 series)
-torch==2.3.0
-torchvision==0.18.0
-torchaudio==2.3.0
+# === Machine Learning & PyTorch ===
+torch==2.5.0
+torchvision==0.20.0
+torchaudio==2.5.0
 
-# Hugging Face Core Libraries
-transformers==4.42.4
+# === Hugging Face Ecosystem ===
+peft==0.17.1
+accelerate==1.10.1
 diffusers==0.29.2
-accelerate==0.31.0
+hf-transfer
 
-# Model Optimization (for Low VRAM GPU)
-bitsandbytes==0.43.1
-xformers==0.0.26.post1
+# === Quantization Libraries ===
+# ARM64 환경에서도 bitsandbytes 사용 가능 (최신 버전)
+bitsandbytes>=0.41.0
+
+# === Tokenizer Libraries ===
+sentencepiece==0.2.0
