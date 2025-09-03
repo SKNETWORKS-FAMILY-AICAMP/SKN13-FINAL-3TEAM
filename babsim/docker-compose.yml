@@ -108,6 +108,19 @@ services:
       # - DISABLE_4BIT=false
       # - DISABLE_8BIT=false
 
+  # Embedding API 서버
+  embedding_api:
+    image: kiwonjune/babsim-embedding:latest
+    command: sh -c "pip install uvicorn && uvicorn main:app --host 0.0.0.0 --port 8002"
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/').read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
 # 볼륨 설정
 volumes:
   postgres_data:

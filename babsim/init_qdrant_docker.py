@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Docker 컨테이너 내에서 Qdrant DB 초기화 스크립트
-BAAI/bge-m3 임베딩 모델을 사용하여 벡터 DB에 데이터를 넣습니다.
+RunPod에 배포된 임베딩 모델을 사용하여 벡터 DB에 데이터를 넣습니다.
 """
 
 import os
@@ -9,9 +9,11 @@ import json
 import time
 from pathlib import Path
 from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
 from tqdm import tqdm
+from typing import List
 from uuid import uuid4
 import requests
 from dotenv import load_dotenv
@@ -21,11 +23,58 @@ HOST = os.getenv("QDRANT_HOST", "qdrant")
 PORT = int(os.getenv("QDRANT_PORT_REST", "6333"))
 COLLECTION_NAME = "babsim_rag_db"
 
+<<<<<<< HEAD
 # 임베딩 모델 설정
 load_dotenv()
 EMBEDDING_MODEL = "BAAI/bge-m3"
 EMBEDDING_ENDPOINT_ID = os.getenv("EMBEDDING_ENDPOINT_ID")
 RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
+=======
+# 임베딩 모델 엔드포인트 URL
+EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
+
+import time
+
+class RunPodEmbedding(Embeddings):
+    """RunPod 엔드포인트와 통신하는 LangChain Embeddings 래퍼 클래스"""
+    def __init__(self, endpoint_url: str, api_key: str = None):
+        if not endpoint_url:
+            raise ValueError("엔드포인트 URL이 제공되지 않았습니다.")
+        self.endpoint_url = endpoint_url
+        self.api_key = api_key
+
+    def _embed(self, texts: List[str]) -> List[List[float]]:
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        payload = {"texts": texts}
+
+        try:
+            response = requests.post(self.endpoint_url, headers=headers, json=payload, timeout=180)
+            response.raise_for_status()
+            result = response.json()
+            if "embeddings" in result:
+                return result["embeddings"]
+            else:
+                raise KeyError("응답에서 'embeddings' 키를 찾을 수 없습니다.")
+
+        except requests.exceptions.RequestException as e:
+            print(f"RunPod 임베딩 엔드포인트 호출 오류: {e}")
+            return [[] for _ in texts]
+        except (KeyError, IndexError, TypeError) as e:
+            print(f"임베딩 응답 처리 오류: {e}, 응답: {response.text}")
+            return [[] for _ in texts]
+
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        return self._embed(texts)
+
+    def embed_query(self, text: str) -> List[float]:
+        result = self._embed([text])
+        return result[0] if result and result[0] else []
+
+>>>>>>> a55d1bd0e60e05a7847a3530481347c39208906e
 
 def load_documents(json_path):
     """
@@ -72,7 +121,8 @@ def get_existing_titles(client, collection_name):
     """
     existing_titles = set()
     try:
-        points, _ = client.scroll(collection_name=collection_name, limit=10000)
+        # payload 필터링을 위해 with_payload에 title만 요청
+        points, _ = client.scroll(collection_name=collection_name, limit=10000, with_payload=["title"])
         for point in points:
             title = point.payload.get("title")
             if title:
@@ -164,7 +214,6 @@ def upload_docs_to_qdrant_batch(client, collection_name, docs, endpoint_id, batc
     for i in tqdm(range(0, total, batch_size), desc="Qdrant 업로드"):
         batch_docs = docs[i:i+batch_size]
         try:
-            # 임베딩 생성
             texts = [doc.page_content for doc in batch_docs]
             vectors = get_embedding_from_runpod(endpoint_id, texts)
 
@@ -185,8 +234,7 @@ def upload_docs_to_qdrant_batch(client, collection_name, docs, endpoint_id, batc
                 )
                 points.append(point)
             
-            # Qdrant에 업로드
-            client.upsert(collection_name=collection_name, points=points)
+            client.upsert(collection_name=collection_name, points=points, wait=True)
             
         except Exception as e:
             print(f"배치 업로드 실패 (인덱스 {i}): {e}")
@@ -197,9 +245,9 @@ def check_qdrant_docs(client, collection_name):
     Qdrant 문서 수 확인
     """
     try:
-        count = client.count(collection_name)
-        print(f"Qdrant 컬렉션 '{collection_name}'의 총 문서 수: {count}")
-        return count
+        count = client.count(collection_name=collection_name, exact=True)
+        print(f"Qdrant 컬렉션 '{collection_name}'의 총 문서 수: {count.count}")
+        return count.count
     except Exception as e:
         print(f"문서 수 확인 실패: {e}")
         return 0
@@ -210,7 +258,6 @@ def init_qdrant_vectordb():
     """
     print("=== Qdrant Vector DB 초기화 시작 ===")
     
-    # Qdrant 클라이언트 연결
     try:
         client = QdrantClient(host=HOST, port=PORT)
         print(f"Qdrant 연결 성공: {HOST}:{PORT}")
@@ -218,10 +265,8 @@ def init_qdrant_vectordb():
         print(f"Qdrant 연결 실패: {e}")
         return
     
-    # 컬렉션 확인/생성
     ensure_qdrant_collection(client, COLLECTION_NAME)
     
-    # 데이터 파일 경로 설정
     data_files = [
         "./text_data/RAG/rag_vectordb.json",
         "./text_data/QA_context/hyundai_journal_articles_qa.jsonl",
@@ -234,7 +279,6 @@ def init_qdrant_vectordb():
     # 기존 문서 확인
     existing_titles = get_existing_titles(client, COLLECTION_NAME)
     
-    # 각 데이터 파일 처리
     for data_file in data_files:
         if not os.path.exists(data_file):
             print(f"파일이 존재하지 않음: {data_file}")
@@ -242,7 +286,6 @@ def init_qdrant_vectordb():
             
         print(f"\n처리 중: {data_file}")
         
-        # JSONL 파일인 경우 별도 처리
         if data_file.endswith('.jsonl'):
             docs = []
             with open(data_file, 'r', encoding='utf-8') as f:
@@ -260,14 +303,12 @@ def init_qdrant_vectordb():
                     except json.JSONDecodeError:
                         continue
         else:
-            # 일반 JSON 파일 처리
             docs = load_documents(data_file)
         
         if not docs:
             print(f"문서가 없음: {data_file}")
             continue
         
-        # 중복 제거
         new_docs = [doc for doc in docs if doc.metadata.get("title") not in existing_titles]
         
         if not new_docs:
@@ -279,13 +320,11 @@ def init_qdrant_vectordb():
         # Qdrant에 업로드
         upload_docs_to_qdrant_batch(client, COLLECTION_NAME, new_docs, EMBEDDING_ENDPOINT_ID)
         
-        # 기존 제목 목록 업데이트
         for doc in new_docs:
             title = doc.metadata.get("title")
             if title:
                 existing_titles.add(title)
     
-    # 최종 문서 수 확인
     final_count = check_qdrant_docs(client, COLLECTION_NAME)
     print(f"\n=== Qdrant Vector DB 초기화 완료 ===")
     print(f"총 문서 수: {final_count}")

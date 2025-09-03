@@ -7,7 +7,7 @@ from typing import List
 
 # --- 설정 ---
 MODEL_NAME = "BAAI/bge-m3"
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cpu"
 print(f"임베딩 모델을 {DEVICE}에서 실행합니다.")
 
 # --- 모델 로딩 ---

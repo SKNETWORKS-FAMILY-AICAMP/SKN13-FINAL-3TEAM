@@ -16,7 +16,7 @@ def upload_glb_files():
         print("오류: .env 파일에 AWS 설정이 모두 필요합니다.")
         return
 
-    local_directory = 'frontend/build/models'
+    local_directory = 'react/build/models'
     if not os.path.isdir(local_directory):
         print(f"오류: 로컬 디렉토리를 찾을 수 없습니다 - {local_directory}")
         return
