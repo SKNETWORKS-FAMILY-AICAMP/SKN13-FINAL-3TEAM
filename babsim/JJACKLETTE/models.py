@@ -124,6 +124,7 @@ class UserReview(models.Model):
     car_model = models.ForeignKey('InsightTrends', on_delete=models.CASCADE, related_name='user_reviews')
     data_id = models.CharField(max_length=50, blank=True, null=True)
     car_name = models.CharField(max_length=100, blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
     review = models.TextField()
     tags = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

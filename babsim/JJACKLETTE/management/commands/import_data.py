@@ -303,7 +303,7 @@ class Command(BaseCommand):
                 _, created = UserReview.objects.update_or_create(
                     car_model=car_model_instance,
                     review=item['review'],
-                    defaults={'tags': item.get('tags', {})}
+                    defaults={'tags': item.get('tags', {}), 'rating': item.get('rating')}
                 )
                 if created:
                     count += 1

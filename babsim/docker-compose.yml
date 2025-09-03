@@ -121,6 +121,39 @@ services:
       retries: 10
       start_period: 30s
 
+  # Airflow 서비스
+  airflow-scheduler:
+    image: apache/airflow:2.8.1
+    command: scheduler
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow_db
+
+  airflow-webserver:
+    image: apache/airflow:2.8.1
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - airflow-scheduler
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow_db
+
 # 볼륨 설정
 volumes:
   postgres_data:
