@@ -256,7 +256,7 @@ function PrototypeLab() {
         return (
           <div key={message.id} className="flex justify-end mb-6">
             <div className="bg-blue-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-blue-500/30">
-              <p className="text-sm font-medium">{message.content}</p>
+              <p className="text-sm font-medium text-left">{message.content}</p>
               <p className="text-xs text-blue-200 mt-2 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>
@@ -268,7 +268,7 @@ function PrototypeLab() {
         return (
           <div key={message.id} className="flex justify-start mb-6">
             <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-gray-600/30">
-              <p className="text-sm font-medium">{message.content}</p>
+              <p className="text-sm font-medium text-left">{message.content}</p>
               <p className="text-xs text-gray-300 mt-2 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>
@@ -394,9 +394,9 @@ function PrototypeLab() {
       
       case 'error':
         return (
-          <div key={message.id} className="flex justify-center mb-6">
+          <div key={message.id} className="flex justify-start mb-6">
             <div className="bg-red-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 shadow-lg border border-red-500/30">
-              <p className="text-sm font-medium">{message.content}</p>
+              <p className="text-sm font-medium text-left">{message.content}</p>
             </div>
           </div>
         );
