@@ -6,13 +6,15 @@ BAAI/bge-m3 임베딩 모델을 사용하여 벡터 DB에 데이터를 넣습니
 
 import os
 import json
+import time
 from pathlib import Path
 from langchain_core.documents import Document
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from tqdm import tqdm
 from uuid import uuid4
+import requests
+from dotenv import load_dotenv
 
 # Qdrant 설정 (Docker 컨테이너 내부에서 접근)
 HOST = os.getenv("QDRANT_HOST", "qdrant")
@@ -20,7 +22,10 @@ PORT = int(os.getenv("QDRANT_PORT_REST", "6333"))
 COLLECTION_NAME = "babsim_rag_db"
 
 # 임베딩 모델 설정
+load_dotenv()
 EMBEDDING_MODEL = "BAAI/bge-m3"
+EMBEDDING_ENDPOINT_ID = os.getenv("EMBEDDING_ENDPOINT_ID")
+RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
 
 def load_documents(json_path):
     """
@@ -77,7 +82,79 @@ def get_existing_titles(client, collection_name):
         print(f"기존 문서 확인 실패: {e}")
     return existing_titles
 
-def upload_docs_to_qdrant_batch(client, collection_name, docs, embedder, batch_size=32):
+def check_embedding_status(endpoint_id, job_id, poll_interval=2):
+    """
+    Serverless Embedding Endpoint 상태 확인 함수 (폴링 방식)
+    
+    Args:
+        endpoint_id (str) : Runpod endpoint ID
+        job_id (str) : 잡 ID
+        poll_interval (int) : 상태 확인 주기 (초)
+    
+    Returns:
+        dict : 최종 응답 JSON
+    """
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/status/{job_id}"
+    headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
+
+    while True:
+        resp = requests.get(url, headers=headers).json()
+        status = resp.get("status")
+
+        if status == "COMPLETED":
+            return resp
+        elif status in ["FAILED", "CANCELLED"]:
+            raise RuntimeError(f"❌ Job {job_id} failed: {resp}")
+        else:
+            print(f"⏳ Job {job_id} status: {status}")
+            time.sleep(poll_interval)
+
+
+def get_embedding_from_runpod(endpoint_id, texts):
+    """
+    Serverless Runpod Embedding Endpoint를 이용하여 임베딩 생성 (폴링 패턴)
+    
+    Args:
+        endpoint_id (str) : Runpod endpoint ID
+        texts (list[str]) : 입력 텍스트 리스트
+    
+    Returns:
+        list : 생성된 임베딩 벡터들
+    """
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/run"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {RUNPOD_API_KEY}"
+    }
+    payload = {
+        "input": {
+            "input": texts,   # 워커가 기대하는 key 확인 필요 ("texts", "input", "prompt" 등)
+            "model": EMBEDDING_MODEL
+        }
+    }
+
+    # 1) 잡 실행
+    resp = requests.post(url, headers=headers, json=payload).json()
+    job_id = resp.get("id")
+    if not job_id:
+        raise RuntimeError(f"❌ Job 생성 실패: {resp}")
+
+    # 2) 상태 확인 (폴링)
+    final_resp = check_embedding_status(endpoint_id, job_id)
+
+    # 3) 임베딩 결과 추출
+    output = final_resp.get("output")
+    if not output:
+        raise RuntimeError(f"❌ 결과 없음: {final_resp}")
+
+    # 워커 스펙에 맞게 키 이름 조정 필요
+    datas = output.get("data")
+    vectors = [item.get("embedding") for item in datas if item.get("embedding")]
+
+    return vectors
+
+
+def upload_docs_to_qdrant_batch(client, collection_name, docs, endpoint_id, batch_size=32):
     """
     문서를 배치로 Qdrant에 업로드
     """
@@ -89,8 +166,12 @@ def upload_docs_to_qdrant_batch(client, collection_name, docs, embedder, batch_s
         try:
             # 임베딩 생성
             texts = [doc.page_content for doc in batch_docs]
-            vectors = embedder.embed_documents(texts)
-            
+            vectors = get_embedding_from_runpod(endpoint_id, texts)
+
+            if not vectors:
+                print(f"❌ 임베딩 생성 실패 (인덱스 {i}): {texts[0][:10]}")
+                continue
+
             # 포인트 생성
             points = []
             for doc, vec in zip(batch_docs, vectors):
@@ -150,19 +231,6 @@ def init_qdrant_vectordb():
         "./text_data/QA_context/total_articles_qa.jsonl"
     ]
     
-    # 임베딩 모델 로드
-    try:
-        print(f"임베딩 모델 로딩 중: {EMBEDDING_MODEL}")
-        embedder = HuggingFaceBgeEmbeddings(
-            model_name=EMBEDDING_MODEL,
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
-        )
-        print("임베딩 모델 로딩 성공")
-    except Exception as e:
-        print(f"임베딩 모델 로딩 실패: {e}")
-        return
-    
     # 기존 문서 확인
     existing_titles = get_existing_titles(client, COLLECTION_NAME)
     
@@ -209,7 +277,7 @@ def init_qdrant_vectordb():
         print(f"업로드할 문서 수: {len(new_docs)}")
         
         # Qdrant에 업로드
-        upload_docs_to_qdrant_batch(client, COLLECTION_NAME, new_docs, embedder)
+        upload_docs_to_qdrant_batch(client, COLLECTION_NAME, new_docs, EMBEDDING_ENDPOINT_ID)
         
         # 기존 제목 목록 업데이트
         for doc in new_docs:
