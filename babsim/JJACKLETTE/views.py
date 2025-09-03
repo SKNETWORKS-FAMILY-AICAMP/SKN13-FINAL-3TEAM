@@ -297,7 +297,7 @@ class InsightTrendsListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['type', 'release_year']
     search_fields = ['car_name']
-    pagination_class = StandardResultSetPagination
+    pagination_class = None
 
 class InsightTrendsDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
