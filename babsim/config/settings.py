@@ -251,10 +251,10 @@ QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
 QDRANT_PORT_GRPC = int(os.getenv('QDRANT_PORT', '6334'))
 QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
 
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost')
 
-# allauth가 여러 사이트를 관리할 수 있도록 설정
-SITE_ID = 7
+# allauth가 여러 사이트를 관리할 수 있도록 설정 
+SITE_ID = 8
 LOGIN_REDIRECT_URL = '/api/oauth/callback/' # allauth, 로그인 후 커스텀 OAuth 콜백으로 리디렉션
 SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/api/oauth/callback/' # 소셜 로그인 후 리디렉션
 
@@ -292,6 +292,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': { # 인증 요청 시 파라미터
             'access_type': 'online',
         },
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
 INFERENCE_SERVER_URL = os.getenv("INFERENCE_SERVER_URL", "http://inference-server:8001")

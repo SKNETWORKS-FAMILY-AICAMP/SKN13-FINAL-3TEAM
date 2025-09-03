@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ThreeDViewer from '../components/ThreeDViewer';
-import backgroundImage from '../assets/Insight&Trends_background.png';
+import backgroundImage from '../assets/InsightTrends_background.png';
 import carReviewsData from '../assets/insight_trends/hyundai_car_reviews.json';
 import carHistoryData from '../assets/insight_trends/hyundai_car_history.json';
 import carSpecsData from '../assets/insight_trends/car_specs/index.js';
