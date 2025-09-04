@@ -25,15 +25,15 @@
 
 #### **챗봇 시스템**
 2. **Chat_session 테이블 관련 API**
-   - 2.1 유저별 챗봇 세션 조회: `/chat/sessions/` - 페이지네이션 지원
-   - 2.2 챗봇 세션 생성: `/chat/sessions/` - 새 세션 생성
-   - 2.3 세션 제목 수정: `/chat/sessions/{session_id}/title/` - 세션 제목 변경
-   - 2.4 챗봇 세션 종료: `/chat/sessions/{session_id}/end/` - 세션 종료
+   - 2.1 유저별 챗봇 세션 조회: `GET /chat/sessions/` - 페이지네이션 지원
+   - 2.2 챗봇 세션 생성: `POST /chat/sessions/` - 새 세션 생성
+   - 2.3 세션 제목 수정: `PUT /chat/sessions/{session_id}/title/` - 세션 제목 변경
+   - 2.4 챗봇 세션 종료: `PUT /chat/sessions/{session_id}/end/` - 세션 종료
 
 3. **Prompt_log & Generated_result 통합 API**
-   - 3.1 세션별 프롬프트 로그 조회: `/chat/sessions/{session_id}/prompts/` - 결과 포함
-   - 3.2 프롬프트 로그 생성: `/chat/sessions/{session_id}/prompts/` - AI 응답 및 결과 저장
-   - 3.3 특정 프롬프트 로그 조회: `/chat/prompts/{prompt_id}/` - 상세 정보 조회
+   - 3.1 세션별 프롬프트 로그 조회: `GET /chat/sessions/{session_id}/prompts/` - 결과 포함
+   - 3.2 프롬프트 로그 생성: - AI 응답 및 결과 저장 / Django 내부 처리
+   - 3.3 챗봇 메세지 생성: `POST /chat/sessions/{session_id}/message/` - 챗봇 응답 생성
    - **통합 특징**: 프롬프트와 생성 결과를 하나의 API로 관리 (result_type: text, image, 3d, 4d)
 
 #### **에셋 라이브러리 시스템**
