@@ -363,6 +363,20 @@ export const sendChatMessage = async (sessionId, message) => {
   }
 };
 
+// 이미지 생성 API
+export const generatePrototypeImage = async (prompt) => {
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/prototypelab/generate-image/`, {
+      method: 'POST',
+      body: JSON.stringify({ prompt }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Generate prototype image error:', error);
+    throw error;
+  }
+};
+
 // 목업 응답 생성 - 실제 파일 경로 사용
 const generateMockResponse = (message) => {
   // 메시지 내용에 따라 다른 응답 생성

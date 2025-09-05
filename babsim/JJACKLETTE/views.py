@@ -315,3 +315,38 @@ class UserReviewListView(generics.ListAPIView):
     serializer_class = UserReviewSerializer
     def get_queryset(self): 
         return UserReview.objects.filter(car_model_id=self.kwargs['car_model_id'])
+
+# --- Prototype Lab ---
+class PrototypeImageGenerateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        prompt = request.data.get("prompt")
+        if not prompt:
+            return Response(
+                {"error": "'prompt' is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            s3_url = generate_prototype_image(prompt)
+            return Response({"s3_url": s3_url}, status=status.HTTP_200_OK)
+        
+        except ConnectionError as e:
+            logger.error(f"Prototype image generation failed due to connection error: {e}")
+            return Response(
+                {"error": "The image generation service is currently unavailable."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except ValueError as e:
+            logger.error(f"Prototype image generation failed due to invalid response: {e}")
+            return Response(
+                {"error": "Received an invalid response from the image generation service."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            logger.exception(f"An unexpected error occurred during prototype image generation: {e}")
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

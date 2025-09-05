@@ -62,3 +62,32 @@ def get_chatbot_response(user_query: str) -> str:
     """
     # 기존 model 변수 대신 vLLM API 사용
     return get_vllm_response(user_query)
+
+def generate_prototype_image(prompt: str) -> str:
+    """
+    inference-server에 이미지 생성을 요청하고 S3 URL을 반환합니다.
+    """
+    try:
+        inference_url = f"{settings.INFERENCE_SERVER_URL}/generate_checklist_image"
+        payload = {"prompt": prompt}
+        
+        # 타임아웃을 넉넉하게 설정 (이미지 생성은 오래 걸릴 수 있음)
+        response = requests.post(inference_url, json=payload, timeout=300)
+        response.raise_for_status()  # 2xx 상태 코드가 아니면 예외 발생
+
+        response_data = response.json()
+        s3_url = response_data.get("s3_url")
+
+        if not s3_url:
+            raise ValueError("Inference server did not return S3 URL.")
+
+        return s3_url
+
+    except requests.exceptions.RequestException as e:
+        # 네트워크 관련 예외 처리
+        print(f"Inference server connection error: {e}")
+        raise ConnectionError(f"Failed to connect to inference server: {e}")
+    except ValueError as e:
+        # 응답 데이터 관련 예외 처리
+        print(f"Inference server response error: {e}")
+        raise

@@ -40,4 +40,7 @@ urlpatterns = [
     path('insights/models/<uuid:car_model_id>/', views.InsightTrendsDetailView.as_view(), name='insight-trends-detail'),
     path('insights/models/<uuid:car_model_id>/specs/', views.EngineeringSpecListView.as_view(), name='engineering-spec-list'),
     path('insights/models/<uuid:car_model_id>/reviews/', views.UserReviewListView.as_view(), name='user-review-list'),
+
+    # --- 5. 프로토타입 랩 ---
+    path('prototypelab/generate-image/', views.PrototypeImageGenerateView.as_view(), name='prototype-generate-image'),
 ]

@@ -6,9 +6,53 @@ import {
   getChatSessions, 
   createChatSession, 
   getPromptLogs,
-  sendChatMessage 
+  sendChatMessage,
+  generatePrototypeImage
 } from '../services/chatService';
 import backgroundImage from '../assets/PrototypeLab_background.png';
+
+// 이미지 생성 버튼을 위한 재사용 가능한 컴포넌트
+function GenerateImageButton({ prompt }) {
+  const [imageUrl, setImageUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    setError(null);
+    setImageUrl(null);
+    try {
+      const data = await generatePrototypeImage(prompt);
+      if (data.s3_url) {
+        setImageUrl(data.s3_url);
+      } else {
+        throw new Error(data.error || '이미지 URL을 받지 못했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center ml-4">
+      <button 
+        onClick={handleGenerate} 
+        disabled={isLoading}
+        className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs font-medium transition-all shadow-md hover:shadow-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
+      >
+        {isLoading ? '생성중...' : '이미지 생성'}
+      </button>
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {imageUrl && (
+        <div className="mt-2">
+          <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 text-xs hover:underline">이미지 보기</a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PrototypeLab() {
   const [chatSessions, setChatSessions] = useState([]);
@@ -627,22 +671,34 @@ function PrototypeLab() {
                   
                   {selectedCategories.viewpoint && (
                     <div className="space-y-2 mt-3 pt-3 border-t border-gray-600/30">
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
-                        <span className="text-sm text-gray-300">Front view</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
-                        <span className="text-sm text-gray-300">3/4 front view</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
-                        <span className="text-sm text-gray-300">Side view</span>
-                      </label>
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
-                        <span className="text-sm text-gray-300">Rear view</span>
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                          <span className="text-sm text-gray-300">Front view</span>
+                        </label>
+                        <GenerateImageButton prompt="Front view" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                          <span className="text-sm text-gray-300">3/4 front view</span>
+                        </label>
+                        <GenerateImageButton prompt="3/4 front view" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                          <span className="text-sm text-gray-300">Side view</span>
+                        </label>
+                        <GenerateImageButton prompt="Side view" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                          <span className="text-sm text-gray-300">Rear view</span>
+                        </label>
+                        <GenerateImageButton prompt="Rear view" />
+                      </div>
                     </div>
                   )}
                 </div>

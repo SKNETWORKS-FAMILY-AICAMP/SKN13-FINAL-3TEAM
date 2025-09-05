@@ -72,6 +72,8 @@ services:
       - hf_cache:/cache/huggingface
     ports:
       - "8001:8001"
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 15s
@@ -108,28 +110,18 @@ services:
       # - DISABLE_4BIT=false
       # - DISABLE_8BIT=false
 
-  # Embedding API 서버
-  embedding_api:
-    image: kiwonjune/babsim-embedding:latest
-    command: sh -c "pip install uvicorn && uvicorn main:app --host 0.0.0.0 --port 8002"
-    ports:
-      - "8002:8002"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/').read()"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-
   # Airflow 서비스
   airflow-scheduler:
-    image: apache/airflow:2.8.1
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile.airflow
     command: scheduler
     depends_on:
       - postgres
     env_file:
       - .env
     volumes:
+      - .:/app
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
@@ -138,7 +130,9 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow_db
 
   airflow-webserver:
-    image: apache/airflow:2.8.1
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile.airflow
     command: webserver
     ports:
       - "8080:8080"
@@ -147,6 +141,7 @@ services:
     env_file:
       - .env
     volumes:
+      - .:/app
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins

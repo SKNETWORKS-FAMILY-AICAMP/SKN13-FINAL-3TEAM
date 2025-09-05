@@ -165,6 +165,39 @@ class TextGenerationRequest(BaseModel):
 class TextGenerationResponse(BaseModel):
     generated_text: str
 
+class ChecklistImageRequest(BaseModel):
+    prompt: str
+
+class ChecklistImageResponse(BaseModel):
+    s3_url: str
+
+# ---------------------- Flux 모델 호출 유틸리티 ----------------------
+FLUX_API_URL = os.getenv("FLUX_API_URL")
+
+def _call_flux_api(prompt: str) -> str:
+    """Flux 모델 API를 호출하여 이미지를 생성하고 S3 URL을 반환합니다."""
+    if not FLUX_API_URL:
+        raise HTTPException(status_code=500, detail="FLUX_API_URL is not set in the environment.")
+    try:
+        logger.info(f"Calling Flux API with prompt: {prompt[:100]}...")
+        response = requests.post(FLUX_API_URL, json={"prompt": prompt}, timeout=300) # 이미지 생성은 오래 걸릴 수 있으므로 timeout을 길게 설정
+        
+        if response.status_code == 200:
+            result = response.json()
+            s3_url = result.get("s3_url")
+            if not s3_url:
+                raise HTTPException(status_code=500, detail="Flux API did not return S3 URL.")
+            logger.info(f"Successfully generated image and got S3 URL: {s3_url}")
+            return s3_url
+        else:
+            logger.error(f"Flux API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=response.status_code, detail=f"Flux API error: {response.text}")
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Flux API request failed: {e}")
+        raise HTTPException(status_code=500, detail="Flux API connection failed.")
+
+
 # ---------------------- 추론 (vLLM API 사용) ----------------------
 def _generate_text_sync(prompt: str, generation_params: dict) -> str:
     """vLLM API를 사용하여 텍스트 생성"""
@@ -218,6 +251,12 @@ async def generate_text(request: TextGenerationRequest):
         }
         generated_text = await asyncio.to_thread(
             _generate_text_sync, request.prompt, generation_params
+        )
+        return TextGenerationResponse(generated_text=generated_text)
+    except Exception as e:
+        logger.error(f"Text generation error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"An error occurred during text generation: {e}")
+          _generate_text_sync, request.prompt, generation_params
         )
         return TextGenerationResponse(generated_text=generated_text)
     except Exception as e:
