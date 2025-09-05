@@ -1,3 +1,4 @@
 .env
 __pycache__/
 .DS_Store
+babsim/airflow/logs/**/attempt=*.log
