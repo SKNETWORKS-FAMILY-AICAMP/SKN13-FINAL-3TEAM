@@ -16,6 +16,7 @@ services:
       - /app/node_modules
       - ./mediafiles:/app/mediafiles
       - static_volume:/app/staticfiles
+      - ../text_data:/app/text_data
     expose:
       - "8000"
     env_file:
@@ -61,66 +62,49 @@ services:
       - "6333:6333"
       - "6334:6334"
 
-  # Inference 서버
+  # pgAdmin (PostgreSQL 관리 도구)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@babsim.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Inference 서버 (CPU 전용)
   inference-server:
     build:
       context: ./inference
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.simple
       args:
         BUILDKIT_INLINE_CACHE: 1
     deploy:
       resources:
         limits:
-          memory: 8G
-        reservations:
           memory: 4G
+        reservations:
+          memory: 2G
     volumes:
       - ./mediafiles:/app/generated_images
-      # - ./models:/app/models:ro
       - hf_cache:/cache/huggingface
     ports:
       - "8001:8001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     environment:
-      # === VLLM 디버깅 설정 ===
-      - VLLM_LOGGING_LEVEL=DEBUG
-      - CUDA_VISIBLE_DEVICES=0
-      - VLLM_USE_PYTORCH_CUDA=0
-      - VLLM_DEVICE=cpu
-      
-      # === vLLM API 설정 ===
-      # 방법 1: nginx를 통한 프록시 (SSH 터널링 필요)
-      - VLLM_API_BASE=http://nginx/vllm
-      # 방법 2: RunPod 공개 IP 직접 연결 (SSH 터널링 불필요)
-      # - VLLM_API_BASE=http://your-runpod-public-ip:8000
-      - VLLM_MODEL_NAME=kakaocorp/kanana-1.5-8b-instruct-2505
-      - VLLM_ADAPTER_NAME=ki-student/kanana-finetuned-model-v1
-      
-      # === SSH 터널링 설정 (필요시 설정) ===
-      # - SSH_TUNNEL_HOST=username@your-runpod-public-ip
-      # - SSH_TUNNEL_PORT=22
-      # - SSH_PRIVATE_KEY_PATH=/path/to/private/key
-      
-      # === vLLM API 인증 (필요시 설정) ===
-      # - VLLM_API_KEY=your_api_key_here
-
-      # # - BASE_MODEL_PATH=/app/models/kanana-1.5-8b-instruct-2505
-      # # - ADAPTER_PATH=/app/models/kanana_finetuned_model
-      # - HF_BASE_REPO=kakaocorp/kanana-1.5-8b-instruct-2505    
-      # - HF_BASE_REV=main               
-      # - HF_ADPT_REPO=ki-student/kanana-finetuned-model-v1             
-      # - HF_ADPT_REV=main               
-      # # === 캐시/전송 최적화 ===
-      # - HF_HOME=/cache/huggingface
-      # - HF_HUB_ENABLE_HF_TRANSFER=1
-      # # === 양자화 폴백 스위치(원하면 제어) ===
-      # - DISABLE_4BIT=false
-      # - DISABLE_8BIT=false
+      # === CPU 전용 설정 ===
+      - TORCH_DEVICE=cpu
+      - CUDA_VISIBLE_DEVICES=""
+      - HF_HOME=/cache/huggingface
 
   # Embedding API 서버
   # embedding_api:
@@ -139,5 +123,6 @@ services:
 volumes:
   postgres_data:
   qdrant_data:
+  pgadmin_data:
   static_volume:
   hf_cache:

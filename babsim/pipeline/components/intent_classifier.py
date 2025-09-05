@@ -1,6 +1,14 @@
 from typing import Dict, Any
-from config import config
-from llm_provider import kanana_llm_model
+import sys
+import os
+from pathlib import Path
+
+# 파이프라인 루트 경로를 Python 경로에 추가
+PIPELINE_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PIPELINE_ROOT))
+
+from pipeline.config import config
+from pipeline.llm_provider import kanana_llm_model
 
 class IntentClassifier:
     """의도 분류 컴포넌트"""
@@ -25,26 +33,26 @@ class IntentClassifier:
             if intent in self.intent_classes:
                 return intent
             else:
-                # 기본값으로 text_generation 반환
-                return "text_generation"
+                # 기본값으로 rag 반환
+                return "rag"
         
         except Exception as e:
             print(f"의도 분류 실패: {e}")
-            return "text_generation"
+            return "rag"
     
     def _extract_intent(self, response: str) -> str:
         """LLM 응답에서 의도 추출"""
         response = response.strip().lower()
         
         # 응답에서 의도 키워드 찾기
-        if "text_generation" in response:
-            return "text_generation"
-        elif "image_modification" in response:
-            return "image_modification"
-        elif "이미지" in response or "수정" in response:
-            return "image_modification"
+        if "rag" in response:
+            return "rag"
+        elif "general" in response:
+            return "general"
+        elif "안녕" in response or "하이" in response or "인사" in response:
+            return "general"
         else:
-            return "text_generation"
+            return "rag"
     
     def get_intent_description(self, intent: str) -> str:
         """의도에 대한 설명 반환"""

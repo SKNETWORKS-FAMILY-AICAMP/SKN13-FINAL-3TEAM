@@ -1,6 +1,14 @@
 from typing import Dict, Any, List
-from config import config
-# from llm_provider import kanana_llm_model
+import sys
+import os
+from pathlib import Path
+
+# 파이프라인 루트 경로를 Python 경로에 추가
+PIPELINE_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PIPELINE_ROOT))
+
+from pipeline.config import config
+from pipeline.llm_provider import kanana_llm_model
 
 class ImageQueryGenerator:
     """이미지 생성 쿼리 생성 컴포넌트"""

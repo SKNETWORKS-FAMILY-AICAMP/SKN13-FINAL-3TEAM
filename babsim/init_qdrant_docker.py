@@ -28,49 +28,13 @@ load_dotenv()
 EMBEDDING_MODEL = "BAAI/bge-m3"
 EMBEDDING_ENDPOINT_ID = os.getenv("EMBEDDING_ENDPOINT_ID")
 RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
-# 임베딩 모델 엔드포인트 URL
-EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
 
-import time
+def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    return self._embed(texts)
 
-class RunPodEmbedding(Embeddings):
-    """RunPod 엔드포인트와 통신하는 LangChain Embeddings 래퍼 클래스"""
-    def __init__(self, endpoint_url: str, api_key: str = None):
-        if not endpoint_url:
-            raise ValueError("엔드포인트 URL이 제공되지 않았습니다.")
-        self.endpoint_url = endpoint_url
-        self.api_key = api_key
-
-    def _embed(self, texts: List[str]) -> List[List[float]]:
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
-
-        payload = {"texts": texts}
-
-        try:
-            response = requests.post(self.endpoint_url, headers=headers, json=payload, timeout=180)
-            response.raise_for_status()
-            result = response.json()
-            if "embeddings" in result:
-                return result["embeddings"]
-            else:
-                raise KeyError("응답에서 'embeddings' 키를 찾을 수 없습니다.")
-
-        except requests.exceptions.RequestException as e:
-            print(f"RunPod 임베딩 엔드포인트 호출 오류: {e}")
-            return [[] for _ in texts]
-        except (KeyError, IndexError, TypeError) as e:
-            print(f"임베딩 응답 처리 오류: {e}, 응답: {response.text}")
-            return [[] for _ in texts]
-
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return self._embed(texts)
-
-    def embed_query(self, text: str) -> List[float]:
-        result = self._embed([text])
-        return result[0] if result and result[0] else []
+def embed_query(self, text: str) -> List[float]:
+    result = self._embed([text])
+    return result[0] if result and result[0] else []
 
 
 def load_documents(json_path):

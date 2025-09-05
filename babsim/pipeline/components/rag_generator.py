@@ -1,8 +1,16 @@
 from typing import Dict, Any, List
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from config import config
-# from ..llm_provider import kanana_llm_model
+import sys
+import os
+from pathlib import Path
+
+# 파이프라인 루트 경로를 Python 경로에 추가
+PIPELINE_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PIPELINE_ROOT))
+
+from pipeline.config import config
+from pipeline.llm_provider import kanana_llm_model
 
 class RAGGenerator:
     """RAG 기반 답변 생성 컴포넌트 (babsim Vector DB 사용)"""
@@ -20,7 +28,8 @@ class RAGGenerator:
             relevant_docs = self._search_vector_db(user_query)
             
             if not relevant_docs:
-                return "죄송합니다. 관련된 정보를 찾을 수 없습니다."
+                # RAG 실패 시 Kanana LLM 직접 응답
+                return self._fallback_llm_response(user_query, chat_history)
             
             # 컨텍스트 구성
             context = self._build_context(relevant_docs)
@@ -38,31 +47,29 @@ class RAGGenerator:
         
         except Exception as e:
             print(f"RAG 답변 생성 실패: {e}")
-            return "죄송합니다. 답변을 생성하는 중 오류가 발생했습니다."
+            # RAG 실패 시 Kanana LLM 직접 응답
+            return self._fallback_llm_response(user_query, chat_history)
     
-    def _search_vector_db(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def _search_vector_db(self, query: str, k: int = None) -> List[Dict[str, Any]]:
         """babsim Vector DB에서 검색"""
         try:
-            # 지연 로딩으로 embedding 모델 초기화 (safetensors 사용)
-            if self.embedding_model is None:
-                self.embedding_model = HuggingFaceBgeEmbeddings(
-                    model_name=config.EMBEDDING_MODEL,
-                    model_kwargs={'device': 'cpu'},
-                    encode_kwargs={'normalize_embeddings': True}
-                )
+            # k 값이 없으면 설정에서 가져오기
+            if k is None:
+                k = config.RAG_TOP_K
             
-            # 쿼리 임베딩 생성
-            query_vector = self.embedding_model.embed_query(query)
+            # RunPod BAAI/bge-m3 API를 사용하여 쿼리 임베딩 생성
+            query_vector = self._embed_query_via_api(query)
             
-            # 검색 실행
+            # 검색 실행 (더 많은 문서 검색)
             search_result = self.qdrant_client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
-                limit=k,
-                with_payload=True
+                limit=config.RAG_FETCH_K,  # 더 넓은 검색
+                with_payload=True,
+                score_threshold=config.RAG_SCORE_THRESHOLD  # 유사도 임계값
             )
             
-            # 결과 변환
+            # 결과 변환 및 상위 k개만 선택
             results = []
             for result in search_result:
                 results.append({
@@ -71,11 +78,61 @@ class RAGGenerator:
                     'score': result.score
                 })
             
-            return results
+            # 상위 k개만 반환
+            return results[:k]
             
         except Exception as e:
             print(f"Vector DB 검색 실패: {e}")
             return []
+    
+    def _embed_query_via_api(self, query: str) -> List[float]:
+        """RunPod BAAI/bge-m3 API를 사용하여 쿼리 임베딩 생성"""
+        import os
+        import requests
+        
+        # RunPod API 설정
+        embedding_endpoint_id = os.getenv("EMBEDDING_ENDPOINT_ID")
+        runpod_api_key = os.getenv("RUNPOD_API_KEY")
+        
+        if not embedding_endpoint_id or not runpod_api_key:
+            raise Exception("EMBEDDING_ENDPOINT_ID 또는 RUNPOD_API_KEY가 설정되지 않았습니다.")
+        
+        # RunPod API 호출
+        url = f"https://api.runpod.ai/v2/{embedding_endpoint_id}/runsync"
+        headers = {
+            "Authorization": f"Bearer {runpod_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "input": {
+                "texts": [query],
+                "model": "BAAI/bge-m3"
+            }
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            response.raise_for_status()
+            
+            result = response.json()
+            if result.get("status") == "COMPLETED":
+                embeddings = result["output"]["embeddings"]
+                return embeddings[0]  # 첫 번째 (유일한) 임베딩 반환
+            else:
+                raise Exception(f"RunPod API 오류: {result}")
+                
+        except Exception as e:
+            print(f"RunPod 임베딩 API 호출 실패: {e}")
+            # 폴백: 로컬 모델 사용
+            if self.embedding_model is None:
+                from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+                self.embedding_model = HuggingFaceBgeEmbeddings(
+                    model_name="sentence-transformers/all-MiniLM-L6-v2",
+                    model_kwargs={'device': 'cpu'},
+                    encode_kwargs={'normalize_embeddings': True}
+                )
+            return self.embedding_model.embed_query(query)
     
     def _build_context(self, relevant_docs: List[Dict[str, Any]]) -> str:
         """관련 문서들을 컨텍스트로 구성"""
@@ -142,6 +199,28 @@ class RAGGenerator:
             return f"추가 질문이 있으시면 언제든 말씀해 주세요. 예를 들어: {follow_up.strip()}"
         except:
             return "추가 질문이 있으시면 언제든 말씀해 주세요."
+    
+    def _fallback_llm_response(self, user_query: str, chat_history: List[Dict[str, str]] = None) -> str:
+        """RAG 실패 시 Kanana LLM 직접 응답"""
+        try:
+            # 대화 기록이 있으면 포함
+            if chat_history:
+                history_text = self._format_chat_history(chat_history)
+                prompt = f"{self.system_prompt}\n\n대화 기록:\n{history_text}\n\n사용자 질문: {user_query}\n답변:"
+            else:
+                prompt = f"{self.system_prompt}\n\n사용자 질문: {user_query}\n답변:"
+            
+            # Kanana LLM 직접 응답
+            response = kanana_llm_model.generate_response(prompt, max_length=1024)
+            
+            # 후속 질문 추가
+            follow_up_question = self._generate_follow_up_question(user_query, response)
+            
+            return f"{response}\n\n{follow_up_question}"
+            
+        except Exception as e:
+            print(f"Fallback LLM 응답 실패: {e}")
+            return "죄송합니다. 현재 답변을 생성할 수 없습니다. 다시 시도해 주세요."
 
 # 전역 RAG 생성기 인스턴스
 rag_generator = RAGGenerator()

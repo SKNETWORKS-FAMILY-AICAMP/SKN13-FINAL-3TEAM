@@ -34,6 +34,7 @@ from .serializers import *
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from pipeline.llm_provider import generate_vllm_response
+from pipeline.services import babsim_pipeline_service
 from .services import get_chatbot_response # Added for vLLM integration
 
 logger = logging.getLogger(__name__)
@@ -173,19 +174,35 @@ class ChatAPIView(APIView):
             )
 
         try:
-            # Use the get_chatbot_response from services.py which now calls vLLM
-            text_answer = get_chatbot_response(user_prompt)
+            # 파이프라인 서비스를 사용하여 완전한 AI 응답 생성
+            logger.info(f"파이프라인 처리 시작: {user_prompt}")
+            
+            # 파이프라인 서비스 호출
+            pipeline_result = babsim_pipeline_service.process_query(user_prompt)
+            
+            # 파이프라인 결과에서 응답 추출
+            if pipeline_result and 'response' in pipeline_result:
+                text_answer = pipeline_result['response']
+                generated_results = pipeline_result.get('generated_results', [])
+            else:
+                # 파이프라인 실패 시 폴백
+                logger.warning("파이프라인 처리 실패, 폴백 응답 사용")
+                text_answer = get_chatbot_response(user_prompt)
+                generated_results = []
 
-            # Log the prompt and response
-            try:
-                session = ChatSession.objects.get(session_id=session_id, user=request.user)
-                PromptLog.objects.create(
-                    session=session, user_prompt=user_prompt, ai_response=text_answer
-                )
-            except ChatSession.DoesNotExist:
-                logger.error("DB 저장 실패: 세션 ID(%s)를 찾을 수 없습니다.", session_id)
-            except Exception as e:
-                logger.error("DB 저장 중 예외 발생: %s", e, exc_info=True)
+            # Log the prompt and response (인증된 사용자만)
+            if request.user.is_authenticated:
+                try:
+                    session = ChatSession.objects.get(session_id=session_id, user=request.user)
+                    PromptLog.objects.create(
+                        session=session, user_prompt=user_prompt, ai_response=text_answer
+                    )
+                except ChatSession.DoesNotExist:
+                    logger.error("DB 저장 실패: 세션 ID(%s)를 찾을 수 없습니다.", session_id)
+                except Exception as e:
+                    logger.error("DB 저장 중 예외 발생: %s", e, exc_info=True)
+            else:
+                logger.info("인증되지 않은 사용자 - DB 저장 건너뜀")
 
             # Final response
             return Response(

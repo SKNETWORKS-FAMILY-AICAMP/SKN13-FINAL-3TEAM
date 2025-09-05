@@ -16,9 +16,10 @@ class Config:
     QDRANT_PORT = int(os.getenv("QDRANT_PORT_REST", "6333"))
     QDRANT_COLLECTION_NAME = "babsim_rag_db"  # babsim의 컬렉션명 사용
     
-    # RAG 설정
-    MMR_K = 5  # 최종 결과 문서 개수
-    MMR_FETCH_K = 20  # 처음 검색할 문서 개수
+    # RAG 설정 - 최적화된 top-k 설정
+    RAG_TOP_K = 8  # 최종 결과 문서 개수 (더 많은 컨텍스트)
+    RAG_FETCH_K = 25  # 처음 검색할 문서 개수 (더 넓은 검색)
+    RAG_SCORE_THRESHOLD = 0.7  # 유사도 임계값
     MMR_LAMBDA = 0.5  # MMR 다양성 파라미터
     
     # 대화 설정
@@ -27,8 +28,8 @@ class Config:
     
     # 의도 분류 설정
     INTENT_CLASSES = {
-        "text_generation": "텍스트 생성 (현대자동차/자동차 지식 질문)",
-        "image_modification": "이미지 수정 요청"
+        "rag": "RAG 기반 답변 (현대자동차/자동차 지식 질문)",
+        "general": "일반 대화 (인사, 간단한 질문 등)"
     }
     
     # 프롬프트 템플릿
@@ -41,10 +42,10 @@ class Config:
 사용자 질문: {user_query}
 
 의도 분류 옵션:
-1. text_generation: 현대자동차나 자동차에 대한 지식 질문
-2. image_modification: 이미지를 첨부하고 수정을 요청하는 질문
+1. rag: 현대자동차나 자동차에 대한 구체적인 지식 질문 (기술, 디자인, 철학, 역사 등)
+2. general: 일반적인 대화, 인사, 간단한 질문
 
-의도만 간단히 답변해주세요 (text_generation 또는 image_modification):"""
+의도만 간단히 답변해주세요 (rag 또는 general):"""
 
 # 전역 설정 인스턴스
 config = Config()

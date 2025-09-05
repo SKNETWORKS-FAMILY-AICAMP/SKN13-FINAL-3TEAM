@@ -1,29 +1,34 @@
-# Mac CPU 환경 전용 Dockerfile
+# CPU 전용 Inference 서버 Dockerfile
 FROM python:3.10-slim
 
-# 필수 시스템 패키지 설치
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
+# 시스템 패키지 업데이트 및 필수 도구 설치
+RUN apt-get update && apt-get install -y \
     curl \
-    build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# requirements.txt 복사 및 설치
-COPY requirements.txt /app/
+# CPU 전용 requirements 설치
+COPY requirements.cpu.txt /app/requirements.cpu.txt
+RUN pip install --no-cache-dir -r requirements.cpu.txt
 
-# CUDA 전용 대신 CPU 전용 PyTorch 설치를 강제
-RUN pip install --no-cache-dir torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
-
-# 나머지 의존성 설치
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 설치된 transformers 버전 확인
 RUN echo "VERIFYING TRANSFORMERS VERSION:" && pip list | grep transformers
 
-# 소스코드 복사
+# inference 폴더 내의 모든 소스 코드를 /app/으로 복사합니다.
 COPY . /app/
 
-# FastAPI 서버 실행
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# 모델 디렉토리 생성
+RUN mkdir -p /app/models
+
+# 모델 다운로드 스크립트 추가
+RUN echo "#!/bin/bash" > /app/download_models.sh && \
+    echo "echo 'Downloading Kanana base model...'" >> /app/download_models.sh && \
+    echo "huggingface-cli download kakaocorp/kanana-1.5-8b-instruct-2505 --local-dir /app/models/kanana-1.5-8b-instruct-2505" >> /app/download_models.sh && \
+    echo "echo 'Downloading Kanana finetuned adapter...'" >> /app/download_models.sh && \
+    echo "huggingface-cli download ki-student/kanana-finetuned-model-v1 --local-dir /app/models/kanana_finetuned_model" >> /app/download_models.sh && \
+    chmod +x /app/download_models.sh
+
+# CPU 전용 vLLM 서버 실행
+CMD ["sh", "-c", "/app/download_models.sh && python -m vllm.entrypoints.openai.api_server --model /app/models/kanana-1.5-8b-instruct-2505 --enable-lora --lora-modules kanana-finetuned=/app/models/kanana_finetuned_model --host 0.0.0.0 --port 8001 --device cpu --tensor-parallel-size 1"]

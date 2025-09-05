@@ -254,7 +254,7 @@ QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost')
 
 # allauth가 여러 사이트를 관리할 수 있도록 설정 
-SITE_ID = 8
+SITE_ID = 9
 LOGIN_REDIRECT_URL = '/api/oauth/callback/' # allauth, 로그인 후 커스텀 OAuth 콜백으로 리디렉션
 SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/api/oauth/callback/' # 소셜 로그인 후 리디렉션
 
@@ -281,6 +281,10 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
+
+# 커스텀 어댑터 설정 (UUID 자동 생성)
+ACCOUNT_ADAPTER = 'JJACKLETTE.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'JJACKLETTE.adapters.CustomSocialAccountAdapter'
 
 # 구글 소셜 로그인 설정
 SOCIALACCOUNT_PROVIDERS = {

@@ -351,7 +351,7 @@ export const sendChatMessage = async (sessionId, message) => {
       
       return {
         success: true,
-        response: data.ai_response,
+        response: data.ai_response,  // Django에서 ai_response로 반환
         generatedResults: data.generated_results || []
       };
     } else {

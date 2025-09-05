@@ -125,7 +125,8 @@ function Chatbot() {
         id: Date.now() + 1,
         type: 'bot',
         content: response.response,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
+        generatedResults: response.generatedResults || []
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -245,6 +246,31 @@ function Chatbot() {
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    
+                    {/* 생성된 결과 표시 */}
+                    {message.generatedResults && message.generatedResults.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {message.generatedResults.map((result, index) => (
+                          <div key={index} className="bg-gray-600 p-2 rounded text-xs">
+                            <div className="font-semibold text-blue-300">
+                              {result.result_type === 'image' ? '🖼️ 이미지' : 
+                               result.result_type === '3d' ? '🎮 3D 모델' :
+                               result.result_type === '4d' ? '🎬 4D 시뮬레이션' : 
+                               '📄 결과'}
+                            </div>
+                            <div className="text-gray-300 mt-1">
+                              {result.result_path && (
+                                <div>경로: {result.result_path}</div>
+                              )}
+                              {result.result && (
+                                <div>설명: {result.result}</div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
                     <p className="text-xs opacity-70 mt-1">{message.timestamp}</p>
                   </div>
                 </div>

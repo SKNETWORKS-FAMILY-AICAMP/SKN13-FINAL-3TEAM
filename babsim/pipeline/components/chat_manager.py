@@ -2,8 +2,16 @@ from typing import Dict, Any, List, Optional
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
-from config import config
-# from ..llm_provider import kanana_llm_model
+import sys
+import os
+from pathlib import Path
+
+# 파이프라인 루트 경로를 Python 경로에 추가
+PIPELINE_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PIPELINE_ROOT))
+
+from pipeline.config import config
+from pipeline.llm_provider import kanana_llm_model
 
 class ChatManager:
     """Multi-turn 대화 관리 컴포넌트"""
@@ -166,6 +174,25 @@ class ChatManager:
                 if "이미지 생성 쿼리" in content or "폼이 완성" in content:
                     return True
         return False
+    
+    def generate_general_response(self, user_query: str, chat_history: List[Dict[str, str]] = None) -> str:
+        """일반 대화용 응답 생성"""
+        try:
+            # 대화 기록이 있으면 포함
+            if chat_history:
+                history_text = self._format_chat_history(chat_history)
+                prompt = f"{self.system_prompt}\n\n대화 기록:\n{history_text}\n\n사용자 질문: {user_query}\n답변:"
+            else:
+                prompt = f"{self.system_prompt}\n\n사용자 질문: {user_query}\n답변:"
+            
+            # Kanana LLM으로 응답 생성
+            response = kanana_llm_model.generate_response(prompt, max_length=512)
+            
+            return response
+            
+        except Exception as e:
+            print(f"일반 대화 응답 생성 실패: {e}")
+            return "안녕하세요! 무엇을 도와드릴까요?"
 
 # 전역 채팅 매니저 인스턴스
 chat_manager = ChatManager()

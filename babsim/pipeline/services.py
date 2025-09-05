@@ -225,6 +225,69 @@ class BabsimPipelineService:
             logger.error(f"세션 종료 실패: {e}")
             return False
 
+    def process_query(self, user_query: str, user_id: str = "default_user") -> Dict[str, Any]:
+        """사용자 쿼리를 파이프라인으로 처리 (새로운 구조)"""
+        try:
+            logger.info(f"파이프라인 쿼리 처리 시작: {user_query}")
+            
+            # LangGraph 파이프라인 실행
+            initial_state = {
+                "user_query": user_query,
+                "intent": "",
+                "chat_history": [],
+                "response": "",
+                "image_query": "",
+                "is_form_complete": False,
+                "messages_summarized": False,
+                "rewritten": False,
+                "retried": False,
+                "eval": {},
+                "completion_status": {}
+            }
+            
+            # 파이프라인 실행
+            pipeline_result = text_pipeline.invoke(initial_state)
+            
+            # 결과 추출
+            response = pipeline_result.get('response', '')
+            intent = pipeline_result.get('intent', '')
+            is_form_complete = pipeline_result.get('is_form_complete', False)
+            image_query = pipeline_result.get('image_query', '')
+            completion_status = pipeline_result.get('completion_status', {})
+            
+            # 생성된 결과 구성
+            generated_results = []
+            if image_query:
+                generated_results.append({
+                    "result_type": "image",
+                    "result_path": "/src/assets/prototype_lab/Ionic6.png",
+                    "result": image_query
+                })
+            
+            # 결과 반환
+            result = {
+                "response": response,
+                "generated_results": generated_results,
+                "intent": intent,
+                "user_query": user_query,
+                "is_form_complete": is_form_complete,
+                "completion_status": completion_status
+            }
+            
+            logger.info(f"파이프라인 처리 완료: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"파이프라인 처리 실패: {e}")
+            return {
+                "response": "죄송합니다. 처리 중 오류가 발생했습니다.",
+                "generated_results": [],
+                "intent": "error",
+                "user_query": user_query,
+                "is_form_complete": False,
+                "completion_status": {"completed": 0, "total": 11, "percentage": 0, "is_complete": False}
+            }
+
 
 # 전역 서비스 인스턴스
 babsim_pipeline_service = BabsimPipelineService()
