@@ -34,7 +34,7 @@ from .serializers import *
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from pipeline.llm_provider import generate_vllm_response
-from .services import get_chatbot_response # Added for vLLM integration
+from .services import get_chatbot_response, generate_prototype_image # Added for vLLM integration
 
 logger = logging.getLogger(__name__)
 

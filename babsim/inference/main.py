@@ -8,257 +8,176 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-# --- 설정 ---
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# ---
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("inference")
 
-# --- vLLM API 설정 ---
-# nginx를 통해 vLLM API에 접근 (포트 번호 불필요)
-VLLM_API_BASE = os.getenv("VLLM_API_BASE", "http://nginx/vllm")  # nginx를 통한 vLLM API 접근
-VLLM_MODEL_NAME = os.getenv("VLLM_MODEL_NAME", "kakaocorp/kanana-1.5-8b-instruct-2505")
-VLLM_ADAPTER_NAME = os.getenv("VLLM_ADAPTER_NAME", "ki-student/kanana-finetuned-model-v1")  # LoRA 어댑터
+# --- API Settings ---
+VLLM_API_BASE = os.getenv("VLLM_API_URL") # .env 파일과 변수명 일치시킴
+FLUX_API_URL = os.getenv("FLUX_API_URL")
+VLLM_API_KEY = os.getenv("VLLM_API_KEY")
 
-# --- SSH 터널링 및 인증 설정 ---
-SSH_TUNNEL_HOST = os.getenv("SSH_TUNNEL_HOST", None)  # SSH 호스트 (예: username@hostname)
-SSH_TUNNEL_PORT = os.getenv("SSH_TUNNEL_PORT", "22")  # SSH 포트
-SSH_PRIVATE_KEY_PATH = os.getenv("SSH_PRIVATE_KEY_PATH", None)  # SSH 개인키 경로
-VLLM_API_KEY = os.getenv("VLLM_API_KEY", None)  # vLLM API 키 (필요한 경우)
+# --- LLM Instruction Prompts for Image Generation ---
+PROMPT_2 = (
+    "You are generating a highly detailed text-to-image prompt for a car design model. "
+    "The goal is to create a realistic Hyundai concept car image that strictly maintains the correct automobile form "
+    "(no human figures, no distorted objects, no unrelated content) with sharp outlines and complete body visible. "
+    "The generated prompt should enforce the following constraints:\n" \
+    "1. Viewpoint: clear 3/4 front view of the entire car, with proper perspective, proportions, and wheel alignment.\n" \
+    "2. Body form: accurate automobile silhouette, well-defined roofline, hood, trunk, and greenhouse. " \
+    "No missing parts, no cropped edges, no blurred boundaries.\n" \
+    "3. Design language: incorporate Hyundai’s design philosophy (Sensuous Sportiness, Parametric Pixel details, " \
+    "clean aerodynamic curves, sharp shoulder lines, taut body surfacing).\n" \
+    "4. Exterior details: angular grille, distinctive headlights and taillights, sculpted hood, " \
+    "aerodynamic side mirrors, flush door handles, sharp window line, short overhangs, proper dash-to-axle ratio.\n" \
+    "5. Wheels and stance: 19-inch multi-spoke wheels, low-profile tires, wide stance, low beltline, sporty proportions.\n" \
+    "6. Materials and finish: metallic paint, photorealistic reflections, no cartoon or abstract style.\n" \
+    "7. Background: neutral studio lighting or soft outdoor daylight, with emphasis on car clarity and edge sharpness.\n" \
+    "8. Negative constraints: absolutely no humans, text overlays, watermarks, distorted wheels, cropped body, " \
+    "excessive background clutter, or unrealistic textures.\n" \
+    "Generate a fluent English text description that integrates all these constraints naturally into one continuous prompt, " \
+    "up to the maximum token limit, so the image model can produce a sharp, realistic, full-body Hyundai car design rendering."
+)
 
-# --- 핸들 저장소 ---
-models = {}
+NEGATIVE_PROMPT = (
+    "cartoon, illustration, sketch, anime, cgi, hand-drawn, "
+    "side view, top view, cropped, out of frame, truncated, incomplete, "
+    "rotating wheel, extra wheels, extra doors, text, watermark, logo, "
+    "outdoor, street, colored background, cut, clutter, "
+    "reflection, shadow, frame, border, blurry, low quality"
+)
 
-# ---------------------- vLLM API 유틸리티 ----------------------
-def _check_vllm_health() -> bool:
-    """vLLM API 서버 상태 확인"""
-    try:
-        response = requests.get(f"{VLLM_API_BASE}/health", timeout=5)
-        return response.status_code == 200
-    except Exception as e:
-        logger.warning(f"vLLM API health check failed: {e}")
-        return False
+NEGATIVE_PROMPT_2 = (
+    "You are generating a negative prompt for a car design image model. "
+    "The goal is to strictly forbid the generation of any elements that would distort, degrade, or distract "
+    "from a clean, photorealistic Hyundai automobile rendering. "
+    "List all forbidden aspects clearly, so the image generator avoids them completely.\n" \
+    "1. No humans, human parts, faces, bodies, or figures inside or outside the car.\n" \
+    "2. No cropped, cut-off, or incomplete vehicles; the full car body must always be visible.\n" \
+    "3. No blurred, foggy, noisy, pixelated, low-resolution, or distorted edges.\n" \
+    "4. No warped, melted, or deformed car shapes (wheels, roofline, hood, doors, headlights, etc.).\n" \
+    "5. No double exposure, ghosting, duplicate wheels, overlapping body panels, or extra limbs.\n" \
+    "6. No text, watermarks, logos, signatures, captions, or overlay graphics in the image.\n" \
+    "7. No cartoon, sketch, anime, comic, abstract, or artistic styles; only photorealism is allowed.\n" \
+    "8. No surreal or unrelated objects (people, animals, buildings, furniture, clouds inside the car, " \
+    "random patterns, extra tires, floating shapes, unrealistic props).\n" \
+    "9. No extreme fisheye, distorted wide-angle, or unnatural camera perspectives.\n" \
+    "10. No excessive background clutter, distracting scenery, irrelevant items, or messy environments.\n" \
+    "11. No incorrect lighting such as harsh glare, overexposed highlights, unrealistic neon, " \
+    "or inconsistent shadows that break realism.\n" \
+    "12. No wrong materials or textures: avoid plastic-like finish, muddy colors, watercolor style, " \
+    "or artificial surfaces.\n" \
+    "13. No cropped wheels, missing tires, distorted rims, or unaligned axles.\n" \
+    "14. No incomplete rendering artifacts such as half-rendered doors, broken reflections, " \
+    "or faded outlines near the car’s border.\n" \
+    "15. No bizarre modifications (wings, rocket boosters, tanks, weapons, fantasy elements).\n" \
+    "16. No duplicate or misplaced emblems; ensure the Hyundai logo appears only once in the correct position on the front of the car.\n" \
+    "Generate a fluent, comprehensive negative prompt that integrates all these forbidden constraints into one " \
+    "continuous text block, maximizing the token budget, to help the image model avoid any unrealistic, " \
+    "distorted, or irrelevant outputs."
+)
+
+# --- vLLM API Utilities ---
 
 def _generate_with_vllm(prompt: str, max_tokens: int = 512, temperature: float = 0.7) -> str:
-    """vLLM API를 사용하여 텍스트 생성 (LoRA 어댑터 지원)"""
+    if not VLLM_API_BASE:
+        raise HTTPException(status_code=500, detail="VLLM_API_URL is not set in the .env file.")
+
+    headers = {"Authorization": f"Bearer {VLLM_API_KEY}"} if VLLM_API_KEY else {}
+    payload = {
+        "prompt": prompt,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "stream": False,
+    }
+
+    # Runpod에 이미 모델이 로드되어 있으므로, model, adapter_name 파라미터는 보내지 않음.
     try:
-        payload = {
-            "model": VLLM_MODEL_NAME,
-            "prompt": prompt,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "stream": False,
-            "adapter_name": VLLM_ADAPTER_NAME  # LoRA 어댑터 사용
-        }
-        
-        # 인증 헤더 설정
-        headers = {}
-        if VLLM_API_KEY:
-            headers["Authorization"] = f"Bearer {VLLM_API_KEY}"
-        
-        response = requests.post(
-            f"{VLLM_API_BASE}/v1/completions",
-            json=payload,
-            headers=headers,
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            result = response.json()
-            return result["choices"][0]["text"]
-        else:
-            logger.error(f"vLLM API error: {response.status_code} - {response.text}")
-            raise HTTPException(status_code=500, detail="vLLM API 호출 실패")
-            
+        response = requests.post(f"{VLLM_API_BASE}/v1/completions", json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response.json()["choices"][0]["text"]
     except requests.exceptions.RequestException as e:
         logger.error(f"vLLM API request failed: {e}")
-        raise HTTPException(status_code=500, detail="vLLM API 연결 실패")
+        raise HTTPException(status_code=500, detail="vLLM API connection failed")
 
-def _chat_with_vllm(messages: list, max_tokens: int = 512, temperature: float = 0.7) -> str:
-    """vLLM API를 사용하여 채팅 응답 생성 (LoRA 어댑터 지원)"""
+# --- Flux API Utility ---
+def _call_flux_api(prompt: str, prompt_2: str = "", negative_prompt: str = "") -> str:
+    if not FLUX_API_URL:
+        raise HTTPException(status_code=500, detail="FLUX_API_URL is not set.")
     try:
-        payload = {
-            "model": VLLM_MODEL_NAME,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "stream": False,
-            "adapter_name": VLLM_ADAPTER_NAME  # LoRA 어댑터 사용
-        }
-        
-        # 인증 헤더 설정
-        headers = {}
-        if VLLM_API_KEY:
-            headers["Authorization"] = f"Bearer {VLLM_API_KEY}"
-        
-        response = requests.post(
-            f"{VLLM_API_BASE}/v1/chat/completions",
-            json=payload,
-            headers=headers,
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
-        else:
-            logger.error(f"vLLM API error: {response.status_code} - {response.text}")
-            raise HTTPException(status_code=500, detail="vLLM API 호출 실패")
-            
+        payload = {"prompt": prompt}
+        if prompt_2:
+            payload["prompt_2"] = prompt_2
+        if negative_prompt:
+            payload["negative_prompt"] = negative_prompt
+
+        logger.info(f"Calling Flux API with prompt: {prompt[:100]}... prompt_2: {prompt_2[:50]}... neg_prompt: {negative_prompt[:50]}...")
+        response = requests.post(FLUX_API_URL, json=payload, timeout=300)
+        response.raise_for_status()
+        data = response.json()
+        if "s3_url" not in data:
+            raise ValueError("S3 URL not in Flux API response.")
+        return data["s3_url"]
     except requests.exceptions.RequestException as e:
-        logger.error(f"vLLM API request failed: {e}")
-        raise HTTPException(status_code=500, detail="vLLM API 연결 실패")
+        logger.error(f"Flux API request failed: {e}")
+        raise HTTPException(status_code=500, detail="Flux API connection failed.")
 
-# ---------------------- 모델 초기화 (vLLM 사용) ----------------------
-def _initialize_vllm_connection():
-    """vLLM API 연결 초기화 및 상태 확인"""
-    logger.info("=== vLLM API 연결 초기화 ===")
-    
-    if not _check_vllm_health():
-        logger.warning("vLLM API 서버가 응답하지 않습니다. 환경변수 VLLM_API_BASE를 확인하세요.")
-        logger.info(f"현재 설정된 VLLM_API_BASE: {VLLM_API_BASE}")
-        logger.info(f"사용할 모델: {VLLM_MODEL_NAME}")
-        return False
-    
-    logger.info("vLLM API 서버 연결 성공!")
-    logger.info(f"API 엔드포인트: {VLLM_API_BASE}")
-    logger.info(f"베이스 모델: {VLLM_MODEL_NAME}")
-    logger.info(f"LoRA 어댑터: {VLLM_ADAPTER_NAME}")
-    return True
+app = FastAPI()
 
-# ---------------------- Lifespan ----------------------
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global models
-    logger.info("--- 서버 시작: 모델 로드를 시작합니다. ---")
-    try:
-        # vLLM API 연결 초기화
-        if not _initialize_vllm_connection():
-            raise RuntimeError("vLLM API 연결 실패. 환경변수 VLLM_API_BASE를 확인하세요.")
-
-        # vLLM API 사용을 위한 모델 핸들 저장
-        models["text_gen_model"] = _generate_with_vllm # 현재는 텍스트 생성만 지원
-        models["text_gen_tokenizer"] = None # vLLM API는 토크나이저가 필요 없음
-
-        logger.info("--- 텍스트 생성 모델(vLLM) 로드 완료 ---")
-    except Exception as e:
-        logger.error(f"모델 로딩 중 심각한 오류 발생: {e}", exc_info=True)
-        models.clear()
-
-    yield
-
-    logger.info("--- 서버 종료: vLLM API 연결을 정리합니다. ---")
-    models.clear()
-
-app = FastAPI(lifespan=lifespan)
-
-# ---------------------- 스키마 ----------------------
-class TextGenerationRequest(BaseModel):
-    prompt: str
-    max_new_tokens: int = Field(default=512)
-    temperature: Optional[float] = Field(default=0.7)
-    top_p: Optional[float] = Field(default=0.9)
-    top_k: Optional[int] = Field(default=50)
-    repetition_penalty: Optional[float] = Field(default=1.2)
-
-class TextGenerationResponse(BaseModel):
-    generated_text: str
-
+# --- Schemas ---
 class ChecklistImageRequest(BaseModel):
     prompt: str
 
 class ChecklistImageResponse(BaseModel):
     s3_url: str
 
-# ---------------------- Flux 모델 호출 유틸리티 ----------------------
-FLUX_API_URL = os.getenv("FLUX_API_URL")
-
-def _call_flux_api(prompt: str) -> str:
-    """Flux 모델 API를 호출하여 이미지를 생성하고 S3 URL을 반환합니다."""
-    if not FLUX_API_URL:
-        raise HTTPException(status_code=500, detail="FLUX_API_URL is not set in the environment.")
-    try:
-        logger.info(f"Calling Flux API with prompt: {prompt[:100]}...")
-        response = requests.post(FLUX_API_URL, json={"prompt": prompt}, timeout=300) # 이미지 생성은 오래 걸릴 수 있으므로 timeout을 길게 설정
-        
-        if response.status_code == 200:
-            result = response.json()
-            s3_url = result.get("s3_url")
-            if not s3_url:
-                raise HTTPException(status_code=500, detail="Flux API did not return S3 URL.")
-            logger.info(f"Successfully generated image and got S3 URL: {s3_url}")
-            return s3_url
-        else:
-            logger.error(f"Flux API error: {response.status_code} - {response.text}")
-            raise HTTPException(status_code=response.status_code, detail=f"Flux API error: {response.text}")
-
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Flux API request failed: {e}")
-        raise HTTPException(status_code=500, detail="Flux API connection failed.")
-
-
-# ---------------------- 추론 (vLLM API 사용) ----------------------
-def _generate_text_sync(prompt: str, generation_params: dict) -> str:
-    """vLLM API를 사용하여 텍스트 생성"""
-    try:
-        # vLLM API 호출
-        generated_text = _generate_with_vllm(
-            prompt=prompt,
-            max_tokens=generation_params.get("max_new_tokens", 512),
-            temperature=generation_params.get("temperature", 0.7)
-        )
-        
-        # 응답 텍스트 정리
-        ans = generated_text.strip()
-        
-        # 프롬프트가 응답에 포함된 경우 제거
-        if ans.startswith(prompt.strip()):
-            ans = ans[len(prompt):].strip()
-        
-        # 특정 패턴 제거
-        import re
-        ans = re.sub(r'^당신은 자동차 디자인 트렌드.*?설명해주세요\.\s*', '', ans, flags=re.DOTALL).strip()
-        if "당신은 자동차 디자인 전문 AI" in ans:
-            ans = ans.replace("당신은 자동차 디자인 전문 AI", "").strip()
-        
-        return ans
-        
-    except Exception as e:
-        logger.error(f"vLLM API 호출 중 오류 발생: {e}")
-        raise e
-
-# ---------------------- 엔드포인트 ----------------------
+# --- Endpoints ---
 @app.get("/health")
 async def health_check():
-    if "text_gen_model" in models and models["text_gen_model"] is not None:
-        return {"status": "ok", "message": "Inference server is running and vLLM API is connected."}
-    raise HTTPException(status_code=503, detail="vLLM API is not ready or failed to connect.")
+    return {"status": "ok"}
 
-@app.post("/generate-text", response_model=TextGenerationResponse)
-async def generate_text(request: TextGenerationRequest):
-    if "text_gen_model" not in models:
-        raise HTTPException(status_code=503, detail="vLLM API가 준비되지 않았습니다.")
-
+@app.post("/generate_checklist_image", response_model=ChecklistImageResponse)
+async def generate_checklist_image(request: ChecklistImageRequest):
     try:
-        logger.info(f"Generating text for prompt: '{request.prompt[:100]}...'")
-        generation_params = {
-            "max_new_tokens": request.max_new_tokens,
-            "temperature": request.temperature,
-            "top_p": request.top_p,
-            "top_k": request.top_k,
-            "repetition_penalty": request.repetition_penalty,
-        }
-        generated_text = await asyncio.to_thread(
-            _generate_text_sync, request.prompt, generation_params
+        # 1. 메인 프롬프트 생성 (기존 로직)
+        refinement_prompt_instruction = (
+            f'Create a detailed, photorealistic image prompt for a futuristic concept car based on this keyword: "{request.prompt}". ' 
+            f'Describe the scene, lighting, and key features in a single, concise English sentence.'
         )
-        return TextGenerationResponse(generated_text=generated_text)
-    except Exception as e:
-        logger.error(f"Text generation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"An error occurred during text generation: {e}")
-          _generate_text_sync, request.prompt, generation_params
+        refined_prompt = await asyncio.to_thread(
+            _generate_with_vllm, refinement_prompt_instruction, max_tokens=100
         )
-        return TextGenerationResponse(generated_text=generated_text)
+        
+        # 2. prompt_2 생성
+        generated_prompt_2 = ""
+        try:
+            generated_prompt_2 = await asyncio.to_thread(
+                _generate_with_vllm, PROMPT_2, max_tokens=500 # prompt_2는 더 길 수 있음
+            )
+        except Exception as e:
+            logger.warning(f"Failed to generate prompt_2 using vLLM: {e}. Using empty string.")
+
+        # 3. negative_prompt 생성 (실패 시 DEFAULT_NEGATIVE_PROMPT 사용)
+        generated_negative_prompt = NEGATIVE_PROMPT
+        try:
+            generated_negative_prompt = await asyncio.to_thread(
+                _generate_with_vllm, NEGATIVE_PROMPT_2, max_tokens=500 # negative_prompt도 더 길 수 있음
+            )
+        except Exception as e:
+            logger.warning(f"Failed to generate negative_prompt using vLLM: {e}. Using default.")
+
+        # 4. Flux 모델 호출
+        s3_url = await asyncio.to_thread(
+             _call_flux_api, 
+             refined_prompt.strip(), 
+             generated_prompt_2.strip(), 
+             generated_negative_prompt.strip()
+        )
+
+        return ChecklistImageResponse(s3_url=s3_url)
+
     except Exception as e:
-        logger.error(f"Text generation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"An error occurred during text generation: {e}")
+        logger.error(f"Checklist image generation error: {e}", exc_info=True)
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))

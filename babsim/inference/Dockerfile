@@ -24,4 +24,4 @@ RUN echo "VERIFYING TRANSFORMERS VERSION:" && pip list | grep transformers
 COPY . /app/
 
 # FastAPI 서버 실행
-CMD ["python", "-m", "vllm.entrypoints.openai.api_server", "--model", "kakaocorp/kanana-1.5-8b-instruct-2505", "--enable-lora", "--lora-modules", "kanana-finetuned=ki-student/kanana-finetuned-model-v1", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
