@@ -37,10 +37,10 @@ class BabsimPipelineService:
         self.intent_classifier = intent_classifier
         self.image_query_generator = image_query_generator
     
-    def get_user_by_email(self, email: str) -> Optional[Users]:
-        """이메일로 사용자 조회"""
+    def get_user_by_id(self, user_id: str) -> Optional[Users]:
+        """user_id로 사용자 조회"""
         try:
-            return Users.objects.get(email=email)
+            return Users.objects.get(user_id=user_id)
         except Users.DoesNotExist:
             return None
     
@@ -106,13 +106,13 @@ class BabsimPipelineService:
         
         return chat_history
     
-    def process_user_message(self, email: str, user_query: str) -> Dict[str, Any]:
+    def process_user_message(self, user_id: str, user_query: str) -> Dict[str, Any]:
         """사용자 메시지 처리 및 파이프라인 실행"""
         try:
             # 사용자 조회 또는 생성
-            user = self.get_user_by_email(email)
+            user = self.get_user_by_id(user_id)
             if not user:
-                user = self.create_user(email)
+                user = self.create_user(user_id)
             
             # 채팅 세션 조회 또는 생성
             session = self.get_or_create_chat_session(user)
@@ -159,7 +159,7 @@ class BabsimPipelineService:
                 'image_query': image_query,
                 'session_id': str(session.session_id),
                 'prompt_id': str(prompt_log.prompt_id),
-                'user_email': email
+                'user_id': user_id
             }
             
             return response_data
@@ -169,13 +169,13 @@ class BabsimPipelineService:
             return {
                 'error': str(e),
                 'response': '죄송합니다. 처리 중 오류가 발생했습니다.',
-                'user_email': email
+                'user_id': user_id
             }
     
-    def get_session_history(self, email: str) -> List[Dict[str, Any]]:
+    def get_session_history(self, user_id: str) -> List[Dict[str, Any]]:
         """사용자의 채팅 세션 기록 조회"""
         try:
-            user = self.get_user_by_email(email)
+            user = self.get_user_by_id(user_id)
             if not user:
                 return []
             
@@ -206,10 +206,10 @@ class BabsimPipelineService:
             logger.error(f"세션 기록 조회 실패: {e}")
             return []
     
-    def clear_session(self, email: str) -> bool:
+    def clear_session(self, user_id: str) -> bool:
         """사용자의 활성 세션 종료"""
         try:
-            user = self.get_user_by_email(email)
+            user = self.get_user_by_id(user_id)
             if not user:
                 return False
             
@@ -218,7 +218,7 @@ class BabsimPipelineService:
                 session.ended_at = django.utils.timezone.now()
                 session.save()
             
-            logger.info(f"사용자 {email}의 활성 세션 종료")
+            logger.info(f"사용자 {user_id}의 활성 세션 종료")
             return True
             
         except Exception as e:

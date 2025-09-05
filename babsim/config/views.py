@@ -17,13 +17,13 @@ async def chatbot_api(request):
     try:
         data = json.loads(request.body)
         user_message = data.get('message')
-        user_email = data.get('email', 'anonymous@example.com')  # 기본값 설정
+        user_id = data.get('user_id')  # 기본값 설정
         
         if not user_message:
             return JsonResponse({'error': '메시지가 비어있습니다.'}, status=400)
 
         # Pipeline 서비스를 사용하여 응답 생성
-        result = babsim_pipeline_service.process_user_message(user_email, user_message)
+        result = babsim_pipeline_service.process_user_message(user_id, user_message)
         
         if 'error' in result:
             return JsonResponse({'error': result['error']}, status=500)

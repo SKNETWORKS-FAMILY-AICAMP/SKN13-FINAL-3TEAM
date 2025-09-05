@@ -1,6 +1,6 @@
 from typing import Dict, Any
-from ..config import config
-# from ..llm_provider import kanana_llm_model
+from config import config
+from llm_provider import kanana_llm_model
 
 class IntentClassifier:
     """의도 분류 컴포넌트"""

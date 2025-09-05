@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 from qdrant_client import QdrantClient
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from ..config import config
+from config import config
 # from ..llm_provider import kanana_llm_model
 
 class RAGGenerator:

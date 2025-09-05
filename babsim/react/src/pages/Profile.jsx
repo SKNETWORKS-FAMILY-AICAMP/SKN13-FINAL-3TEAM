@@ -4,7 +4,7 @@ import { updateUserProfile, uploadProfileImage } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import ioniq6Image from '../assets/profile/Ionic6.png';
+import ioniq6Image from '../assets/prototype_lab/Ionic6.png';
 
 function Profile() {
   const { user, login } = useAuth();

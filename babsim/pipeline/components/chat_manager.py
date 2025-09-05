@@ -2,7 +2,7 @@ from typing import Dict, Any, List, Optional
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
-from ..config import config
+from config import config
 # from ..llm_provider import kanana_llm_model
 
 class ChatManager:

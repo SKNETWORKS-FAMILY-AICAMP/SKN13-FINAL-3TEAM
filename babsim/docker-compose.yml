@@ -66,6 +66,14 @@ services:
     build:
       context: ./inference
       dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
     volumes:
       - ./mediafiles:/app/generated_images
       # - ./models:/app/models:ro
@@ -79,6 +87,12 @@ services:
       retries: 10
       start_period: 30s
     environment:
+      # === VLLM 디버깅 설정 ===
+      - VLLM_LOGGING_LEVEL=DEBUG
+      - CUDA_VISIBLE_DEVICES=0
+      - VLLM_USE_PYTORCH_CUDA=0
+      - VLLM_DEVICE=cpu
+      
       # === vLLM API 설정 ===
       # 방법 1: nginx를 통한 프록시 (SSH 터널링 필요)
       - VLLM_API_BASE=http://nginx/vllm

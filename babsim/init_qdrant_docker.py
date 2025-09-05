@@ -23,13 +23,11 @@ HOST = os.getenv("QDRANT_HOST", "qdrant")
 PORT = int(os.getenv("QDRANT_PORT_REST", "6333"))
 COLLECTION_NAME = "babsim_rag_db"
 
-<<<<<<< HEAD
 # 임베딩 모델 설정
 load_dotenv()
 EMBEDDING_MODEL = "BAAI/bge-m3"
 EMBEDDING_ENDPOINT_ID = os.getenv("EMBEDDING_ENDPOINT_ID")
 RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
-=======
 # 임베딩 모델 엔드포인트 URL
 EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
 
@@ -74,7 +72,6 @@ class RunPodEmbedding(Embeddings):
         result = self._embed([text])
         return result[0] if result and result[0] else []
 
->>>>>>> a55d1bd0e60e05a7847a3530481347c39208906e
 
 def load_documents(json_path):
     """

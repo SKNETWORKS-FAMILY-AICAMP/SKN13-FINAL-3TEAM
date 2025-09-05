@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile, uploadProfileImage } from '../services/authService';
-import ioniq6Image from '../assets/profile/Ionic6.png';
+import ioniq6Image from '../assets/prototype_lab/Ionic6.png';
 
 function MyWorkspace() {
   const { user, login } = useAuth();

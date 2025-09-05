@@ -4,13 +4,13 @@ uvicorn[standard]==0.29.0
 pydantic==2.7.4
 
 # === Machine Learning & PyTorch ===
-torch==2.5.0
-torchvision==0.20.0
-torchaudio==2.5.0
+torch==2.3.1
+torchvision==0.18.1
+torchaudio==2.3.1
 
 # === Hugging Face Ecosystem ===
 peft==0.17.1
-accelerate==1.10.1
+accelerate==0.27.0
 diffusers==0.29.2
 hf-transfer
 
@@ -21,3 +21,6 @@ bitsandbytes>=0.41.0
 # === Tokenizer Libraries ===
 sentencepiece==0.2.0
 openai
+
+# === VLLM ===
+vllm==0.2.0
