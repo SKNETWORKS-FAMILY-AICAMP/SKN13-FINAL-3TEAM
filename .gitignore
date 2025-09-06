@@ -1,5 +1,6 @@
 ### 환경변수
 .env
+.env.local
 
 ### 캐시 파일
 .vite/
@@ -16,5 +17,3 @@ __pycache__/
 *.jpg
 
 models/
-docker-compose.yml
-Dockerfile
