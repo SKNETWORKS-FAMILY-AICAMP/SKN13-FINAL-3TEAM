@@ -135,12 +135,15 @@ function Chatbot() {
       await loadSessions();
     } catch (error) {
       console.error('메시지 전송 실패:', error);
+      
+      // 에러 메시지 추가
       const errorMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: '죄송합니다. 메시지 전송 중 오류가 발생했습니다.',
+        content: '죄송합니다. 메시지 전송에 실패했습니다. 다시 시도해주세요.',
         timestamp: new Date().toLocaleString()
       };
+      
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);

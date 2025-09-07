@@ -270,7 +270,7 @@ function AssetLibrary() {
                       </div>
                     </div>
                     <div className="text-gray-400 text-xs">
-                      {asset.documents}
+                      {asset.lib_name}
                     </div>
                   </div>
                 </div>
@@ -382,7 +382,7 @@ function AssetLibrary() {
                 <h3 className="text-white text-lg font-semibold mb-3">문서 정보</h3>
                 <div className="bg-gray-700 rounded-lg p-4">
                   <p className="text-gray-300 mb-2">
-                    <span className="font-medium">파일명:</span> {selectedAsset.documents}
+                    <span className="font-medium">파일명:</span> {selectedAsset.lib_name}
                   </p>
                   <button
                     onClick={() => openPDF(selectedAsset.pdf_path)}

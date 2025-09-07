@@ -171,15 +171,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-      {/* Full width border */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: 0, 
-        left: 0, 
-        right: 0, 
-        height: '1px', 
-        backgroundColor: '#374151' 
-      }}></div>
     </header>
   );
 }

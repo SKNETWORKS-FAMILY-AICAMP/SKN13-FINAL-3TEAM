@@ -403,7 +403,7 @@ export const createComment = async (libId, comment) => {
 
   // 실제 Django API 모드
   try {
-    const response = await apiRequest(`${API_BASE_URL}/library/comments/`, {
+    const response = await apiRequest(`${API_BASE_URL}/library/assets/${libId}/comments/`, {
       method: 'POST',
       body: JSON.stringify({
         lib_id: libId,
@@ -508,7 +508,7 @@ export const toggleCommentLike = async (commentId) => {
   }
 };
 
-// 자산 삭제 API
+// 자산 삭제 API - 미구현
 export const deleteAsset = async (assetId) => {
   if (USE_MOCK_DATA) {
     // 목업 모드
@@ -544,7 +544,7 @@ export const deleteAsset = async (assetId) => {
   }
 };
 
-// 자산 수정 API
+// 자산 수정 API - 미구현
 export const updateAsset = async (assetId, updateData) => {
   if (USE_MOCK_DATA) {
     // 목업 모드
@@ -594,7 +594,7 @@ export const updateAsset = async (assetId, updateData) => {
   }
 };
 
-// 댓글 삭제 API
+// 댓글 삭제 API - 미구현
 export const deleteComment = async (commentId) => {
   if (USE_MOCK_DATA) {
     // 목업 모드

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ThreeDViewer from '../components/ThreeDViewer';
-import backgroundImage from '../assets/PrototypeLab_background.png';
+import backgroundImage from '../assets/InsightTrends_background.png';
 import { getCarModels, getCarModelDetail } from '../services/insightService';
 
 // 사용자가 제공한 원래의 카테고리 구조를 그대로 복원

@@ -7,6 +7,7 @@ import os
 import requests
 import httpx
 import time
+import boto3
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -294,8 +295,65 @@ class AssetLibraryListCreateView(generics.ListCreateAPIView):
     pagination_class = StandardResultSetPagination
     def get_queryset(self): 
         return AssetLibrary.objects.all().order_by('-created_at')
+    def upload_to_s3(self, file, folder, filename):
+        """S3에 파일 업로드"""
+        try:
+            s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+            
+            # S3 키 생성
+            s3_key = f"{folder}/{filename}"
+            
+            # 파일 업로드
+            s3_client.upload_fileobj(
+                file,
+                settings.AWS_STORAGE_BUCKET_NAME,
+                s3_key,
+                ExtraArgs={'ContentType': file.content_type}
+            )
+            
+            # S3 URL 생성
+            s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+            
+            return s3_url
+        except Exception as e:
+            logging.error(f"S3 업로드 실패: {str(e)}")
+            raise e
+
     def perform_create(self, serializer): 
-        serializer.save(user=self.request.user)
+        # 파일 저장 로직
+        instance = serializer.save(user=self.request.user)
+        
+        # documents 파일을 S3에 저장
+        if 'documents' in self.request.FILES:
+            documents_file = self.request.FILES['documents']
+            # 파일명을 안전하게 처리
+            safe_filename = f"{instance.title}_{documents_file.name}"
+            
+            # S3에 업로드
+            s3_url = self.upload_to_s3(documents_file, 'assets', safe_filename)
+            
+            # 모델에 정보 저장
+            instance.documents = documents_file.name
+            instance.pdf_path = s3_url
+            instance.save()
+        
+        # cover_photo 파일을 S3에 저장
+        if 'cover_photo' in self.request.FILES:
+            cover_photo = self.request.FILES['cover_photo']
+            # 파일명을 안전하게 처리
+            safe_filename = f"{instance.lib_id}_{cover_photo.name}"
+            
+            # S3에 업로드
+            s3_url = self.upload_to_s3(cover_photo, 'assets_cover_image', safe_filename)
+            
+            # 모델에 정보 저장
+            instance.img_path = s3_url
+            instance.save()
 
 class LibraryCommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]

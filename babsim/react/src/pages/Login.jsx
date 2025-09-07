@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, getMockUsers, resetMockData } from '../services/authService';
+import { login, getMockUsers, resetMockData, USE_MOCK_DATA } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -57,10 +57,6 @@ function Login() {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // 소셜 로그인 기능은 추후 구현
-    alert(`${provider} 로그인은 아직 구현되지 않았습니다.`);
-  };
 
   const handleQuickLogin = (email, password) => {
     setFormData({ email, password });
@@ -90,8 +86,9 @@ function Login() {
             </p>
           </div>
 
-          {/* Mock Data Info */}
-          <div className="bg-yellow-600 text-white p-4 rounded-lg mb-6">
+          {/* Mock Data Info - Only show when USE_MOCK_DATA is true */}
+          {USE_MOCK_DATA && (
+            <div className="bg-yellow-600 text-white p-4 rounded-lg mb-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">🧪 개발 모드 - 더미 데이터 사용 중</h3>
@@ -123,7 +120,8 @@ function Login() {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Login Form Container */}
           <div className="bg-dark-blue rounded-lg p-8 border border-gray-700">
@@ -194,23 +192,6 @@ function Login() {
                     <span>Continue with Google</span>
                   </a>
                   
-                  <button
-                    onClick={() => handleSocialLogin('Naver')}
-                    className="w-full bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center justify-center space-x-3"
-                  >
-                    <span className="font-bold text-lg">N</span>
-                    <span>Continue with Naver</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => handleSocialLogin('Kakao')}
-                    className="w-full bg-yellow-400 text-black py-3 px-6 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-3"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 3C6.48 3 2 6.48 2 12s4.48 9 10 9 10-4.48 10-9S17.52 3 12 3zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>
-                    </svg>
-                    <span>Continue with Kakao</span>
-                  </button>
                 </div>
               </div>
             </div>

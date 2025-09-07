@@ -29,9 +29,8 @@ def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
     """
     vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
     """
-    # 기본값 설정 - 로컬 inference-server 사용
-    api_url = getattr(settings, 'VLLM_API_URL', "http://inference-server:8001/v1/chat/completions")
-    model_name = getattr(settings, 'VLLM_MODEL_NAME', 'kanana-finetuned')
+    api_url = settings.VLLM_API_URL
+    model_name = settings.VLLM_MODEL_NAME
 
     headers = {"Content-Type": "application/json"}
     
@@ -63,5 +62,43 @@ def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
         print(f"vLLM API 응답 처리 오류: {e}")
         return "모델 응답을 처리하는 데 실패했습니다."
 
-# 전역 모델 인스턴스
-kanana_llm_model = _KananaChat()
+
+# kanana_llm_model = _KananaChat()
+
+def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
+    """
+    RunPod의 vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
+    """
+    api_url = settings.VLLM_API_URL
+    model_name = settings.VLLM_MODEL_NAME
+
+    headers = {"Content-Type": "application/json"}
+    
+    # OpenAI 호환 API 형식에 맞게 데이터 구성
+    data = {
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": max_length,
+        "temperature": 0.7,
+    }
+
+    try:
+        response = requests.post(api_url, headers=headers, json=data, timeout=120) # 120초 타임아웃
+        response.raise_for_status()  # 200 OK가 아닌 경우 예외 발생
+
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        return content.strip()
+
+    except requests.exceptions.RequestException as e:
+        # 네트워크 오류 또는 HTTP 오류 처리
+        print(f"vLLM API 호출 오류: {e}")
+        return "모델 응답을 가져오는 데 실패했습니다."
+    except (KeyError, IndexError) as e:
+        # 응답 JSON 구조가 예상과 다를 경우 처리
+        print(f"vLLM API 응답 처리 오류: {e}")
+        return "모델 응답을 처리하는 데 실패했습니다."
+

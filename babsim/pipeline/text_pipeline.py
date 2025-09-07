@@ -6,6 +6,10 @@ from .components.intent_classifier import intent_classifier
 from .components.rag_generator import rag_generator
 from .components.chat_manager import chat_manager
 from .components.image_query_generator import image_query_generator
+from .components.image_generator import generate_image
+from .components.3d_generator import generate_3d_model
+from .components.4d_generator import generate_4d_model
+from .components.content_router import content_generation_router, route_content_generation
 
 from .components.query_rewriter import query_rewriter
 from .components.answer_evaluator import answer_evaluator
@@ -132,6 +136,7 @@ def route_by_intent(state: PipelineState) -> str:
 def route_retry_ok(state: PipelineState) -> str:
     return "generate_rag_response" if state.get("route") == "retry" else "check_form_completion"
 
+
 # 그래프 조립
 def create_text_pipeline():
     g = StateGraph(PipelineState)
@@ -143,6 +148,10 @@ def create_text_pipeline():
     g.add_node("retry_or_accept", retry_or_accept)
     g.add_node("check_form_completion", check_form_completion)
     g.add_node("generate_image_query", generate_image_query)
+    g.add_node("content_router", content_generation_router)
+    g.add_node("generate_image", generate_image)
+    g.add_node("generate_3d_model", generate_3d_model)
+    g.add_node("generate_4d_model", generate_4d_model)
     g.add_node("continue_conversation", continue_conversation)
     g.add_node("handle_general_conversation", handle_general_conversation)
 

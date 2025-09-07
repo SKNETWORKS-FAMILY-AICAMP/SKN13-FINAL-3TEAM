@@ -28,7 +28,7 @@ urlpatterns = [
     path('chat/sessions/', views.ChatSessionListCreateView.as_view(), name='chat-session-list-create'),
     path('chat/sessions/<uuid:session_id>/end/', views.ChatSessionEndView.as_view(), name='chat-session-end'),
     path('chat/sessions/<uuid:session_id>/prompts/', views.PromptLogListView.as_view(), name='prompt-log-list'),
-    path('chat/sessions/<uuid:session_id>/message/', views.ChatAPIView.as_view(), name='chat-message'),
+    # path('chat/sessions/<uuid:session_id>/message/', views.ChatAPIView.as_view(), name='chat-message'),
     # path('chat/prompts/<uuid:prompt_id>/results/', views.GeneratedResultListCreateView.as_view(), name='generated-result-list-create'),
     
     # --- 3. 에셋 라이브러리 ---

@@ -46,6 +46,9 @@ def oauth_callback(request):
                 }
                 
                 logger.info(f"JWT tokens generated and stored in session for user: {user.email}")
+                print(user)
+                print(f"user_id: {user.user_id}")
+                print(f"email: {user.email}")
                 
                 # .env 파일에 저장된 FRONTEND_URL 사용
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost')

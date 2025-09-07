@@ -48,6 +48,20 @@ services:
     expose:
       - "5432"
 
+  # PostgreSQL UI (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
   # Qdrant 서비스
   qdrant:
     image: qdrant/qdrant:latest
@@ -126,3 +140,4 @@ volumes:
   pgadmin_data:
   static_volume:
   hf_cache:
+  pgadmin_data:

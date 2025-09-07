@@ -20,44 +20,6 @@ const mockChatSessions = [
 const mockPromptLogs = [];
 const mockGeneratedResults = [];
 
-// HTTP 요청 시뮬레이션 함수
-const simulateHttpRequest = async (url, options, mockData) => {
-  const requestId = httpLogger.logRequest(url, options, mockData);
-
-  console.log('🌐 HTTP 요청 시뮬레이션:', {
-    url,
-    method: options.method,
-    headers: options.headers,
-    body: options.body
-  });
-
-  // USE_MOCK_DATA가 true일 때는 실제 요청을 보내지 않고 목업 응답만 반환
-  if (USE_MOCK_DATA) {
-    console.log('🔄 목업 모드: 실제 HTTP 요청 없이 목업 응답 반환');
-    const mockResponse = await createMockResponse(mockData);
-    console.log('✅ 목업 응답 반환:', mockData);
-    return mockResponse;
-  }
-
-  // 실제 fetch 요청을 보내지만 목업 응답을 반환 (USE_MOCK_DATA가 false일 때만)
-  try {
-    const response = await fetch(url, options);
-    console.log('📡 실제 HTTP 요청 전송됨:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.url
-    });
-    httpLogger.logResponse(requestId, response);
-  } catch (error) {
-    console.log('❌ 네트워크 오류 (예상됨 - Django 서버가 실행되지 않음):', error.message);
-    httpLogger.logResponse(requestId, null, error);
-  }
-
-  // 목업 응답 반환
-  const mockResponse = await createMockResponse(mockData);
-  console.log('✅ 목업 응답 반환:', mockData);
-  return mockResponse;
-};
 
 // 고유 ID 생성 함수
 const generateUniqueId = () => {
@@ -291,34 +253,34 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 export const sendChatMessage = async (sessionId, message) => {
   console.log('💬 챗봇 메시지 전송:', { sessionId, message });
   
-  // // 목업 모드일 때는 Django 서버 연결 시도하지 않음
-  // if (USE_MOCK_DATA) {
-  //   console.log('🔄 목업 모드: 목업 응답 생성');
+  // 목업 모드일 때는 Django 서버 연결 시도하지 않음
+  if (USE_MOCK_DATA) {
+    console.log('🔄 목업 모드: 목업 응답 생성');
     
-  //   // 목업 응답 생성
-  //   // const mockResponse = generateMockResponse(message);
+    // 목업 응답 생성
+    // const mockResponse = generateMockResponse(message);
     
-  //   // 프롬프트 로그 생성
-  //   // const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
+    // 프롬프트 로그 생성
+    // const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
     
-  //   // 생성 결과가 있으면 저장
-  //   // if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
-  //   //   for (const result of mockResponse.generatedResults) {
-  //   //     await createGeneratedResult(
-  //   //       promptLog.prompt_id,
-  //   //       result.result_type,
-  //   //       result.result_path,
-  //   //       result.result
-  //   //     );
-  //   //   }
-  //   // }
+    // 생성 결과가 있으면 저장
+    // if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
+    //   for (const result of mockResponse.generatedResults) {
+    //     await createGeneratedResult(
+    //       promptLog.prompt_id,
+    //       result.result_type,
+    //       result.result_path,
+    //       result.result
+    //     );
+    //   }
+    // }
     
-  //   return {
-  //     success: true,
-  //     response: mockResponse.aiResponse,
-  //     generatedResults: mockResponse.generatedResults || []
-  //   };
-  // }
+    return {
+      success: true,
+      response: mockResponse.aiResponse,
+      generatedResults: mockResponse.generatedResults || []
+    };
+  }
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {

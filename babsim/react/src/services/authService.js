@@ -17,7 +17,7 @@ import {
 const API_BASE_URL = '/api';
 
 // 목업 데이터 사용 여부 (개발 중에는 true로 설정)
-const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = false;
 
 // 사용자 정보 수정 API
 export const updateUserProfile = async (userData) => {
@@ -294,7 +294,7 @@ export const register = async (userData) => {
       },
       body: JSON.stringify({
         user_name: userData.user_name,
-        e_mail: userData.e_mail,
+        email: userData.e_mail,
         password: userData.password,
         password_confirm: userData.password_confirm,
       }),
@@ -501,9 +501,12 @@ export const apiRequest = async (url, options = {}) => {
   const token = getToken();
   const refreshTokenValue = getRefreshToken();
   
+  // FormData인 경우 Content-Type을 설정하지 않음 (브라우저가 자동으로 설정)
+  const isFormData = options.body instanceof FormData;
+  
   // 기본 헤더 설정
   const headers = {
-    'Content-Type': 'application/json',
+    ...(!isFormData && { 'Content-Type': 'application/json' }),
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
@@ -521,7 +524,7 @@ export const apiRequest = async (url, options = {}) => {
         if (refreshResult.success) {
           // 새로운 토큰으로 재시도
           const newHeaders = {
-            'Content-Type': 'application/json',
+            ...(!isFormData && { 'Content-Type': 'application/json' }),
             ...(refreshResult.access_token && { Authorization: `Bearer ${refreshResult.access_token}` }),
             ...options.headers,
           };
