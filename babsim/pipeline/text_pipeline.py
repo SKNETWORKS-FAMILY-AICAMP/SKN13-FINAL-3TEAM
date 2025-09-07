@@ -7,8 +7,6 @@ from .components.rag_generator import rag_generator
 from .components.chat_manager import chat_manager
 from .components.image_query_generator import image_query_generator
 from .components.image_generator import generate_image
-from .components.3d_generator import generate_3d_model
-from .components.4d_generator import generate_4d_model
 from .components.content_router import content_generation_router, route_content_generation
 
 from .components.query_rewriter import query_rewriter
