@@ -208,32 +208,24 @@ class Command(BaseCommand):
 
         car_count, spec_count = 0, 0
         
-        # 모든 차량에 대해 처리 (CSV에 있는 차량 + GLB에만 있는 차량)
+        # CSV에 있는 차량들만 처리 (GLB 파일은 S3에서 동적으로 로드)
         all_cars = set(csv_specs.keys())
-        
-        # GLB에만 있는 차량들도 추가 (React 빌드된 모델 파일들)
-        glb_files = []
-        try:
-            # React 빌드된 모델 파일 경로 확인
-            models_path = 'react/build/models'
-            if os.path.exists(models_path):
-                glb_files = [os.path.splitext(f)[0] for f in os.listdir(models_path) if f.endswith('.glb')]
-                self.stdout.write(f"GLB 모델 파일 {len(glb_files)}개를 찾았습니다.")
-            else:
-                self.stdout.write(self.style.WARNING("GLB 모델 파일 경로를 찾을 수 없습니다. CSV 데이터만 처리합니다."))
-        except FileNotFoundError:
-            # GLB 파일이 없는 경우 무시하고 계속 진행
-            self.stdout.write(self.style.WARNING("GLB 모델 파일 경로를 찾을 수 없습니다. CSV 데이터만 처리합니다."))
-        
-        all_cars.update(glb_files)
+        self.stdout.write(f"CSV에서 {len(all_cars)}개의 차량을 찾았습니다.")
         
         for car_name in all_cars:
             car_type = car_category_map.get(car_name, 'Unknown')
             
             # InsightTrends에 차량 추가/업데이트
+            # 3D 모델 경로는 S3 URL로 설정 (insightService.js의 get3DModelPath와 동일한 로직)
+            s3_model_path = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/models/{car_name}.glb"
+            
             car_model, created = InsightTrends.objects.update_or_create(
                 car_name=car_name,
-                defaults={'type': car_type, 'release_year': 2025}
+                defaults={
+                    'type': car_type, 
+                    'release_year': 2025,
+                    'model_3d_path': s3_model_path
+                }
             )
             if created:
                 car_count += 1
