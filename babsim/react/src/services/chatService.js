@@ -288,71 +288,31 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 };
 
 // 챗봇 메시지 전송 (AI 응답 시뮬레이션)
-export const sendChatMessage = async (sessionId, message) => {
-  console.log('💬 챗봇 메시지 전송:', { sessionId, message });
-  
-  // // 목업 모드일 때는 Django 서버 연결 시도하지 않음
-  // if (USE_MOCK_DATA) {
-  //   console.log('🔄 목업 모드: 목업 응답 생성');
-    
-  //   // 목업 응답 생성
-  //   // const mockResponse = generateMockResponse(message);
-    
-  //   // 프롬프트 로그 생성
-  //   // const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
-    
-  //   // 생성 결과가 있으면 저장
-  //   // if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
-  //   //   for (const result of mockResponse.generatedResults) {
-  //   //     await createGeneratedResult(
-  //   //       promptLog.prompt_id,
-  //   //       result.result_type,
-  //   //       result.result_path,
-  //   //       result.result
-  //   //     );
-  //   //   }
-  //   // }
-    
-  //   return {
-  //     success: true,
-  //     response: mockResponse.aiResponse,
-  //     generatedResults: mockResponse.generatedResults || []
-  //   };
-  // }
+export const sendChatMessage = async (sessionId, message, additionalData = {}) => {
+  console.log('💬 챗봇 메시지 전송:', { sessionId, message, additionalData });
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {
+    const requestBody = {
+      session_id: sessionId,
+      message: message,
+      ...additionalData  // 체크리스트 데이터와 완성도 정보 포함
+    };
+    
     const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/message/`, {
       method: 'POST',
-      body: JSON.stringify({
-        session_id: sessionId,
-        message: message
-      })
+      body: JSON.stringify(requestBody)
     });
     
     if (response.ok) {
       const data = await response.json();
       console.log('✅ Django 서버 응답:', data);
       
-      // // 프롬프트 로그 생성
-      // const promptLog = await createPromptLog(sessionId, message, data.ai_response);
-      
-      // // 생성된 결과가 있으면 저장
-      // if (data.generated_results && data.generated_results.length > 0) {
-      //   for (const result of data.generated_results) {
-      //     await createGeneratedResult(
-      //       promptLog.prompt_id, 
-      //       result.result_type, 
-      //       result.result_path, 
-      //       result.result
-      //     );
-      //   }
-      // }
-      
       return {
         success: true,
         response: data.ai_response,  // Django에서 ai_response로 반환
-        generatedResults: data.generated_results || []
+        generatedResults: data.generated_results || [],
+        completionStatus: data.completion_status || null  // 체크리스트 완성도 정보
       };
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

@@ -21,17 +21,17 @@ class _KananaChat:
         return f"[SYSTEM]\n{system}\n\n[USER]\n{prompt}\n\n[ASSISTANT]\n"
 
     @torch.inference_mode()
-    def generate_response(self, prompt: str, max_length: int = 512) -> str:
+    def generate_response(self, prompt: str, max_length: int = 512, temperature: float = 0.7) -> str:
         # 기존 로컬 추론 대신, vLLM 서버를 호출하는 함수를 사용
-        return generate_vllm_response(prompt, max_length=max_length)
+        return generate_vllm_response(prompt, max_length=max_length, temperature=temperature)
 
-def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
+def generate_vllm_response(prompt: str, max_length: int = 512, temperature: float = 0.7) -> str:
     """
     vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
     """
     # 기본값 설정 - 로컬 inference-server 사용
-    api_url = getattr(settings, 'VLLM_API_URL', "http://inference-server:8001/v1/chat/completions")
-    model_name = getattr(settings, 'VLLM_MODEL_NAME', 'kanana-finetuned')
+    api_url = getattr(settings, 'VLLM_API_URL', "https://ifms1tvpam2z8w-8001.proxy.runpod.net/v1/chat/completions")
+    model_name = getattr(settings, 'VLLM_MODEL_NAME', 'kakaocorp/kanana-1.5-8b-instruct-2505')
 
     headers = {"Content-Type": "application/json"}
     
@@ -43,7 +43,7 @@ def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
             {"role": "user", "content": prompt}
         ],
         "max_tokens": max_length,
-        "temperature": 0.7,
+        "temperature": temperature,
     }
 
     try:
@@ -52,6 +52,9 @@ def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
 
         result = response.json()
         content = result['choices'][0]['message']['content']
+
+
+        print(content.strip())
         return content.strip()
 
     except requests.exceptions.RequestException as e:
@@ -65,3 +68,4 @@ def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
 
 # 전역 모델 인스턴스
 kanana_llm_model = _KananaChat()
+kanana_llm_model.generate_response("현대차에 대해 설명해줘")

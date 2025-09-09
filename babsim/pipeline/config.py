@@ -26,26 +26,34 @@ class Config:
     MAX_HISTORY_LENGTH = 10  # 대화 기록 최대 길이
     SUMMARIZATION_THRESHOLD = 5  # 요약 시작 임계값
     
-    # 의도 분류 설정
-    INTENT_CLASSES = {
-        "rag": "RAG 기반 답변 (현대자동차/자동차 지식 질문)",
-        "general": "일반 대화 (인사, 간단한 질문 등)"
-    }
     
     # 프롬프트 템플릿
     SYSTEM_PROMPT = """You are a helpful assistant specialized in Hyundai Motor Company and automotive knowledge. 
     Answer all questions to the best of your ability. The provided chat history includes facts about the user you are speaking with. 
     YOU MUST ANSWER IN KOREAN."""
     
-    INTENT_CLASSIFICATION_PROMPT = """다음 사용자 질문의 의도를 분류해주세요:
+    # 1단계: 초기 목적 파악 프롬프트
+    INITIAL_INTENT_CLASSIFICATION_PROMPT = """다음 사용자 질문의 의도를 분류해주세요:
 
 사용자 질문: {user_query}
 
 의도 분류 옵션:
 1. rag: 현대자동차나 자동차에 대한 구체적인 지식 질문 (기술, 디자인, 철학, 역사 등)
-2. general: 일반적인 대화, 인사, 간단한 질문
+2. image_generation: 새로운 자동차 이미지 생성 요청 (예: "자동차 이미지 만들어줘", "새로운 디자인 생성해줘", "이미지 생성")
+3. image_modification: 이미지 수정 요청 (예: "이미지 수정해줘", "이 차 색깔 바꿔줘", "이미지 업로드해서 수정")
 
-의도만 간단히 답변해주세요 (rag 또는 general):"""
+반드시 다음 중 하나의 키워드만 답변하세요: rag, image_generation, image_modification"""
+
+    # 2단계: 이미지 생성 세부 경로 분류 프롬프트
+    IMAGE_GENERATION_INTENT_CLASSIFICATION_PROMPT = """사용자가 이미지 생성을 원합니다. 어떤 방식으로 진행할지 분류해주세요:
+
+사용자 질문: {user_query}
+
+이미지 생성 방식 분류:
+1. guided: 체크리스트 기반 단계별 가이드 (예: "단계별로 만들어줘", "체크리스트로 해줘", "차근차근 만들어줘")
+2. direct: 직접 이미지 생성 (예: "빨간색 SUV 만들어줘", "현대차 스타일로 만들어줘", "바로 만들어줘")
+
+반드시 다음 중 하나의 키워드만 답변하세요: guided, direct"""
 
 # 전역 설정 인스턴스
 config = Config()

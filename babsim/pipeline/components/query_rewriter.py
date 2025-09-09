@@ -28,7 +28,7 @@ class QueryRewriter:
         pseudo = _pick(out, r"가상답변\s*:\s*(.+)")
         keys   = _pick(out, r"키워드\s*:\s*(.+)")
         q      = _pick(out, r"검색쿼리\s*:\s*(.+)") or re.sub(r"\s+", " ", keys.replace(",", " "))
-        return q[:200], pseudo
+        return q[:512], pseudo
 
 def _pick(text: str, pat: str) -> str:
     m = re.search(pat, text, re.IGNORECASE | re.DOTALL)

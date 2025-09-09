@@ -123,14 +123,9 @@ class BabsimPipelineService:
             # LangGraph 파이프라인 실행
             initial_state = {
                 "user_query": user_query,
-                "intent": "",
                 "chat_history": chat_history,
-                "response": "",
-                "image_query": "",
-                "is_form_complete": False,
-                "messages_summarized": False
+                "pipeline_step": "start",
             }
-            
             pipeline_result = text_pipeline.invoke(initial_state)
             
             # 결과 추출
@@ -225,32 +220,27 @@ class BabsimPipelineService:
             logger.error(f"세션 종료 실패: {e}")
             return False
 
-    def process_query(self, user_query: str, user_id: str = "default_user") -> Dict[str, Any]:
-        """사용자 쿼리를 파이프라인으로 처리 (새로운 구조)"""
+    def process_query(self, user_query: str, user_id: str = "default_user", 
+                     checklist_data: Dict[str, Any] = None, 
+                     completion_status: Dict[str, Any] = None) -> Dict[str, Any]:
+        """사용자 쿼리를 파이프라인으로 처리 (체크리스트 데이터 포함)"""
         try:
             logger.info(f"파이프라인 쿼리 처리 시작: {user_query}")
-            
-            # LangGraph 파이프라인 실행
-            initial_state = {
-                "user_query": user_query,
-                "intent": "",
-                "chat_history": [],
-                "response": "",
-                "image_query": "",
-                "is_form_complete": False,
-                "messages_summarized": False,
-                "rewritten": False,
-                "retried": False,
-                "eval": {},
-                "completion_status": {}
-            }
+            logger.info(f"체크리스트 데이터: {checklist_data}")
+            logger.info(f"완성도 상태: {completion_status}")
             
             # 파이프라인 실행
+            initial_state = {
+                "user_query": user_query,
+                "chat_history": [],
+                "pipeline_step": "start",
+            }
             pipeline_result = text_pipeline.invoke(initial_state)
             
             # 결과 추출
             response = pipeline_result.get('response', '')
-            intent = pipeline_result.get('intent', '')
+            initial_intent = pipeline_result.get('initial_intent', '')
+            image_generation_intent = pipeline_result.get('image_generation_intent', '')
             is_form_complete = pipeline_result.get('is_form_complete', False)
             image_query = pipeline_result.get('image_query', '')
             completion_status = pipeline_result.get('completion_status', {})
@@ -268,7 +258,8 @@ class BabsimPipelineService:
             result = {
                 "response": response,
                 "generated_results": generated_results,
-                "intent": intent,
+                "initial_intent": initial_intent,
+                "image_generation_intent": image_generation_intent,
                 "user_query": user_query,
                 "is_form_complete": is_form_complete,
                 "completion_status": completion_status
