@@ -163,13 +163,14 @@ class InsightTrendsDetailSerializer(serializers.ModelSerializer):
         model = InsightTrends
         fields = (
             'car_model_id', 'car_name', 'type', 'release_year', 'model_3d_path',
+            'average_rating', 'review_categories',
             'engineering_specs', 'user_reviews', 'recent_articles'
         )
 
 class InsightTrendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InsightTrends
-        fields = ('car_model_id', 'car_name', 'type', 'release_year', 'model_3d_path')
+        fields = ('car_model_id', 'car_name', 'type', 'release_year', 'model_3d_path', 'average_rating', 'review_categories')
 
 # --- 7. 좋아요 ---
 class AssetLikesSerializer(serializers.ModelSerializer):

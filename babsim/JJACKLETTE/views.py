@@ -291,7 +291,7 @@ class LibraryCommentListCreateView(generics.ListCreateAPIView):
 
 # --- 7-11. 인사이트 ---
 class InsightTrendsListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # 임시로 인증 우회
     serializer_class = InsightTrendsSerializer
     queryset = InsightTrends.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]

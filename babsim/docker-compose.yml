@@ -21,7 +21,6 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgres
       - qdrant
       - inference-server
 
@@ -37,15 +36,15 @@ services:
     depends_on:
       - django_gunicorn
 
-  # PostgreSQL 서비스
-  postgres:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env
-    expose:
-      - "5432"
+  # # PostgreSQL 서비스
+  # postgres:
+  #   image: postgres:15-alpine
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   env_file:
+  #     - .env
+  #   expose:
+  #     - "5432"
 
   # Qdrant 서비스
   qdrant:
@@ -87,8 +86,6 @@ services:
       context: ./airflow
       dockerfile: Dockerfile.airflow
     command: scheduler
-    depends_on:
-      - postgres
     env_file:
       - .env
     volumes:
@@ -98,7 +95,7 @@ services:
       - ./airflow/plugins:/opt/airflow/plugins
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow_db
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/airflow_db
 
   airflow-webserver:
     build:
@@ -118,11 +115,11 @@ services:
       - ./airflow/plugins:/opt/airflow/plugins
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow_db
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/airflow_db
 
 # 볼륨 설정
 volumes:
-  postgres_data:
   qdrant_data:
   static_volume:
   hf_cache:
+

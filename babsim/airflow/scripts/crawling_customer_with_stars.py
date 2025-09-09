@@ -1,212 +1,221 @@
-import time, json, re
+import time, json, re, os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, WebDriverException
 
-chrome_options = Options()
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--headless=new")
-chrome_options.add_argument("--disable-dev-shm-usage")
+def main():
+    chrome_options = Options()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--disable-background-networking")
 
-service = Service(executable_path='/usr/bin/chromedriver')
-driver = webdriver.Chrome(service=service, options=chrome_options)
-driver.get("https://www.hyundai.com/kr/ko/purchase-event/vehicles-review")
-driver.maximize_window()
+    service = Service(executable_path='/usr/bin/chromedriver')
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.get("https://www.hyundai.com/kr/ko/purchase-event/vehicles-review")
 
-WebDriverWait(driver, 15).until(
-    EC.presence_of_element_located((By.CSS_SELECTOR, "#reviewList li"))
-)
-time.sleep(1)
+    # 초기 페이지 로딩 대기 시간을 20초로 유지
+    WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#reviewList li"))
+    )
+    time.sleep(1.5)
 
-car_reviews = []
+    car_reviews = []
+    seen_ids = set()
 
-def parse_rating(review_item, debug=False, debug_index=0):
-    """
-    평점 파서 (우선순위)
-    1) 접근성/숨김텍스트(.blind, .sr-only, aria-label) → 숫자
-    2) 게이지 막대 .bar[style*='width'] → 100% = 5.0
-    3) 클래스 내 rating-(\d{2}) → 45 = 4.5
-    4) .star-on / .star-half 카운트
-    """
-    rating = 0.0
-    # 스코프를 요약영역으로 고정
-    star_root = None
-    try:
-        star_root = review_item.find_element(By.CSS_SELECTOR, ".summary-wrap .review-star")
-    except:
-        # 폴백: 가장 가까운 .review-star (비권장)
+    def parse_rating(review_item):
         try:
-            star_root = review_item.find_element(By.CSS_SELECTOR, ".review-star")
+            star_root = review_item.find_element(By.CSS_SELECTOR, ".summary-wrap .review-star")
+        except:
+            try:
+                star_root = review_item.find_element(By.CSS_SELECTOR, ".review-star")
+            except:
+                return 0.0
+
+        try:
+            aria = star_root.get_attribute("aria-label") or ""
+            m = re.search(r'([0-5](?:\.\d)?)', aria)
+            if m:
+                return float(m.group(1))
+        except:
+            pass
+
+        try:
+            hidden_nodes = star_root.find_elements(By.CSS_SELECTOR, ".blind, .sr-only, .visually-hidden, .ir")
+            for node in hidden_nodes:
+                t = (node.text or "").strip()
+                m = re.search(r'([0-5](?:\.\d)?)', t)
+                if m:
+                    return float(m.group(1))
+        except:
+            pass
+
+        try:
+            bar = star_root.find_element(By.CSS_SELECTOR, ".bar")
+            style = bar.get_attribute("style") or ""
+            m = re.search(r'width\s*:\s*([0-9.]+)\s*%', style)
+            if m:
+                return round(float(m.group(1)) / 20.0, 1)
+        except:
+            pass
+
+        try:
+            cls = star_root.get_attribute("class") or ""
+            m = re.search(r'rating[-_]?([0-9]{2})', cls)
+            if m:
+                return int(m.group(1)) / 10.0
+        except:
+            pass
+
+        try:
+            full = len(star_root.find_elements(By.CSS_SELECTOR, ".star-on"))
+            half = len(star_root.find_elements(By.CSS_SELECTOR, ".star-half"))
+            return full + 0.5 * half
         except:
             return 0.0
 
-    if debug:
+    page = 1
+    # 580페이지부터 587페이지까지 테스트를 원할 경우 아래 줄의 주석을 해제하세요.
+    # page = 580
+    while page <= 587:
+        print(f"\n📄 현재 페이지: {page}")
         try:
-            outer = star_root.get_attribute("outerHTML")
-            print(f"[DEBUG HTML {debug_index}] {outer[:300]}...")
-        except:
-            pass
-
-    # 1) 접근성/숨김 텍스트
-    try:
-        # aria-label 우선
-        aria = star_root.get_attribute("aria-label") or ""
-        m = re.search(r'([0-5](?:\.\d)?)', aria)
-        if m:
-            val = float(m.group(1))
-            return max(0.0, min(5.0, val))
-    except:
-        pass
-    try:
-        # 숨김 텍스트들
-        hidden_nodes = []
-        hidden_nodes += star_root.find_elements(By.CSS_SELECTOR, ".blind, .sr-only, .visually-hidden, .ir")
-        # 혹시 부모에 있는 경우
-        try:
-            summary = review_item.find_element(By.CSS_SELECTOR, ".summary-wrap")
-            hidden_nodes += summary.find_elements(By.CSS_SELECTOR, ".blind, .sr-only, .visually-hidden, .ir")
-        except:
-            pass
-        for node in hidden_nodes:
-            t = (node.text or "").strip()
-            m = re.search(r'([0-5](?:\.\d)?)', t)
-            if m:
-                val = float(m.group(1))
-                return max(0.0, min(5.0, val))
-    except:
-        pass
-
-    # 2) 게이지 막대 width
-    try:
-        bar = star_root.find_element(By.CSS_SELECTOR, ".bar")
-        style = bar.get_attribute("style") or ""
-        m = re.search(r'width\s*:\s*([0-9.]+)\s*%', style)
-        if m:
-            pct = float(m.group(1))
-            return round(max(0.0, min(5.0, pct / 20.0)), 1)
-    except:
-        pass
-
-    # 3) 클래스에 rating-xx 패턴
-    try:
-        cls = (star_root.get_attribute("class") or "") + " " + (review_item.get_attribute("class") or "")
-        m = re.search(r'rating[-_]?([0-9]{2})', cls)
-        if m:
-            val = int(m.group(1)) / 10.0  # 45 -> 4.5
-            return max(0.0, min(5.0, val))
-    except:
-        pass
-
-    # 4) 마지막: 별 아이콘 카운트
-    try:
-        full = len(star_root.find_elements(By.CSS_SELECTOR, ".star-on"))
-        half = len(star_root.find_elements(By.CSS_SELECTOR, ".star-half"))
-        rating = max(0.0, min(5.0, full + 0.5 * half))
-        return rating
-    except:
-        return 0.0
-
-for page in range(1, 588):
-    print(f"\n📄 현재 페이지: {page}")
-    # 무한스크롤/지연 로딩 대비
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(1.2)
-
-    review_list = driver.find_elements(By.CSS_SELECTOR, "#reviewList li")
-
-    for idx, review_item in enumerate(review_list):
-        try:
-            data_id = review_item.get_attribute("data-id")
-            li_class = review_item.get_attribute("class") or ""
-            li_style = review_item.get_attribute("style") or ""
-
-            if "clone" in li_class or "display:none" in li_style:
-                continue
-            if len(review_item.find_elements(By.CSS_SELECTOR, ".title-wrap .title")) == 0:
-                continue
-
-            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", review_item)
-            time.sleep(0.15)
-
-            # 제목
-            title_element = review_item.find_element(By.CSS_SELECTOR, ".title-wrap .title")
-            try:
-                span_best = title_element.find_element(By.TAG_NAME, "span")
-                driver.execute_script("arguments[0].remove();", span_best)
-            except:
-                pass
-            car_title = title_element.text.strip()
-
-            # 별점(디버그는 처음 몇 개만)
-            debug_flag = (idx < 3)
-            star_rating = parse_rating(review_item, debug=debug_flag, debug_index=idx)
-            print(f"DEBUG: rating={star_rating}")
-
-            # 더보기
-            has_more_btn = False
-            try:
-                toggle_btn = review_item.find_element(By.CLASS_NAME, "toggle-btn")
-                if toggle_btn.text.strip() == "더보기":
-                    has_more_btn = True
-                    driver.execute_script("arguments[0].click();", toggle_btn)
-                    time.sleep(0.25)
-            except:
-                pass
-
-            # 리뷰 내용
-            review_html = ""
-            try:
-                if has_more_btn:
-                    review_elem = review_item.find_element(By.CSS_SELECTOR, ".desc .review-text .text.show-more")
-                else:
-                    review_elem = review_item.find_element(By.CSS_SELECTOR, ".desc .review-text .text")
-                review_html = review_elem.get_attribute("innerHTML") or ""
-            except:
-                review_html = ""
-            review_text = review_html.replace("<br>", "\n").strip()
-
-            # 태그
-            tags_dict = {}
-            try:
-                for cat in review_item.find_elements(By.CSS_SELECTOR, ".category-list .list li"):
-                    tag_name = cat.find_element(By.CSS_SELECTOR, ".flag").text.strip()
-                    tag_desc = cat.find_element(By.CSS_SELECTOR, ".txt").text.strip()
-                    tags_dict[tag_name] = tag_desc
-            except:
-                pass
-
-            car_reviews.append({
-                "data_id": data_id,
-                "car_name": car_title,
-                "rating": star_rating,
-                "review": review_text,
-                "tags": tags_dict
-            })
-
-            print(f"✅ {idx + 1}: [{data_id}] {car_title} - {star_rating}★ - {review_text[:30]}... | tags: {list(tags_dict.keys())}")
-
-        except Exception as e:
-            print(f"WARN: 항목 처리 실패: {e}")
-            continue
-
-    # 페이지 이동
-    if page < 588:
-        try:
-            next_button = driver.find_element(By.CSS_SELECTOR, "button.navi.next")
-            driver.execute_script("arguments[0].click();", next_button)
-            WebDriverWait(driver, 10).until(EC.staleness_of(review_list[0]))
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#reviewList li")))
-            time.sleep(0.4)
-        except Exception as e:
-            print(f"❌ 페이지 {page + 1} 이동 실패: {e}")
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(1.5)
+        except WebDriverException as e:
+            print(f"❌ 브라우저 오류: {type(e).__name__} - {str(e)}")
             break
 
-driver.quit()
+        review_list = driver.find_elements(By.CSS_SELECTOR, "#reviewList li")
+        if not review_list:
+            print("❌ 리뷰 항목 없음. 재시도 중...")
+            time.sleep(3)
+            review_list = driver.find_elements(By.CSS_SELECTOR, "#reviewList li")
+            if not review_list:
+                print("❌ 리뷰 항목 여전히 없음. 종료.")
+                break
 
-out_path = "/app/text_data/DB/hyundai_car_reviews.json"
-with open(out_path, "w", encoding="utf-8") as f:
-    json.dump(car_reviews, f, ensure_ascii=False, indent=2)
-print(f"\n✅ 최종 저장 완료: {out_path}")
+        if page >= 1: # 1페이지부터 수집하도록 조건 변경
+            for idx, review_item in enumerate(review_list):
+                try:
+                    data_id = review_item.get_attribute("data-id")
+                    if data_id in seen_ids:
+                        continue
+                    seen_ids.add(data_id)
+
+                    li_class = review_item.get_attribute("class") or ""
+                    li_style = review_item.get_attribute("style") or ""
+                    if "clone" in li_class or "display:none" in li_style:
+                        continue
+
+                    if len(review_item.find_elements(By.CSS_SELECTOR, ".title-wrap .title")) == 0:
+                        continue
+
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", review_item)
+                    time.sleep(0.2)
+
+                    title_element = review_item.find_element(By.CSS_SELECTOR, ".title-wrap .title")
+                    try:
+                        span_best = title_element.find_element(By.TAG_NAME, "span")
+                        driver.execute_script("arguments[0].remove();", span_best)
+                    except:
+                        pass
+                    car_title = title_element.text.strip()
+
+                    star_rating = parse_rating(review_item)
+
+                    has_more_btn = False
+                    try:
+                        toggle_btn = review_item.find_element(By.CLASS_NAME, "toggle-btn")
+                        if toggle_btn.text.strip() == "더보기":
+                            has_more_btn = True
+                            driver.execute_script("arguments[0].click();", toggle_btn)
+                            time.sleep(0.3)
+                    except:
+                        pass
+
+                    review_html = ""
+                    try:
+                        if has_more_btn:
+                            review_elem = review_item.find_element(By.CSS_SELECTOR, ".desc .review-text .text.show-more")
+                        else:
+                            review_elem = review_item.find_element(By.CSS_SELECTOR, ".desc .review-text .text")
+                        review_html = review_elem.get_attribute("innerHTML") or ""
+                    except:
+                        review_html = ""
+                    review_text = review_html.replace("<br>", "\n").strip()
+
+                    tags_dict = {}
+                    try:
+                        for cat in review_item.find_elements(By.CSS_SELECTOR, ".category-list .list li"):
+                            tag_name = cat.find_element(By.CSS_SELECTOR, ".flag").text.strip()
+                            tag_desc = cat.find_element(By.CSS_SELECTOR, ".txt").text.strip()
+                            tags_dict[tag_name] = tag_desc
+                    except:
+                        pass
+
+                    car_reviews.append({
+                        "data_id": data_id,
+                        "car_name": car_title,
+                        "rating": star_rating,
+                        "review": review_text,
+                        "tags": tags_dict
+                    })
+
+                    review_preview = review_text.replace("\n", " ").strip()[:40] + "..."
+                    tag_keys = list(tags_dict.keys())
+                    print(f"✅ {idx + 1}: [{data_id}] {car_title} - {star_rating}★ - \"{review_preview}\" | tags: {tag_keys}")
+
+                except Exception as e:
+                    print(f"WARN: 항목 처리 실패: {type(e).__name__} - {str(e)}")
+                    continue
+
+        next_btns = driver.find_elements(By.CSS_SELECTOR, "button.navi.next")
+        if not next_btns or not next_btns[0].is_enabled():
+            print("✅ 마지막 페이지 도달. 종료.")
+            break
+
+        # 페이지 이동 실패 시 재시도 로직 추가
+        try:
+            current_ids = set([r.get_attribute("data-id") for r in review_list])
+            
+            for attempt in range(3): # 최대 3번 재시도
+                try:
+                    driver.execute_script("arguments[0].click();", next_btns[0])
+                    WebDriverWait(driver, 30).until( # 타임아웃 30초로 증가
+                        lambda d: any(
+                            r.get_attribute("data-id") not in current_ids
+                            for r in d.find_elements(By.CSS_SELECTOR, "#reviewList li")
+                        )
+                    )
+                    time.sleep(1.5)
+                    page += 1
+                    break # 성공 시 재시도 루프 종료
+                except (TimeoutException, WebDriverException) as e:
+                    print(f"❌ 페이지 이동 재시도 ({attempt+1}/3): {type(e).__name__} - {str(e)}")
+                    time.sleep(5) # 재시도 전 5초 대기
+            else:
+                print("❌ 반복된 페이지 이동 실패. 스크래퍼 종료.")
+                break # 모든 재시도 실패 시 전체 루프 종료
+
+        except Exception as e:
+            print(f"❌ 페이지 이동 실패: {type(e).__name__} - {str(e)}")
+            time.sleep(2)
+            continue
+
+    driver.quit()
+
+    out_path = "/app/text_data/DB/hyundai_car_reviews.json"
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(car_reviews, f, ensure_ascii=False, indent=2)
+    print(f"\n✅ 최종 저장 완료: {out_path}")
+
+if __name__ == "__main__":
+    main()

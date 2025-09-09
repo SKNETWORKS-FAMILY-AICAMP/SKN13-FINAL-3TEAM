@@ -103,6 +103,8 @@ class InsightTrends(models.Model):
     type = models.CharField(max_length=50)
     release_year = models.IntegerField()
     model_3d_path = models.CharField(max_length=255, blank=True, null=True)
+    average_rating = models.FloatField(null=True, blank=True, verbose_name='평균 평점')
+    review_categories = models.JSONField(null=True, blank=True, verbose_name='리뷰 카테고리 통계')
     created_at = models.DateTimeField(auto_now_add=True)
 
 # 7. Engineering_spec (공학적 스펙)

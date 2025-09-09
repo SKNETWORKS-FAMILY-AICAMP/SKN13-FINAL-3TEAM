@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your_default_secret_key_if_not_set')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,52.62.239.147.nip.io').split(',')
 
 
 # Application definition
@@ -151,39 +151,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경�
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "mediafiles"
 
-EXAONE_MODEL_PATH = os.getenv("EXAONE_MODEL_PATH", str(BASE_DIR / "models" / "exaone_4.0_1.2b"))
-SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
+# [DELETED] RunPod API를 사용하므로, 아래의 로컬 모델 경로 설정들은 더 이상 필요하지 않아 삭제합니다.
 
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
-
-# CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b'
-# CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
-
-# Hugging Face 모델은 폴더명을 지정합니다.
-KANANA_MODEL_PATH = os.getenv("KANANA_MODEL_PATH", str(BASE_DIR / "models" / "kanana-1.5-8b-instruct-2505"))
-# SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
-
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
-
-# CURRENT_MODEL_FOLDER_NAME = 'kanana-1.5-8b-instruct-2505'
-# CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
-
-# Hugging Face 모델은 폴더명을 지정합니다.
-CURRENT_MODEL_FOLDER_NAME = 'kanana-1.5-8b-instruct-2505'
-
-CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
 
 # Custom User Model
 AUTH_USER_MODEL = 'JJACKLETTE.Users'
@@ -218,23 +187,25 @@ SIMPLE_JWT = {
 }
 
 
-# CORS 설정 (React 프론트엔드와 통신을 위해 필수)
+# CORS 설정 (하이브리드 방식)
+# 1. 로컬 개발용 주소는 코드에 유지합니다.
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", # React 개발 서버 주소
-    "http://localhost:5173", # Vite 기본 포트
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://localhost", # Nginx를 통한 접근 (배포 환경)
-    # "http://your.domain.com", # 배포 시 실제 도메인
-
-]
-
-CSRF_TRUSTED_ORIGINS = [       # ← 추가: 폼/쿠키 기반 호출 시 필요
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
-    "http://localhost", # Nginx를 통한 접근
+    "http://localhost",
+    "http://52.62.239.147.nip.io",
+]
+
+# CSRF도 동일한 방식으로 적용합니다.
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost",
+    "http://52.62.239.147.nip.io",
 ]
 
 CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True

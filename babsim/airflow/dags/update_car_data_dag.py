@@ -12,11 +12,17 @@ with DAG(
     catchup=False,
     tags=["db", "import", "crawling"],
 ) as dag:
+    
+    # 1. 증분 크롤링 (매일 첫 페이지만)
     crawl_reviews_task = BashOperator(
-        task_id="crawl_car_reviews",
-        bash_command="python /app/airflow/scripts/crawling_customer_with_stars.py",
+        task_id="crawl_car_reviews_incremental",
+        bash_command="""
+        echo "📅 매일 첫 페이지만 크롤링합니다"
+        python /app/airflow/scripts/incremental_crawling.py 1 1
+        """,
     )
 
+    # 2. DB 데이터 임포트 (리뷰 + 집계)
     import_data_task = BashOperator(
         task_id="import_car_data",
         bash_command="docker-compose exec django_gunicorn python manage.py import_data",

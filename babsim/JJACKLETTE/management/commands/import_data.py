@@ -3,8 +3,11 @@ import json
 import os
 import logging
 from datetime import datetime
+from collections import defaultdict, Counter
+from statistics import mean
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from JJACKLETTE.models import InsightTrends, UserReview, EngineeringSpec, RecentArticle
 
 # 로거 설정
@@ -194,7 +197,7 @@ class Command(BaseCommand):
             file_path = os.path.join(dir_path, filename)
             
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, 'r', encoding='utf-8-sig') as f:
                     reader = csv.reader(f)
                     next(reader)
                     csv_data = {row[0].strip(): row[1].strip() for row in reader if len(row) >= 2}
@@ -301,9 +304,14 @@ class Command(BaseCommand):
                 car_model_instance = car_models_map[matched_car_name]
                 
                 _, created = UserReview.objects.update_or_create(
+                    data_id=item.get('data_id'),
                     car_model=car_model_instance,
-                    review=item['review'],
-                    defaults={'tags': item.get('tags', {}), 'rating': item.get('rating')}
+                    defaults={
+                        'car_name': item.get('car_name'),
+                        'rating': item.get('rating'),
+                        'review': item.get('review', ''),
+                        'tags': item.get('tags', {})
+                    }
                 )
                 if created:
                     count += 1
@@ -397,9 +405,72 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"총 {skipped_count}개의 차량 역사를 건너뛰었습니다."))
         self.stdout.write(self.style.SUCCESS("차량 역사 임포트가 완료되었습니다.\n"))
 
+    def calculate_aggregates(self):
+        """차량별 집계 통계를 계산하고 저장합니다"""
+        self.stdout.write(self.style.SUCCESS("4. 차량별 집계 통계를 계산합니다..."))
+        
+        with transaction.atomic():
+            for insight_trend in InsightTrends.objects.all():
+                reviews = UserReview.objects.filter(car_model=insight_trend)
+                
+                if not reviews.exists():
+                    continue
+                
+                # 1. 평균 평점 계산
+                ratings = [r.rating for r in reviews if r.rating is not None]
+                if ratings:
+                    avg_rating = round(mean(ratings), 2)
+                    insight_trend.average_rating = avg_rating
+                    self.stdout.write(f"  {insight_trend.car_name}: 평균 평점 {avg_rating}")
+
+                # 2. 리뷰 카테고리 통계 계산
+                tag_stats = defaultdict(list)
+                
+                for review in reviews:
+                    tags = review.tags or {}
+                    if isinstance(tags, dict):
+                        for tag_key, tag_value in tags.items():
+                            if tag_value and isinstance(tag_value, str):
+                                tag_stats[tag_key].append(tag_value)
+
+                # 각 태그별로 가장 많이 나온 문장과 비율 계산
+                review_categories = {}
+                total_reviews = reviews.count()
+                
+                for tag_key, tag_values in tag_stats.items():
+                    if not tag_values:
+                        continue
+                        
+                    # 가장 많이 나온 문장 찾기
+                    value_counts = Counter(tag_values)
+                    most_common = value_counts.most_common(1)[0]
+                    most_common_text = most_common[0]
+                    most_common_count = most_common[1]
+                    percentage = round((most_common_count / total_reviews) * 100, 1)
+                    
+                    review_categories[tag_key] = {
+                        'most_common_text': most_common_text,
+                        'count': most_common_count,
+                        'percentage': percentage,
+                        'total_mentions': len(tag_values)
+                    }
+
+                insight_trend.review_categories = review_categories
+                insight_trend.save()
+
+                # 로그 출력
+                for tag_key, stats in review_categories.items():
+                    self.stdout.write(
+                        f"    {tag_key}: \"{stats['most_common_text']}\" "
+                        f"({stats['count']}회, {stats['percentage']}%)"
+                    )
+
+        self.stdout.write(self.style.SUCCESS("집계 통계 계산이 완료되었습니다.\n"))
+
     def handle(self, *args, **kwargs):
         """메인 핸들러: 스펙, 리뷰, 히스토리 임포트를 순차적으로 실행합니다."""
         self.handle_specs()
         self.handle_reviews()
         self.handle_history()
+        self.calculate_aggregates()
         self.stdout.write(self.style.SUCCESS("\n모든 데이터 임포트 작업이 완료되었습니다."))

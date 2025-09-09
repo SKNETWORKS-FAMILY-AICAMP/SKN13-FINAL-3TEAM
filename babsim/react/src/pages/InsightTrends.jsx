@@ -121,7 +121,7 @@ const InsightTrends = () => {
   const [carSpecs, setCarSpecs] = useState(null);
   const [reviewAnalysis, setReviewAnalysis] = useState({
     recentReviews: [],
-    reviewCategories: { design: { phrase: 'No Data', percentage: 0 }, performance: { phrase: 'No Data', percentage: 0 }, comfort: { phrase: 'No Data', percentage: 0 }, space: { phrase: 'No Data', percentage: 0 } },
+    reviewCategories: { '디자인': { phrase: 'No Data', percentage: 0 }, '성능': { phrase: 'No Data', percentage: 0 }, '승차감': { phrase: 'No Data', percentage: 0 }, '공간': { phrase: 'No Data', percentage: 0 } },
     overallRating: { score: 0, level: '', stars: 0 }
   });
   const [carHistory, setCarHistory] = useState([]);
@@ -163,7 +163,7 @@ const InsightTrends = () => {
           const details = await getCarModelDetail(selectedCar.car_model_id);
           const specObj = Array.isArray(details.engineering_specs) ? (details.engineering_specs[0] || null) : (details.engineering_specs || null);
           setCarSpecs(specObj);
-          analyzeReviews(details.user_reviews || []);
+          analyzeReviews(details.user_reviews || [], details.review_categories);
           setCarHistory(details.recent_articles || []);
           setExpandedArticles({});
         } catch (error) {
@@ -183,16 +183,15 @@ const InsightTrends = () => {
     }
   };
 
-  const analyzeReviews = (carReviews) => {
+  const analyzeReviews = (carReviews, reviewCategories) => {
     try {
       if (!carReviews || carReviews.length === 0) {
-        setReviewAnalysis({ recentReviews: [], reviewCategories: { design: { phrase: 'No Data', percentage: 0 }, performance: { phrase: 'No Data', percentage: 0 }, comfort: { phrase: 'No Data', percentage: 0 }, space: { phrase: 'No Data', percentage: 0 } }, overallRating: { score: 0, level: 'No Data', stars: 0 } });
+        setReviewAnalysis({ recentReviews: [], reviewCategories: { '디자인': { phrase: 'No Data', percentage: 0 }, '성능': { phrase: 'No Data', percentage: 0 }, '승차감': { phrase: 'No Data', percentage: 0 }, '공간': { phrase: 'No Data', percentage: 0 } }, overallRating: { score: 0, level: 'No Data', stars: 0 } });
         return;
       }
       const randomReviews = getRandomReviews(carReviews, 2);
-      const categoryAnalysis = analyzeReviewCategories(carReviews);
       const randomRating = generateRandomRating();
-      setReviewAnalysis({ recentReviews: randomReviews, reviewCategories: categoryAnalysis, overallRating: randomRating });
+      setReviewAnalysis({ recentReviews: randomReviews, reviewCategories: reviewCategories, overallRating: randomRating });
     } catch (error) {
       console.error('Error analyzing reviews:', error);
     }
@@ -205,32 +204,6 @@ const InsightTrends = () => {
       review: review.review,
       rating: review.rating || Math.floor(Math.random() * 2) + 4
     }));
-  };
-
-  const analyzeReviewCategories = (reviews) => {
-    const categories = { design: {}, performance: {}, comfort: {}, space: {} };
-    reviews.forEach(review => {
-      if (review.tags && typeof review.tags === 'object') {
-        Object.entries(review.tags).forEach(([key, value]) => {
-          if (categories[key]) {
-            categories[key][value] = (categories[key][value] || 0) + 1;
-          }
-        });
-      }
-    });
-    const result = {};
-    Object.keys(categories).forEach(category => {
-      const phrases = categories[category];
-      if (Object.keys(phrases).length > 0) {
-        const totalInCategory = Object.values(phrases).reduce((sum, count) => sum + count, 0);
-        const maxPhrase = Object.keys(phrases).reduce((a, b) => phrases[a] > phrases[b] ? a : b);
-        const percentage = Math.round((phrases[maxPhrase] / totalInCategory) * 100);
-        result[category] = { phrase: maxPhrase, percentage: percentage };
-      } else {
-        result[category] = { phrase: 'No Data', percentage: 0 };
-      }
-    });
-    return result;
   };
 
   const generateRandomRating = () => {
@@ -338,20 +311,20 @@ const InsightTrends = () => {
               <h3 className="text-xl font-bold text-white mb-4">Review Categories</h3>
               <div className="space-y-3">
                 <div className="bg-gray-800/50 rounded-lg p-3">
-                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">Design</span><span className="text-green-400 font-semibold">{reviewAnalysis?.reviewCategories?.design?.percentage || 0}%</span></div>
-                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.design?.phrase || 'No Data'}</p>
+                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">디자인</span><span className="text-green-400 font-semibold">{reviewAnalysis?.reviewCategories?.['디자인']?.percentage || 0}%</span></div>
+                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.['디자인']?.most_common_text || 'No Data'}</p>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3">
-                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">Performance</span><span className="text-blue-400 font-semibold">{reviewAnalysis?.reviewCategories?.performance?.percentage || 0}%</span></div>
-                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.performance?.phrase || 'No Data'}</p>
+                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">성능</span><span className="text-blue-400 font-semibold">{reviewAnalysis?.reviewCategories?.['성능']?.percentage || 0}%</span></div>
+                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.['성능']?.most_common_text || 'No Data'}</p>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3">
-                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">Comfort</span><span className="text-purple-400 font-semibold">{reviewAnalysis?.reviewCategories?.comfort?.percentage || 0}%</span></div>
-                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.comfort?.phrase || 'No Data'}</p>
+                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">승차감</span><span className="text-purple-400 font-semibold">{reviewAnalysis?.reviewCategories?.['승차감']?.percentage || 0}%</span></div>
+                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.['승차감']?.most_common_text || 'No Data'}</p>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3">
-                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">Space</span><span className="text-yellow-400 font-semibold">{reviewAnalysis?.reviewCategories?.space?.percentage || 0}%</span></div>
-                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.space?.phrase || 'No Data'}</p>
+                  <div className="flex justify-between items-center mb-1"><span className="text-gray-300">공간</span><span className="text-yellow-400 font-semibold">{reviewAnalysis?.reviewCategories?.['공간']?.percentage || 0}%</span></div>
+                  <p className="text-xs text-gray-400">{reviewAnalysis?.reviewCategories?.['공간']?.most_common_text || 'No Data'}</p>
                 </div>
               </div>
             </div>
