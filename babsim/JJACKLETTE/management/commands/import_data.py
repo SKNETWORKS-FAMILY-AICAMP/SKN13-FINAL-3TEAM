@@ -211,8 +211,20 @@ class Command(BaseCommand):
         # 모든 차량에 대해 처리 (CSV에 있는 차량 + GLB에만 있는 차량)
         all_cars = set(csv_specs.keys())
         
-        # GLB에만 있는 차량들도 추가
-        glb_files = [os.path.splitext(f)[0] for f in os.listdir('react/public/models') if f.endswith('.glb')]
+        # GLB에만 있는 차량들도 추가 (React 빌드된 모델 파일들)
+        glb_files = []
+        try:
+            # React 빌드된 모델 파일 경로 확인
+            models_path = 'react/build/models'
+            if os.path.exists(models_path):
+                glb_files = [os.path.splitext(f)[0] for f in os.listdir(models_path) if f.endswith('.glb')]
+                self.stdout.write(f"GLB 모델 파일 {len(glb_files)}개를 찾았습니다.")
+            else:
+                self.stdout.write(self.style.WARNING("GLB 모델 파일 경로를 찾을 수 없습니다. CSV 데이터만 처리합니다."))
+        except FileNotFoundError:
+            # GLB 파일이 없는 경우 무시하고 계속 진행
+            self.stdout.write(self.style.WARNING("GLB 모델 파일 경로를 찾을 수 없습니다. CSV 데이터만 처리합니다."))
+        
         all_cars.update(glb_files)
         
         for car_name in all_cars:
