@@ -1,0 +1,20 @@
+{
+  "input": {
+    "mode": "3d",
+    "preset": "BAL",
+    "image": "https://your-static-or-s3/path/to/seed.png",
+    "input_name": "input.png",
+    "workflows": {
+      "hy3d": "hunyuan_3d.json"
+    },
+    "params": {
+      "views": 12,
+      "render_size": 1024,
+      "texture_size": 2048,
+      "sample_steps": 25,
+      "mesh_steps": 50,
+      "octree_resolution": 512,
+      "max_facenum": 50000
+    }
+  }
+}

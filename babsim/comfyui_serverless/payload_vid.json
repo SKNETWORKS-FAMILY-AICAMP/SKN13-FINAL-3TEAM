@@ -1,0 +1,17 @@
+{
+  "input": {
+    "mode": "video",
+    "preset": "FAST",
+    "image": "https://your-static-or-s3/path/to/seed.png",
+    "input_name": "input.png",
+    "workflows": {
+      "ltxv": "LTX_video.json"
+    },
+    "params": {
+      "frames": 24,
+      "width": 512,
+      "height": 512,
+      "steps": 20
+    }
+  }
+}
