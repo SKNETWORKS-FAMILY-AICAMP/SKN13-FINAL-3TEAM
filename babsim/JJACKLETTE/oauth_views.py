@@ -12,60 +12,43 @@ logger = logging.getLogger(__name__)
 def oauth_callback(request):
     """OAuth 콜백 처리 및 JWT 토큰 생성"""
     try:
-        # OAuth 로그인 완료 후 사용자 정보를 직접 가져와서 Django 세션 설정
-        
-        # 현재 요청에서 OAuth 사용자 정보 확인
-        from allauth.socialaccount.models import SocialAccount
-        from django.contrib.auth import login
-        
-        # 방법 1: 가장 최근에 생성된 Google SocialAccount 확인
-        try:
-            latest_social_account = SocialAccount.objects.filter(
-                provider='google'
-            ).order_by('-date_joined').first()
-            
-            if latest_social_account:
-                user = latest_social_account.user
-                
-                # Django 세션에 사용자 로그인 (backend 명시)
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                
-                logger.info(f"User logged in via OAuth (latest account): {user.email}")
-                
-                # JWT 토큰 생성
-                refresh = RefreshToken.for_user(user)
-                access_token = str(refresh.access_token)
-                refresh_token = str(refresh)
-                
-                # 세션에 JWT 토큰 정보 저장
-                request.session['jwt_tokens'] = {
-                    'user_id': str(user.user_id),
-                    'email': user.email,
-                    'access_token': access_token,
-                    'refresh_token': refresh_token
-                }
-                
-                logger.info(f"JWT tokens generated and stored in session for user: {user.email}")
-                
-                # .env 파일에 저장된 FRONTEND_URL 사용
-                frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost')
-                redirect_url = (
-                    f"{frontend_url}/oauth-callback?"
-                    f"access_token={access_token}&"
-                    f"refresh_token={refresh_token}&"
-                    f"user_id={user.user_id}&"
-                    f"email={user.email}"
-                )
-                
-                logger.info(f"Redirecting to frontend: {redirect_url}")
-                return redirect(redirect_url)
-            else:
-                logger.warning("No Google SocialAccount found")
-                return redirect('/login')
-                
-        except Exception as e:
-            logger.error(f"Error getting latest social account: {e}")
+        # 현재 요청 컨텍스트의 사용자만 사용 (브라우저/세션별로 분리)
+        if not request.user.is_authenticated:
+            logger.warning("OAuth callback without authenticated user context")
             return redirect('/login')
+
+        user = request.user
+
+        # Django 세션 로그인 (보강용)
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        # JWT 토큰 생성
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        # 세션에 JWT 토큰 정보 저장
+        request.session['jwt_tokens'] = {
+            'user_id': str(user.user_id),
+            'email': user.email,
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }
+
+        logger.info(f"JWT tokens generated and stored in session for user: {user.email}")
+
+        # .env 파일에 저장된 FRONTEND_URL 사용
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost')
+        redirect_url = (
+            f"{frontend_url}/oauth-callback?"
+            f"access_token={access_token}&"
+            f"refresh_token={refresh_token}&"
+            f"user_id={user.user_id}&"
+            f"email={user.email}"
+        )
+
+        logger.info(f"Redirecting to frontend: {redirect_url}")
+        return redirect(redirect_url)
         
     except Exception as e:
         logger.error(f"Error in oauth_callback: {e}")

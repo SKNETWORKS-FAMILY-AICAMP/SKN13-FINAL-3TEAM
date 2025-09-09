@@ -225,7 +225,7 @@ QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # allauth가 여러 사이트를 관리할 수 있도록 설정
-SITE_ID = 7
+SITE_ID = 8
 LOGIN_REDIRECT_URL = '/api/oauth/callback/' # allauth, 로그인 후 커스텀 OAuth 콜백으로 리디렉션
 SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/api/oauth/callback/' # 소셜 로그인 후 리디렉션
 
