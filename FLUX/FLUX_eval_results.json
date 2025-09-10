@@ -1,0 +1,1261 @@
+{
+  "summary": {
+    "CLIP": {
+      "base_avg": 24.020770656928587,
+      "lora_avg": 22.04441933685474
+    },
+    "FID": {
+      "base": 66.35466003417969,
+      "lora": 52.42274475097656,
+      "better": "LoRA"
+    }
+  },
+  "clip_details": [
+    {
+      "file_name": "Hyundai-Clix_Concept-2001-thb",
+      "prompt": "(feDesigned by Hyundai, 3/4 front view, coupe, two-box, short wheelbase, wide stance, low beltline, taut body surfacing, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, tinted greenhouse, aerodynamic curves, metallic silver paint",
+      "base_score": 26.789974212646484,
+      "lora_score": 25.112646102905273,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-HCD-14_Genesis_Concept-2013-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, long wheelbase, wide stance, short overhangs, clean surfacing, sharp shoulder lines, prominent grille, large air intakes, sleek bumper, flush door handles, 20-inch alloy wheels, low-profile tires, tinted glass, chrome accents, metallic paint",
+      "base_score": 23.688949584960938,
+      "lora_score": 25.721227645874023,
+      "improved": true
+    },
+    {
+      "file_name": "Hyundai-Hexa_Space_Concept-2012-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact MPV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, aggressive grille, angular intakes, sculpted hood, recessed door handles, body-colored rocker, 17-inch alloy wheels, low-profile tires, tinted mirrors, B-pillars, roof rails, panoramic DLO, glossy metallic blue paint",
+      "base_score": 23.439348220825195,
+      "lora_score": 20.77029037475586,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-Intrado_Concept-2014-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted hood, sharp chamfers, aggressive grille, large air intakes, angular bumper, LED DRL, sleek headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, black trim, tinted mirrors, roof rails, metallic gray paint",
+      "base_score": 20.513916015625,
+      "lora_score": 19.31658363342285,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-Nuvis_Concept-2009-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, LED DRL, sleek headlamps, flush door handles, 17-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, metallic silver paint",
+      "base_score": 26.438400268554688,
+      "lora_score": 24.097415924072266,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-QarmaQ_Concept-2007-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, soft body surfacing, angular shoulder lines, prominent grille, large air intakes, integrated bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 26.50904083251953,
+      "lora_score": 17.634559631347656,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-RM19_Concept-2019-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, sculpted hood, angular grille, large air intakes, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof spoiler, dynamic paint",
+      "base_score": 24.022686004638672,
+      "lora_score": 22.43790054321289,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-Santa_Cruz_Crossover_Truck_Concept-2015-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, wide bumper, hood scoop, LED DRL, sleek headlamps, integrated door handles, high beltline, chrome cladding, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic gray paint",
+      "base_score": 23.846134185791016,
+      "lora_score": 19.29393196105957,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-Veloster_Concept-2007-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive hood bulge, angular grille, large air intakes, sport bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof mirrors, no aero add-ons, glossy red paint",
+      "base_score": 27.493518829345703,
+      "lora_score": 26.56061553955078,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-Vision_T_Concept-2019-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, taut body surfacing, angular shoulder lines, aggressive grille, narrow intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, metallic blue paint",
+      "base_score": 25.225400924682617,
+      "lora_score": 21.853675842285156,
+      "improved": false
+    },
+    {
+      "file_name": "Hyundai-i-flow_Concept-2010-thb",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted greenhouse, integrated mirrors, roof spoiler, metallic silver paint",
+      "base_score": 24.618431091308594,
+      "lora_score": 25.148109436035156,
+      "improved": true
+    },
+    {
+      "file_name": "Large-40336-2020SonataHybrid-Limited-HamptonGray",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, short hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, body-colored mirrors, chrome accents, metallic gray paint",
+      "base_score": 27.438413619995117,
+      "lora_score": 24.539508819580078,
+      "improved": false
+    },
+    {
+      "file_name": "Large-40343-2020SonataHybrid-SEL-HamptonGray",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, angular shoulder lines, prominent grille, horizontal intakes, integrated bumper, narrow DRL, LED headlamps, flush door handles, multi-spoke alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 22.791963577270508,
+      "lora_score": 22.824665069580078,
+      "improved": true
+    },
+    {
+      "file_name": "Large-40593-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, aggressive beltline, sculpted shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic burgundy paint",
+      "base_score": 18.591524124145508,
+      "lora_score": 20.239423751831055,
+      "improved": true
+    },
+    {
+      "file_name": "Large-41251-2021Veloster",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, integrated mirrors, greenhouse with DLO, metallic paint",
+      "base_score": 26.165372848510742,
+      "lora_score": 26.889610290527344,
+      "improved": true
+    },
+    {
+      "file_name": "Large-41338-2021VelosterTurbo",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, taut surfacing, aggressive shoulder lines, mesh grille, angular intakes, aerodynamic bumper, sloping hood, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, vibrant red paint",
+      "base_score": 26.2879638671875,
+      "lora_score": 27.037948608398438,
+      "improved": true
+    },
+    {
+      "file_name": "Large-41383-2021VelosterTurbo",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, sculpted hood, angular grille, large air intakes, integrated bumper, LED DRL, sleek headlamps, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black side mirrors, roof spoiler, vibrant red paint",
+      "base_score": 25.611082077026367,
+      "lora_score": 24.431575775146484,
+      "improved": false
+    },
+    {
+      "file_name": "Large-41607-2021Palisade",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, angular intakes, sculpted hood, hidden door handles, black rocker cladding, LED DRL, projector headlamps, chrome accents, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome side mirrors, roof rails, metallic dark paint",
+      "base_score": 25.5460147857666,
+      "lora_score": 26.477214813232422,
+      "improved": true
+    },
+    {
+      "file_name": "Large-41871-2021VelosterN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, mesh grille, angular intakes, aerodynamic bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof spoiler, vibrant blue paint",
+      "base_score": 23.122777938842773,
+      "lora_score": 22.97283935546875,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42000-2021Kona",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, prominent bumper, sloping hood, flush door handles, body-colored rocker, cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic blue paint",
+      "base_score": 24.1718807220459,
+      "lora_score": 20.444034576416016,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42002-2021HyundaiTucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, LED DRL, sleek headlamps, slim taillamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic silver paint",
+      "base_score": 25.38182830810547,
+      "lora_score": 22.680601119995117,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42085-2021Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, black rocker cladding, integrated fog lights, LED DRL, sleek headlamps, chrome accents, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 22.203937530517578,
+      "lora_score": 21.75684356689453,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42091-2021Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, black rocker cladding, clear DRL, LED headlamps, fog lights, 18-inch alloy wheels, low-profile tires, chrome side mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 21.17679214477539,
+      "lora_score": 22.166261672973633,
+      "improved": true
+    },
+    {
+      "file_name": "Large-42113-2021Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, integrated bumper, hood scoop, LED DRL, sleek headlamps, hidden door handles, body-colored rocker, cladding, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 27.094873428344727,
+      "lora_score": 22.990224838256836,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42117-2021Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, black rocker cladding, LED DRL, sleek headlamps, fog lamp cutouts, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, panoramic greenhouse, roof rails, metallic silver paint",
+      "base_score": 22.360679626464844,
+      "lora_score": 16.17906379699707,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42253-2021NEXO",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, sleek DRL, LED headlamps, integrated fog lights, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint",
+      "base_score": 25.872779846191406,
+      "lora_score": 21.909046173095703,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42407-2021KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, angular DRL, LED headlamps, taillamps, 18-inch alloy wheels, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic gray paint",
+      "base_score": 22.834693908691406,
+      "lora_score": 23.21185302734375,
+      "improved": true
+    },
+    {
+      "file_name": "Large-42414-2021KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, prominent grille, large air intakes, sculpted hood, integrated door handles, black rocker cladding, LED DRL, sleek headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, chrome trim accents, matte gray paint",
+      "base_score": 25.284326553344727,
+      "lora_score": 19.822486877441406,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42415-2021KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, prominent grille, large air intakes, integrated bumper, sleek hood, flush door handles, black rocker cladding, LED DRL, projector headlamps, fog lamp cutouts, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint",
+      "base_score": 21.555971145629883,
+      "lora_score": 16.099824905395508,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42490-2021IONIQElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, prominent grille, narrow intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, no roof rails, silver paint",
+      "base_score": 22.33487892150879,
+      "lora_score": 22.419986724853516,
+      "improved": true
+    },
+    {
+      "file_name": "Large-42552-2021Venue",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, sporty bumper, sloped hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, black roof, chrome trim, body mirrors, roof rails, metallic gray paint",
+      "base_score": 21.943357467651367,
+      "lora_score": 17.207019805908203,
+      "improved": false
+    },
+    {
+      "file_name": "Large-42954-2021SonataNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, taut body surfacing, aggressive fascia, narrow grille, large air intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, roofline trim, hyundai car style",
+      "base_score": 25.51591682434082,
+      "lora_score": 22.760244369506836,
+      "improved": false
+    },
+    {
+      "file_name": "Large-43668-2022Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, metallic burgundy paint",
+      "base_score": 22.617923736572266,
+      "lora_score": 17.36964225769043,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44118-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, glossy blue paint",
+      "base_score": 27.90753936767578,
+      "lora_score": 25.270641326904297,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44120-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, clean greenhouse, dynamic stance, glossy deep blue paint",
+      "base_score": 22.6956844329834,
+      "lora_score": 22.09825897216797,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44124-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black side mirrors, metallic white paint",
+      "base_score": 23.154844284057617,
+      "lora_score": 20.35123062133789,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44126-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, fastback roofline, flush door handles, 19-inch alloy wheels, low-profile tires, tinted mirrors, chrome accents, panoramic DLO, metallic white paint",
+      "base_score": 24.97490119934082,
+      "lora_score": 26.44281005859375,
+      "improved": true
+    },
+    {
+      "file_name": "Large-44129-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, panoramic DLO, body-colored mirrors, Hyundai car style",
+      "base_score": 26.144439697265625,
+      "lora_score": 21.086156845092773,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44408-2021Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted mirrors, chrome accents, metallic silver paint",
+      "base_score": 25.09421157836914,
+      "lora_score": 25.98911476135254,
+      "improved": true
+    },
+    {
+      "file_name": "Large-44744-2022KonaLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, honeycomb pattern, narrow DRL, LED headlamps, body-colored door handles, black lower cladding, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy blue paint",
+      "base_score": 21.24785041809082,
+      "lora_score": 19.912254333496094,
+      "improved": false
+    },
+    {
+      "file_name": "Large-44750-2022KonaLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, prominent grille, large air intakes, sculpted hood, flush door handles, black lower cladding, 17-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy blue paint",
+      "base_score": 21.60854721069336,
+      "lora_score": 20.124780654907227,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45198-2022TucsonPlug-inHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp DRL, LED headlamps, body-colored door handles, high beltline, chrome cladding, 18-inch alloy wheels, low-profile tires, integrated mirrors, roof rails, metallic gray paint",
+      "base_score": 21.860897064208984,
+      "lora_score": 19.710540771484375,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45206-2022TucsonPlug-inHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, sharp beltline, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 20-inch multi-spoke wheels, low-profile tires, tinted mirrors, black roof, chrome accents, LED DRL, sharp headlamps, integrated fog lights, roof rails, metallic gray paint",
+      "base_score": 20.897903442382812,
+      "lora_score": 19.84654426574707,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45239-2022TucsonNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, LED DRL, projector headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic dark gray paint",
+      "base_score": 23.956796646118164,
+      "lora_score": 20.306270599365234,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45623-2022TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, panoramic DLO, tinted windows, roof rails, metallic white paint",
+      "base_score": 23.811918258666992,
+      "lora_score": 23.331905364990234,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45627-2022TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 18.859764099121094,
+      "lora_score": 20.356739044189453,
+      "improved": true
+    },
+    {
+      "file_name": "Large-45957-2022IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic gray paint",
+      "base_score": 25.510784149169922,
+      "lora_score": 24.656278610229492,
+      "improved": false
+    },
+    {
+      "file_name": "Large-45978-2022IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood bulge, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, matte gray paint",
+      "base_score": 24.119524002075195,
+      "lora_score": 26.953739166259766,
+      "improved": true
+    },
+    {
+      "file_name": "Large-46196-2022IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, flush door handles, sculpted rocker, black cladding, LED DRL, sleek headlamps, LED taillamps, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 25.111675262451172,
+      "lora_score": 22.242847442626953,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46242-HyundaiMotorUpgradesDesignandPerformanceofXCIENTFuelCellTruckforGlobalExpansion",
+      "prompt": "Designed by Hyundai, 3/4 front view, semi-truck, three-box, long wheelbase, wide stance, short overhangs, flat beltline, angular shoulder lines, prominent grille, large air intakes, integrated bumper, LED headlights, flush door handles, dual exhaust, 18-inch wheels, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic white paint",
+      "base_score": 23.714004516601562,
+      "lora_score": 22.375995635986328,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46438-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy red paint",
+      "base_score": 28.510452270507812,
+      "lora_score": 23.921323776245117,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46497-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, panoramic DLO, body-colored mirrors, hyundai car style",
+      "base_score": 25.181495666503906,
+      "lora_score": 23.184452056884766,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46510-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black roof, glossy black paint",
+      "base_score": 25.6414737701416,
+      "lora_score": 24.96803855895996,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46518-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse roofline, metallic gray paint",
+      "base_score": 25.74433708190918,
+      "lora_score": 24.900875091552734,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46525-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, black trim accents, glossy white paint",
+      "base_score": 25.129573822021484,
+      "lora_score": 21.100088119506836,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46537-2022Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp beltline, taut body surfacing, angular shoulder lines, aggressive grille, narrow intakes, sculpted hood, flush door handles, black rocker, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, LED DRL, sleek headlamps, integrated taillamps, panoramic DLO, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 23.100717544555664,
+      "lora_score": 21.839502334594727,
+      "improved": false
+    },
+    {
+      "file_name": "Large-46622-2022ElantraHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, streamlined greenhouse, metallic gray paint",
+      "base_score": 27.374393463134766,
+      "lora_score": 23.117387771606445,
+      "improved": false
+    },
+    {
+      "file_name": "Large-47203-2022Accent",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, integrated intakes, sleek bumper, flush door handles, 17-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, body-colored side mirrors, red paint",
+      "base_score": 23.189208984375,
+      "lora_score": 23.435466766357422,
+      "improved": true
+    },
+    {
+      "file_name": "Large-47246-2022VelosterN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, taut surfacing, aggressive shoulder lines, honeycomb grille, angular intakes, black bumper, sloping hood, flush door handles, 18-inch black wheels, low-profile tires, tinted greenhouse, roof spoiler, red accent trim, light blue paint",
+      "base_score": 26.85030174255371,
+      "lora_score": 19.224781036376953,
+      "improved": false
+    },
+    {
+      "file_name": "Large-47649-2022KonaN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, no aero add-ons, vibrant red paint",
+      "base_score": 25.770795822143555,
+      "lora_score": 22.773719787597656,
+      "improved": false
+    },
+    {
+      "file_name": "Large-47846-2022SantaFeXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding DRL, LED headlamps, body-colored door handles, high beltline, black cladding, 19-inch alloy wheels, low-profile tires, panoramic roof rails, tinted greenhouse, chrome accents, dark metallic paint",
+      "base_score": 24.845726013183594,
+      "lora_score": 22.579288482666016,
+      "improved": false
+    },
+    {
+      "file_name": "Large-48002-2022SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, prominent bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear headlamps, LED DRL, tinted greenhouse, chrome trim, metallic beige paint",
+      "base_score": 21.967477798461914,
+      "lora_score": 20.055706024169922,
+      "improved": false
+    },
+    {
+      "file_name": "Large-48781-2022ElantraN",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof spoiler, glossy dark blue paint",
+      "base_score": 24.558147430419922,
+      "lora_score": 20.325542449951172,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50406-HyundaiIONIQ6ElectrifiedStreamlinerDebutswithExtendedRangeandInnovativePersonalSpace",
+      "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut surfacing, sharp shoulder lines, narrow grille, integrated intakes, sleek bumper, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof spoiler, silver paint",
+      "base_score": 19.8174991607666,
+      "lora_score": 23.289234161376953,
+      "improved": true
+    },
+    {
+      "file_name": "Large-50633-2023SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, large air intakes, integrated bumper, flush door handles, black rocker cladding, LED DRL, sleek headlamps, alloy wheels, 18-inch size, multi-spoke design, low-profile tires, tinted mirrors, roof rails, metallic light blue paint",
+      "base_score": 21.975841522216797,
+      "lora_score": 18.72232437133789,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50635-2023SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, black rocker cladding, LED DRL, sleek headlamps, integrated fog lights, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint",
+      "base_score": 26.26154327392578,
+      "lora_score": 19.948772430419922,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50705-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, flush door handles, sculpted rocker, black cladding, angular DRL, LED headlamps, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic roof, roof rails, metallic silver paint",
+      "base_score": 24.13983917236328,
+      "lora_score": 25.75564956665039,
+      "improved": true
+    },
+    {
+      "file_name": "Large-50716-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 23.63806915283203,
+      "lora_score": 19.438623428344727,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50788-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, flush door handles, sculpted hood, LED DRL, sleek headlamps, black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, body-colored side mirrors, roof rails, metallic gray paint",
+      "base_score": 24.667518615722656,
+      "lora_score": 22.66707420349121,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50842-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean surfacing, narrow grille, integrated intakes, sleek hood, flush door handles, black rocker cladding, angular bumper, LED DRL, slim headlamps, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 24.923927307128906,
+      "lora_score": 20.273046493530273,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50885-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular bumper, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, panoramic greenhouse, chrome side mirrors, roof rails, contrasting roof, matte paint",
+      "base_score": 22.79121208190918,
+      "lora_score": 17.275970458984375,
+      "improved": false
+    },
+    {
+      "file_name": "Large-50937-2023IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, angular DRL, LED headlamps, flush door handles, black cladding, 18-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, dark paint",
+      "base_score": 24.848485946655273,
+      "lora_score": 20.75444984436035,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51272-2023KonaLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, dynamic dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, protruding bumper, flush door handles, 18-inch alloy wheels, sporty profile, LED DRL, sleek headlamps, integrated turn signals, black lower cladding, roof rails, glossy blue paint",
+      "base_score": 23.318281173706055,
+      "lora_score": 22.97479248046875,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51299-2023KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, black trim, body-colored mirrors, panoramic DLO, chrome accents, glossy cobalt blue paint",
+      "base_score": 24.102275848388672,
+      "lora_score": 22.452302932739258,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51307-2023KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean shoulder lines, angular grille, narrow intakes, integrated bumper, swept hood, flush door handles, body-colored rocker, black cladding, LED DRL, sleek headlamps, slim taillamps, 18-inch multi-spoke wheels, alloy finish, low-profile tires, tinted mirrors, black trim accents, metallic gray paint",
+      "base_score": 22.857526779174805,
+      "lora_score": 21.4774227142334,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51466-2023Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, sleek headlamps, flush door handles, 18-inch multi-spoke wheels, low-profile tires, body-colored mirrors, panoramic greenhouse, chrome accents, glossy burgundy paint",
+      "base_score": 23.73591423034668,
+      "lora_score": 22.2136287689209,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51503-2023Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black side mirrors, panoramic DLO, hyundai car style",
+      "base_score": 24.384498596191406,
+      "lora_score": 23.372304916381836,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51524-2023Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, glossy paint",
+      "base_score": 30.681249618530273,
+      "lora_score": 28.705245971679688,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51538-2023Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, aggressive beltline, sculpted shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic burgundy paint",
+      "base_score": 25.337108612060547,
+      "lora_score": 23.931015014648438,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51541-2023Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, sloping hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, clean stance, dynamic paint",
+      "base_score": 24.865957260131836,
+      "lora_score": 21.412853240966797,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51638-2023ElantraHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted mirrors, black trim accents, metallic gray paint",
+      "base_score": 24.980268478393555,
+      "lora_score": 23.54224967956543,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51642-2023ElantraHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, hidden door handles, black rockers, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, sleek DRL, LED headlamps, chrome accents, metallic gray paint",
+      "base_score": 25.048784255981445,
+      "lora_score": 20.868488311767578,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51876-2023SantaFeXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, black rock cladding, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome side mirrors, roof rails, metallic blue paint",
+      "base_score": 24.528759002685547,
+      "lora_score": 24.88926887512207,
+      "improved": true
+    },
+    {
+      "file_name": "Large-51937-2023KonaN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, glossy red paint",
+      "base_score": 26.50638771057129,
+      "lora_score": 25.143783569335938,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51959-2023KonaN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, black trim accents, tinted greenhouse, chrome side mirrors, roof rails, glossy red paint",
+      "base_score": 18.28608512878418,
+      "lora_score": 13.939743041992188,
+      "improved": false
+    },
+    {
+      "file_name": "Large-51968-2023KonaN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, glossy white paint",
+      "base_score": 21.50040054321289,
+      "lora_score": 19.368148803710938,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52033-2023ElantraN",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, angular grille, large air intakes, sculpted hood, hidden door handles, black lower bumper, red accent trim, multi-spoke alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, aerodynamic splitter, glossy white paint",
+      "base_score": 22.87508773803711,
+      "lora_score": 19.93352699279785,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52041-2023ElantraN",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, black bumper, sloping hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, red trim accents, tinted windows, body-colored side mirrors, aerodynamic splitter, metallic white paint",
+      "base_score": 24.495464324951172,
+      "lora_score": 19.917219161987305,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52159-2023Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, metallic burgundy paint",
+      "base_score": 21.163562774658203,
+      "lora_score": 18.94613265991211,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52226-2023TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, tinted windows, roof rails, metallic white paint",
+      "base_score": 19.119632720947266,
+      "lora_score": 21.754972457885742,
+      "improved": true
+    },
+    {
+      "file_name": "Large-52235-2023TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear taillamps, LED lighting, metallic silver paint",
+      "base_score": 22.29818344116211,
+      "lora_score": 21.224992752075195,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52313-2023SantaCruzNight",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sloped hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, integrated mirrors, roof rails, metallic black paint",
+      "base_score": 23.995105743408203,
+      "lora_score": 21.32445526123047,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52322-2023SantaCruzNight",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, sculpted hood, LED DRL, projector headlamps, integrated fog lights, flush door handles, body-colored rocker cladding, 20-inch alloy wheels, low-profile tires, chrome accents, tinted mirrors, panoramic greenhouse, glossy black paint",
+      "base_score": 24.26332664489746,
+      "lora_score": 16.76024055480957,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52470-2023ElantraNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp beltline, dynamic shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black side mirrors, roof pillars, aerodynamic bumper, metallic blue paint",
+      "base_score": 22.764001846313477,
+      "lora_score": 22.50688934326172,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52480-2023ElantraNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, greenhouse, chrome accents, glossy blue paint",
+      "base_score": 25.016456604003906,
+      "lora_score": 24.9725399017334,
+      "improved": false
+    },
+    {
+      "file_name": "Large-52938-2023IONIQ6",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, flush door handles, aerodynamic rocker, narrow grille, LED DRL, angular headlamps, black lower bumper, 20-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, metallic silver paint",
+      "base_score": 26.285869598388672,
+      "lora_score": 27.692520141601562,
+      "improved": true
+    },
+    {
+      "file_name": "Large-52944-2023IONIQ6",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, slim intakes, aerodynamic bumper, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, no roof rails, no spoiler, matte silver paint, contrast roof, no trim accents",
+      "base_score": 27.11673355102539,
+      "lora_score": 22.331249237060547,
+      "improved": false
+    },
+    {
+      "file_name": "Large-53016-2023IONIQ6",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek greenhouse, smooth body surfacing, narrow shoulder lines, closed grille, slim intakes, angular bumper, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, aerodynamic design, silver paint",
+      "base_score": 25.30784034729004,
+      "lora_score": 24.113773345947266,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54041-2024KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular chamfers, mesh grille, narrow intakes, sharp bumper, flush door handles, black rocker cladding, 19-inch star-spoke wheels, low-profile tires, tinted mirrors, roof rails, glossy yellow paint",
+      "base_score": 22.03168487548828,
+      "lora_score": 18.49972915649414,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54055-2024KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, black lower bumper, sleek hood, flush door handles, black rocker cladding, LED DRL, angular headlamps, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, vibrant lime green paint",
+      "base_score": 22.140777587890625,
+      "lora_score": 19.857463836669922,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54173-2024KonaNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, tinted mirrors, roof rails, integrated spoiler, glossy red paint",
+      "base_score": 22.840667724609375,
+      "lora_score": 22.3992862701416,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54220-2023IONIQ6Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, taut body surfacing, aggressive shoulder lines, narrow grille, large air intakes, low bumper, hood bulge, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, metallic red paint",
+      "base_score": 21.736495971679688,
+      "lora_score": 14.242574691772461,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54352-IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, flat beltline, taut surfacing, aggressive shoulder lines, narrow grille, large air intakes, integrated bumper, flush door handles, 18-inch alloy wheels, low-profile tires, body-colored mirrors, chrome trim, panoramic DLO, roof rails, metallic blue paint",
+      "base_score": 22.03587532043457,
+      "lora_score": 18.291404724121094,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54357-IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean surfacing, sharp shoulder lines, aggressive grille, wide intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof pillars, no aero add-ons, matte black finish, white camouflage pattern",
+      "base_score": 24.92067527770996,
+      "lora_score": 22.125125885009766,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54359-IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean surfacing, aggressive shoulder lines, prominent grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic blue paint",
+      "base_score": 22.896007537841797,
+      "lora_score": 21.029312133789062,
+      "improved": false
+    },
+    {
+      "file_name": "Large-54383-IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, aggressive chamfers, prominent grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim, tinted mirrors, roof rails, glossy paint",
+      "base_score": 25.672969818115234,
+      "lora_score": 19.847387313842773,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55289-2024IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated bumper, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, chrome trim, body-colored mirrors, panoramic DLO, tinted windows, roof rails, metallic silver paint",
+      "base_score": 23.808990478515625,
+      "lora_score": 18.406660079956055,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55291-2024IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, sharp shoulder lines, narrow grille, integrated bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, panoramic DLO, black roof, chrome accents, tinted mirrors, roof rails, metallic silver paint",
+      "base_score": 20.485095977783203,
+      "lora_score": 19.84879493713379,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55298-2024IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 26.13138198852539,
+      "lora_score": 19.754297256469727,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55386-2024IONIQ5",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, clean shoulder lines, angular grille, narrow intakes, LED DRL, sleek headlamps, flush door handles, 20-inch mesh-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, metallic gray paint",
+      "base_score": 25.8673095703125,
+      "lora_score": 21.808940887451172,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55735-2024IONIQ6Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, sculpted hood, angular chamfers, narrow grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, body-colored mirrors, roof spoiler, glossy red paint",
+      "base_score": 25.486473083496094,
+      "lora_score": 21.665679931640625,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55901-2024NEXO",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, sleek bumper, sloping hood, hidden door handles, black lower cladding, LED DRL, projector headlamps, chrome accents, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, roof rails, metallic white paint",
+      "base_score": 23.019283294677734,
+      "lora_score": 17.76820945739746,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55949-2024NEXO",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, multi-spoke design, low-profile tires, black trim, panoramic DLO, body-colored mirrors, roof rails, metallic white paint",
+      "base_score": 28.19409942626953,
+      "lora_score": 21.13738441467285,
+      "improved": false
+    },
+    {
+      "file_name": "Large-55966-2024Palisade",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, clean shoulder lines, aggressive grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 20-inch multi-spoke wheels, low-profile tires, chrome cladding, body-colored side mirrors, roof rails, metallic paint",
+      "base_score": 27.222549438476562,
+      "lora_score": 25.71957778930664,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56035-2024Palisade",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large intakes, angular DRL, LED headlamps, body-colored door handles, 20-inch multi-spoke wheels, low-profile tires, chrome accents, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 27.64080238342285,
+      "lora_score": 28.111373901367188,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56086-2024PalisadeXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, taut body surfacing, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, glossy black paint",
+      "base_score": 25.26569366455078,
+      "lora_score": 23.704933166503906,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56098-2024Tucson",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sleek bumper, sloped hood, hidden door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, black trim, chrome accents, tinted mirrors, roof rails, glossy burgundy paint",
+      "base_score": 24.303375244140625,
+      "lora_score": 20.994029998779297,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56159-2024TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 23.469635009765625,
+      "lora_score": 19.088468551635742,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56166-2024TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear taillamps, LED lighting, metallic silver paint",
+      "base_score": 21.5664119720459,
+      "lora_score": 19.717985153198242,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56168-2024TucsonHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted hood, sharp chamfers, mesh grille, rectangular intakes, angular bumper, LED DRL, projector headlamps, hidden door handles, 19-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, roof rails, metallic white paint",
+      "base_score": 20.69538688659668,
+      "lora_score": 21.644458770751953,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56213-2024TucsonPlug-InHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, 19-inch alloy wheels, low-profile tires, black side mirrors, roof rails, metallic gray paint",
+      "base_score": 26.67206573486328,
+      "lora_score": 25.24936866760254,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56270-2024TucsonNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, dynamic beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, metallic dark paint",
+      "base_score": 24.02690887451172,
+      "lora_score": 25.334632873535156,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56271-2024TucsonNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, dynamic beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding bumper, flush door handles, 20-inch multi-spoke wheels, gold-accented rims, low-profile tires, chrome side mirrors, roof rails, glossy black paint",
+      "base_score": 22.73894500732422,
+      "lora_score": 19.756078720092773,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56523-2024SantaFe",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, black side rockers, tinted greenhouse, roof rails, matte black roof box, vibrant orange paint",
+      "base_score": 20.944326400756836,
+      "lora_score": 22.95149803161621,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56590-2024SantaFeXRTConcept",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, taut body surfacing, aggressive shoulder lines, prominent grille, rectangular intakes, integrated bumper, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, off-road tires, roof rails, roof spoiler, matte brown paint",
+      "base_score": 20.104238510131836,
+      "lora_score": 19.81278419494629,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56696-2024Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, sloping dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, chrome side mirrors, roof rails, metallic gray paint",
+      "base_score": 27.13229751586914,
+      "lora_score": 25.094928741455078,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56750-2024ElantraNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, aggressive bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, black trim accents, matte paint",
+      "base_score": 25.439496994018555,
+      "lora_score": 21.835777282714844,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56767-2024SonataNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, sloping greenhouse, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sculpted hood, flush door handles, 20-inch alloy wheels, low-profile tires, tinted glass, chrome accents, LED DRL, sleek headlamps, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 24.71087646484375,
+      "lora_score": 21.54104232788086,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56779-2024SonataNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, short hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DRL, LED headlamps, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 27.057355880737305,
+      "lora_score": 27.4663028717041,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56793-2024SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, LED DRL, sleek headlamps, integrated turn signals, chrome accents, dark mirrors, metallic gray paint",
+      "base_score": 24.007610321044922,
+      "lora_score": 25.14112663269043,
+      "improved": true
+    },
+    {
+      "file_name": "Large-56799-2024SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, aggressive fascia, narrow grille, angular intakes, LED DRL, sharp headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style",
+      "base_score": 25.6439151763916,
+      "lora_score": 23.73149299621582,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56800-2024SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sleek bumper, flush hood, integrated door handles, low stance, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, panoramic greenhouse, tinted windows, aerodynamic design, dark metallic paint",
+      "base_score": 22.903600692749023,
+      "lora_score": 21.46061134338379,
+      "improved": false
+    },
+    {
+      "file_name": "Large-56804-2024SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, narrow grille, aggressive intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, tinted mirrors, chrome accents, metallic gray paint",
+      "base_score": 24.890399932861328,
+      "lora_score": 24.25874900817871,
+      "improved": false
+    },
+    {
+      "file_name": "Large-57013-2024Kona",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, angular grille, narrow intakes, sculpted hood, flush door handles, black rocker cladding, LED DRL, angular headlamps, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, metallic gray paint",
+      "base_score": 13.196272850036621,
+      "lora_score": 16.11865997314453,
+      "improved": true
+    },
+    {
+      "file_name": "Large-57776-2024SantaFeCalligraphy",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, angular bumper, hood with subtle bulge, flush door handles, 20-inch multi-spoke wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic bronze paint",
+      "base_score": 26.532150268554688,
+      "lora_score": 21.45843505859375,
+      "improved": false
+    },
+    {
+      "file_name": "Large-58280-2024SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, prominent bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, tinted mirrors, roof rails, metallic gray paint",
+      "base_score": 21.70296859741211,
+      "lora_score": 22.34123420715332,
+      "improved": true
+    },
+    {
+      "file_name": "Large-58332-2024SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, prominent bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear headlamps, LED DRL, tinted greenhouse, chrome trim, metallic beige paint",
+      "base_score": 21.33595848083496,
+      "lora_score": 14.87412166595459,
+      "improved": false
+    },
+    {
+      "file_name": "Large-58335-2024SantaCruz",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, hidden door handles, black lower bumper, LED DRL, sleek headlamps, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 27.896032333374023,
+      "lora_score": 27.02798843383789,
+      "improved": false
+    },
+    {
+      "file_name": "Large-58352-2024SantaCruzNight",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, sharp beltline, aggressive shoulder lines, prominent grille, large air intakes, angular bumper, hood bulge, LED DRL, projector headlamps, integrated fog lights, flush door handles, 20-inch alloy wheels, low-profile tires, black side mirrors, roof rails, glossy black paint",
+      "base_score": 22.624160766601562,
+      "lora_score": 21.643518447875977,
+      "improved": false
+    },
+    {
+      "file_name": "Large-58419-2024TucsonXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sculpted hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic silver paint",
+      "base_score": 22.450851440429688,
+      "lora_score": 17.78485870361328,
+      "improved": false
+    },
+    {
+      "file_name": "Large-58426-2024TucsonXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic silver paint",
+      "base_score": 22.76593780517578,
+      "lora_score": 22.937990188598633,
+      "improved": true
+    },
+    {
+      "file_name": "Large-59040-2024SantaFe",
+      "prompt": "Designed by Hyundai, 3/4 front view, full-size SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic gray paint",
+      "base_score": 24.123491287231445,
+      "lora_score": 20.416065216064453,
+      "improved": false
+    },
+    {
+      "file_name": "Large-59057-2024SantaFe",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, black bumper, hood with subtle bulge, angular DRL, LED headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic gray paint",
+      "base_score": 25.091297149658203,
+      "lora_score": 24.173381805419922,
+      "improved": false
+    },
+    {
+      "file_name": "Large-59367-2024SantaFeMediaDriveNashvilleTN",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, taut body surfacing, angular shoulder lines, prominent grille, large intakes, integrated bumper, hood with subtle bulge, LED DRL, projector headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic brown paint",
+      "base_score": 22.680618286132812,
+      "lora_score": 24.403051376342773,
+      "improved": true
+    },
+    {
+      "file_name": "Large-59606-2025IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof rails, metallic blue paint",
+      "base_score": 25.84676742553711,
+      "lora_score": 24.0872745513916,
+      "improved": false
+    },
+    {
+      "file_name": "Large-59672-2025IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, angular intakes, LED DRL, sleek headlamps, flush door handles, black rocker, red trim accents, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, aerodynamic bumper, metallic white paint",
+      "base_score": 26.779052734375,
+      "lora_score": 22.83930206298828,
+      "improved": false
+    },
+    {
+      "file_name": "Large-61767-2025IONIQ6",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, aggressive fascia, narrow grille, large air intakes, angular DRL, LED headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, roof rails, metallic silver paint",
+      "base_score": 23.85150718688965,
+      "lora_score": 27.687402725219727,
+      "improved": true
+    },
+    {
+      "file_name": "Large-61808-2025IONIQ6",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, smooth beltline, clean shoulder lines, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, tinted windows, aerodynamic bumper, metallic silver paint",
+      "base_score": 22.444162368774414,
+      "lora_score": 20.068710327148438,
+      "improved": false
+    },
+    {
+      "file_name": "Large-61898-2025IONIQ6SE",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, panoramic greenhouse, no roof rails, no spoiler, silver paint",
+      "base_score": 23.122331619262695,
+      "lora_score": 20.49674415588379,
+      "improved": false
+    },
+    {
+      "file_name": "Large-61967-2025IONIQ6Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, aggressive fascia, narrow grille, large air intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, LED DRL, angular headlamps, body-colored side mirrors, roof rails, metallic burgundy paint",
+      "base_score": 22.643978118896484,
+      "lora_score": 19.956268310546875,
+      "improved": false
+    },
+    {
+      "file_name": "Large-62239-2025NEXO",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, mesh grille, narrow intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, integrated turn signals, chrome accents, panoramic roof, body-colored mirrors, roof rails, metallic gray paint",
+      "base_score": 22.702592849731445,
+      "lora_score": 22.683256149291992,
+      "improved": false
+    },
+    {
+      "file_name": "Large-62275-2025NEXO",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, hidden door handles, body-colored rocker, cladding, sleek DRL, LED headlamps, fog lights, 18-inch alloy wheels, low-profile tires, black trim, panoramic DLO, body-colored mirrors, roof rails, metallic white paint",
+      "base_score": 19.76195526123047,
+      "lora_score": 17.106876373291016,
+      "improved": false
+    },
+    {
+      "file_name": "Large-62578-2025KonaNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, angular grille, large air intakes, sculpted hood, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic red paint",
+      "base_score": 21.63909149169922,
+      "lora_score": 22.07423210144043,
+      "improved": true
+    },
+    {
+      "file_name": "Large-62646-2025SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, aggressive fascia, narrow grille, angular intakes, LED DRL, sharp headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style",
+      "base_score": 24.43988037109375,
+      "lora_score": 23.2738037109375,
+      "improved": false
+    },
+    {
+      "file_name": "Large-62654-2025SonataHybridLimited",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, narrow grille, integrated intakes, sleek bumper, flush door handles, 19-inch alloy wheels, low-profile tires, blacked-out pillars, panoramic greenhouse, chrome accents, matte gray paint",
+      "base_score": 27.791101455688477,
+      "lora_score": 24.136274337768555,
+      "improved": false
+    },
+    {
+      "file_name": "Large-62796-2025PalisadeXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, taut body surfacing, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, glossy black paint",
+      "base_score": 25.89980697631836,
+      "lora_score": 24.077293395996094,
+      "improved": false
+    },
+    {
+      "file_name": "Large-63142-2025IONIQ5XRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean shoulder lines, aggressive grille, large air intakes, angular hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, matte black accents, two-tone paint",
+      "base_score": 23.764625549316406,
+      "lora_score": 24.20760154724121,
+      "improved": true
+    },
+    {
+      "file_name": "Large-63164-2025IONIQ5XRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, clean body surfacing, narrow grille, large air intakes, flush headlamps, LED DRL, black door handles, body-colored rocker, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body mirrors, roof rails, metallic gray paint",
+      "base_score": 24.846628189086914,
+      "lora_score": 25.493148803710938,
+      "improved": true
+    },
+    {
+      "file_name": "Large-64562-2024SantaFeHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic brown paint",
+      "base_score": 22.550695419311523,
+      "lora_score": 22.003463745117188,
+      "improved": false
+    },
+    {
+      "file_name": "Large-64573-2024SantaFeHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent hood, flush door handles, 20-inch multi-spoke wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, matte paint",
+      "base_score": 23.688491821289062,
+      "lora_score": 24.81463623046875,
+      "improved": true
+    },
+    {
+      "file_name": "Large-65182-2025IONIQ5Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, matte black trim accents, dark metallic paint",
+      "base_score": 22.489442825317383,
+      "lora_score": 21.902692794799805,
+      "improved": false
+    },
+    {
+      "file_name": "Large-65556-2026PalisadeHybridCalligraphy",
+      "prompt": "Designed by Hyundai, 3/4 front view, full-size SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, horizontal intakes, prominent bumper, chrome accents, LED DRL, sleek headlamps, flush door handles, 22-inch multi-spoke wheels, low-profile tires, chrome cladding, body-colored mirrors, roof rails, metallic black paint",
+      "base_score": 23.52178955078125,
+      "lora_score": 24.043577194213867,
+      "improved": true
+    },
+    {
+      "file_name": "Large-66034-2026IONIQ9",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, clean shoulder lines, horizontal grille, large air intakes, angular DRL, LED headlamps, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim, chrome accents, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 26.87862205505371,
+      "lora_score": 26.760160446166992,
+      "improved": false
+    },
+    {
+      "file_name": "Large-66048-2026IONIQ9",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, clean beltline, sharp shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 22.509082794189453,
+      "lora_score": 23.064868927001953,
+      "improved": true
+    },
+    {
+      "file_name": "Large-66520-2026Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, angular shoulder lines, aggressive grille, narrow intakes, integrated bumper, LED DRL, sleek headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style",
+      "base_score": 26.149728775024414,
+      "lora_score": 25.65062713623047,
+      "improved": false
+    },
+    {
+      "file_name": "Large-66531-2026Elantra",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse roofline, metallic gray paint",
+      "base_score": 21.00730323791504,
+      "lora_score": 23.6374568939209,
+      "improved": true
+    },
+    {
+      "file_name": "Large-66576-2026ElantraHybrid",
+      "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, chrome accents, tinted mirrors, metallic gray paint",
+      "base_score": 26.988685607910156,
+      "lora_score": 25.49640464782715,
+      "improved": false
+    },
+    {
+      "file_name": "Large-66666-2026Venue",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, body mirrors, roof rails, metallic dark blue paint",
+      "base_score": 18.685813903808594,
+      "lora_score": 16.330387115478516,
+      "improved": false
+    },
+    {
+      "file_name": "Large-66697-2026KonaElectric",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, prominent bumper, sculpted hood, flush door handles, black rocker cladding, LED DRL, sleek headlamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, vibrant lime green paint",
+      "base_score": 25.591941833496094,
+      "lora_score": 15.93197250366211,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67190-2025ElantraNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large hexagonal intakes, wide bumper, hood bulge, hidden door handles, black side rockers, sleek DRL, LED headlamps, 18-inch alloy wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, matte black paint",
+      "base_score": 25.863086700439453,
+      "lora_score": 20.94972801208496,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67209-2026ElantraNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, sharp DRL, LED headlamps, black door handles, sleek rocker, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, black side mirrors, metallic gray paint",
+      "base_score": 24.961387634277344,
+      "lora_score": 22.272066116333008,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67370-2026SonataNLine",
+      "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, short hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DRL, LED headlamps, body-colored mirrors, roof rails, metallic silver paint",
+      "base_score": 23.765155792236328,
+      "lora_score": 20.803176879882812,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67435-2026IONIQ5Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, black roof, chrome accents, tinted mirrors, panoramic DLO, roof rails, metallic silver paint",
+      "base_score": 25.282365798950195,
+      "lora_score": 26.283628463745117,
+      "improved": true
+    },
+    {
+      "file_name": "Large-67450-2026IONIQ5Limited",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular bumper, swept-back hood, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, glossy silver paint",
+      "base_score": 25.791627883911133,
+      "lora_score": 23.772052764892578,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67606-2026IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, black bumper, narrow DRL, LED headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, body-colored rocker, orange trim accents, metallic white paint",
+      "base_score": 24.092432022094727,
+      "lora_score": 23.552040100097656,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67615-2026IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, red accent trim, silver paint",
+      "base_score": 27.065122604370117,
+      "lora_score": 21.481525421142578,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67663-2026IONIQ5N",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof rails, metallic blue paint",
+      "base_score": 23.16985511779785,
+      "lora_score": 21.06989860534668,
+      "improved": false
+    },
+    {
+      "file_name": "Large-67809-2026SantaCruzXRT",
+      "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, large intakes, angular bumper, hood scoop, LED DRL, projector headlamps, integrated fog lights, flush door handles, black rocker cladding, 20-inch alloy wheels, multi-spoke design, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic burgundy paint",
+      "base_score": 21.082805633544922,
+      "lora_score": 16.66724967956543,
+      "improved": false
+    }
+  ]
+}

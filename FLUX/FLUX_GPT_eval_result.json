@@ -1,0 +1,3902 @@
+[
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도가 높습니다. 특히, 짧은 휠베이스와 공격적인 어깨 라인이 더 잘 표현되었습니다.",
+    "file_name": "Hyundai-Clix_Concept-2001-thb",
+    "prompt": "(feDesigned by Hyundai, 3/4 front view, coupe, two-box, short wheelbase, wide stance, low beltline, taut body surfacing, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, tinted greenhouse, aerodynamic curves, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인 완성도와 브랜드 정체성 측면에서 더 우수합니다.",
+    "file_name": "Hyundai-HCD-14_Genesis_Concept-2013-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, long wheelbase, wide stance, short overhangs, clean surfacing, sharp shoulder lines, prominent grille, large air intakes, sleek bumper, flush door handles, 20-inch alloy wheels, low-profile tires, tinted glass, chrome accents, metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히 3/4 전면 뷰와 컴팩트 MPV의 특성을 잘 나타내고 있습니다. Base 이미지는 현대차의 브랜드 정체성을 잘 유지하고 있으나, 프롬프트의 세부 사항을 덜 반영하고 있습니다.",
+    "file_name": "Hyundai-Hexa_Space_Concept-2012-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact MPV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, aggressive grille, angular intakes, sculpted hood, recessed door handles, body-colored rocker, 17-inch alloy wheels, low-profile tires, tinted mirrors, B-pillars, roof rails, panoramic DLO, glossy metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 세단 스타일로, SUV의 특징인 짧은 휠베이스와 좁은 트랙, 긴 오버행을 잘 반영하지 못했습니다. 그러나 디자인 완성도와 브랜드 정체성은 잘 유지되고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Hyundai-Intrado_Concept-2014-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted hood, sharp chamfers, aggressive grille, large air intakes, angular bumper, LED DRL, sleek headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, black trim, tinted mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소들을 더 잘 반영하고 있습니다. 특히 컴팩트한 해치백 디자인과 짧은 휠베이스가 더 잘 드러납니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Hyundai-Nuvis_Concept-2009-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, LED DRL, sleek headlamps, flush door handles, 17-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 세단에 가까운 디자인으로, 프롬프트의 SUV 특성을 덜 반영합니다.",
+    "file_name": "Hyundai-QarmaQ_Concept-2007-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, soft body surfacing, angular shoulder lines, prominent grille, large air intakes, integrated bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 특히 컴팩트 해치백의 짧은 휠베이스와 공격적인 어깨 라인을 잘 표현했습니다. Base 이미지도 훌륭하지만, LoRA가 전체적으로 더 잘 맞습니다.",
+    "file_name": "Hyundai-RM19_Concept-2019-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, sculpted hood, angular grille, large air intakes, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof spoiler, dynamic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 세단 스타일로, SUV의 특징을 잘 반영하지 못했습니다. 디자인 완성도와 브랜드 정체성은 양호하며, 이미지 품질은 우수합니다.",
+    "file_name": "Hyundai-Santa_Cruz_Crossover_Truck_Concept-2015-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, wide bumper, hood scoop, LED DRL, sleek headlamps, integrated door handles, high beltline, chrome cladding, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 디자인 완성도와 이미지 품질에서 더 우수합니다. 두 이미지 모두 프롬프트의 세부 사항을 완전히 반영하지는 못했지만, Base는 현대차의 브랜드 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Hyundai-Veloster_Concept-2007-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive hood bulge, angular grille, large air intakes, sport bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof mirrors, no aero add-ons, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 디자인 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다. Base 이미지도 우수하지만, 일부 디테일이 부족합니다.",
+    "file_name": "Hyundai-Vision_T_Concept-2019-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, taut body surfacing, angular shoulder lines, aggressive grille, narrow intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트에 잘 맞으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. 두 이미지 모두 높은 품질을 보여주지만, Base 이미지가 약간 더 날카로운 디자인 요소를 잘 표현하고 있습니다.",
+    "file_name": "Hyundai-i-flow_Concept-2010-thb",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted greenhouse, integrated mirrors, roof spoiler, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "두 이미지 모두 프롬프트에 충실하며 현대차의 디자인 요소를 잘 반영하고 있습니다. 그러나 LoRA 이미지가 디자인 완성도 면에서 더 세련된 디테일을 보여줍니다.",
+    "file_name": "Large-40336-2020SonataHybrid-Limited-HamptonGray",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, short hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, body-colored mirrors, chrome accents, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트에 충실하며, 디자인 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 이미지 품질도 우수하여 두 이미지 모두 동등하게 평가됩니다.",
+    "file_name": "Large-40343-2020SonataHybrid-SEL-HamptonGray",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, angular shoulder lines, prominent grille, horizontal intakes, integrated bumper, narrow DRL, LED headlamps, flush door handles, multi-spoke alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트와의 일치도가 낮습니다. 세단보다는 해치백 스타일에 가깝고, 메탈릭 버건디 색상도 없습니다. 디자인 완성도는 두 이미지 모두 무난하지만, 이미지 품질 면에서 Base가 더 나은 해상도를 보여줍니다.",
+    "file_name": "Large-40593-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, aggressive beltline, sculpted shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 또한 디자인 완성도가 더 높습니다.",
+    "file_name": "Large-41251-2021Veloster",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, integrated mirrors, greenhouse with DLO, metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 요소를 더 잘 구현했습니다. 디자인 완성도와 브랜드 정체성 면에서도 LoRA가 우수합니다.",
+    "file_name": "Large-41338-2021VelosterTurbo",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, taut surfacing, aggressive shoulder lines, mesh grille, angular intakes, aerodynamic bumper, sloping hood, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, vibrant red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 주요 요소를 잘 반영하고 있습니다. 그러나 빨간색 페인트가 아닌 점에서 프롬프트 충실도가 떨어집니다. 디자인 완성도와 브랜드 정체성은 현대차의 스타일을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-41383-2021VelosterTurbo",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, sculpted hood, angular grille, large air intakes, integrated bumper, LED DRL, sleek headlamps, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black side mirrors, roof spoiler, vibrant red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도와 현대차의 브랜드 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-41607-2021Palisade",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, angular intakes, sculpted hood, hidden door handles, black rocker cladding, LED DRL, projector headlamps, chrome accents, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome side mirrors, roof rails, metallic dark paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. 특히, 공격적인 숄더 라인과 메쉬 그릴, 공기역학적 범퍼 등의 디테일이 더 잘 표현되었습니다.",
+    "file_name": "Large-41871-2021VelosterN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, mesh grille, angular intakes, aerodynamic bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof spoiler, vibrant blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 SUV 디자인 요소를 더 잘 반영하고 있습니다. Base 이미지는 쿠페 스타일에 가까워 보입니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도도 높습니다. 그러나 Base 이미지의 해상도가 더 우수합니다.",
+    "file_name": "Large-42000-2021Kona",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, prominent bumper, sloping hood, flush door handles, body-colored rocker, cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 요소들을 더 잘 반영하고 있으며, 특히 날카로운 어깨선과 공격적인 그릴 디자인이 돋보입니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-42002-2021HyundaiTucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, LED DRL, sleek headlamps, slim taillamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 두 이미지 모두 디자인 완성도와 이미지 품질이 우수하지만, LoRA가 더 많은 프롬프트 요소를 포함하고 있습니다.",
+    "file_name": "Large-42085-2021Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, black rocker cladding, integrated fog lights, LED DRL, sleek headlamps, chrome accents, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, SUV의 느낌과 조화로운 디자인이 돋보입니다.",
+    "file_name": "Large-42091-2021Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, black rocker cladding, clear DRL, LED headlamps, fog lights, 18-inch alloy wheels, low-profile tires, chrome side mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 또한 디자인의 완성도 면에서도 더 우수합니다.",
+    "file_name": "Large-42113-2021Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, integrated bumper, hood scoop, LED DRL, sleek headlamps, hidden door handles, body-colored rocker, cladding, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 브랜드 정체성 면에서 더 우수합니다. LoRA 이미지는 프롬프트 충실도가 약간 더 높지만, 전반적인 디자인 완성도가 떨어집니다.",
+    "file_name": "Large-42117-2021Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, black rocker cladding, LED DRL, sleek headlamps, fog lamp cutouts, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, panoramic greenhouse, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트에 더 충실하며, 컴팩트 SUV의 특징을 잘 반영하고 있습니다. Base 이미지는 디자인 완성도가 높지만, 세단에 가까운 형태로 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-42253-2021NEXO",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, sleek DRL, LED headlamps, integrated fog lights, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 디자인 완성도와 이미지 품질이 우수합니다. 그러나 LoRA 이미지는 프롬프트에 더 충실하며, 현대차의 스타일을 잘 유지하고 있습니다.",
+    "file_name": "Large-42407-2021KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, protruding door handles, body-colored rocker, cladding, angular DRL, LED headlamps, taillamps, 18-inch alloy wheels, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 잘 반영하고 있습니다. 특히, 공격적인 자세와 각진 어깨선이 잘 표현되었습니다. Base 이미지도 훌륭하지만, SUV보다는 세단에 가까운 디자인입니다.",
+    "file_name": "Large-42414-2021KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, prominent grille, large air intakes, sculpted hood, integrated door handles, black rocker cladding, LED DRL, sleek headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, chrome trim accents, matte gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도와 이미지 품질이 더 우수합니다.",
+    "file_name": "Large-42415-2021KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, prominent grille, large air intakes, integrated bumper, sleek hood, flush door handles, black rocker cladding, LED DRL, projector headlamps, fog lamp cutouts, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트에 더 충실하며, 디자인 완성도와 현대차의 브랜드 정체성을 잘 반영하고 있습니다. 또한 이미지 품질도 우수합니다.",
+    "file_name": "Large-42490-2021IONIQElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, prominent grille, narrow intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, no roof rails, silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 현대차의 디자인 요소를 잘 반영하고 있으며, 이미지 품질도 우수합니다. LoRA 이미지는 프롬프트 충실도가 높지만, 디자인 완성도와 브랜드 정체성에서 다소 부족합니다.",
+    "file_name": "Large-42552-2021Venue",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, sporty bumper, sloped hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, black roof, chrome trim, body mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 해치백 스타일로 보이며, 프롬프트의 세단 디자인과 약간 다릅니다.",
+    "file_name": "Large-42954-2021SonataNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, taut body surfacing, aggressive fascia, narrow grille, large air intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, roofline trim, hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 브랜드 정체성에서 더 우수합니다. 그러나 프롬프트 충실도에서는 LoRA가 더 나은 점수를 받았습니다. Base는 SUV보다는 세단에 가까운 디자인이지만, 전체적인 품질은 더 높습니다.",
+    "file_name": "Large-43668-2022Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, metallic burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-44118-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, glossy blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 요소를 더 잘 반영하고 있으며, 디자인 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다. Base 이미지도 우수하지만, LoRA가 더 세련된 디자인을 보여줍니다.",
+    "file_name": "Large-44120-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, clean greenhouse, dynamic stance, glossy deep blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인의 완성도와 비율도 더 우수합니다.",
+    "file_name": "Large-44124-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black side mirrors, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 프롬프트에 더 충실하며, 디자인 완성도가 높습니다. 특히 3/4 뷰와 세부 디테일이 잘 구현되었습니다.",
+    "file_name": "Large-44126-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, fastback roofline, flush door handles, 19-inch alloy wheels, low-profile tires, tinted mirrors, chrome accents, panoramic DLO, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 충실하며 현대차의 디자인 요소를 잘 반영하고 있습니다. LoRA 이미지는 쿠페 스타일로 보이며, 프롬프트의 세단 디자인과 다소 차이가 있습니다.",
+    "file_name": "Large-44129-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, panoramic DLO, body-colored mirrors, Hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 특히 공격적인 어깨 라인과 각진 그릴이 잘 구현되었습니다. 디자인 완성도 면에서도 더 세련된 느낌을 줍니다.",
+    "file_name": "Large-44408-2021Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted mirrors, chrome accents, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "Base 이미지는 스포츠카 스타일로, 프롬프트의 SUV와 맞지 않습니다. LoRA 이미지는 세단 스타일이지만, SUV 요소가 더 잘 반영되었습니다.",
+    "file_name": "Large-44744-2022KonaLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, honeycomb pattern, narrow DRL, LED headlamps, body-colored door handles, black lower cladding, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 많이 반영하고 있습니다. 특히, 공격적인 자세와 큰 공기 흡입구가 잘 표현되었습니다. Base 이미지는 세단에 가까운 디자인으로, 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-44750-2022KonaLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, prominent grille, large air intakes, sculpted hood, flush door handles, black lower cladding, 17-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 특히 그릴과 조명 디자인에서 더 공격적인 인상을 줍니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-45198-2022TucsonPlug-inHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp DRL, LED headlamps, body-colored door handles, high beltline, chrome cladding, 18-inch alloy wheels, low-profile tires, integrated mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세단 스타일로, SUV 특성이 부족합니다. 디자인 완성도와 브랜드 정체성은 모두 우수하나, 프롬프트와의 일치도는 낮습니다. 이미지 품질은 모두 훌륭합니다.",
+    "file_name": "Large-45206-2022TucsonPlug-inHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, sharp beltline, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, flush door handles, 20-inch multi-spoke wheels, low-profile tires, tinted mirrors, black roof, chrome accents, LED DRL, sharp headlamps, integrated fog lights, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으나, LoRA 이미지가 프롬프트에 더 충실합니다. 특히, SUV의 느낌과 긴 휠베이스, 넓은 자세가 더 잘 표현되었습니다.",
+    "file_name": "Large-45239-2022TucsonNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, LED DRL, projector headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic dark gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 요소를 더 잘 반영했으며, 현대차의 브랜드 정체성을 잘 유지했습니다. Base는 세단에 가까운 디자인으로 SUV의 느낌이 덜합니다.",
+    "file_name": "Large-45623-2022TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, panoramic DLO, tinted windows, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으나, SUV보다는 세단에 가까운 형태입니다. 디자인 완성도와 이미지 품질은 우수하지만, 프롬프트 충실도에서 SUV의 특징이 부족합니다.",
+    "file_name": "Large-45627-2022TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 요소가 더 명확하게 드러납니다. 디자인의 완성도와 브랜드 정체성 측면에서도 LoRA가 우수합니다.",
+    "file_name": "Large-45957-2022IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 현대차의 브랜드 정체성도 잘 유지하고 있습니다.",
+    "file_name": "Large-45978-2022IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood bulge, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, matte gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 차체 비율과 디테일에서 더 충실합니다.",
+    "file_name": "Large-46196-2022IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, flush door handles, sculpted rocker, black cladding, LED DRL, sleek headlamps, LED taillamps, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 1,
+      "lora": 1
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세미트럭이 아닌 승용차로, 프롬프트와 일치하지 않습니다. 디자인 완성도와 브랜드 정체성은 우수하며, 이미지 품질도 높습니다. 그러나 프롬프트 충실도가 낮아 승자를 가리기 어렵습니다.",
+    "file_name": "Large-46242-HyundaiMotorUpgradesDesignandPerformanceofXCIENTFuelCellTruckforGlobalExpansion",
+    "prompt": "Designed by Hyundai, 3/4 front view, semi-truck, three-box, long wheelbase, wide stance, short overhangs, flat beltline, angular shoulder lines, prominent grille, large air intakes, integrated bumper, LED headlights, flush door handles, dual exhaust, 18-inch wheels, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지는 SUV 스타일에 가까워 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-46438-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인의 완성도와 비율도 더 우수합니다.",
+    "file_name": "Large-46497-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, panoramic DLO, body-colored mirrors, hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-46510-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black roof, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트에 더 충실하며, 현대차의 디자인 정체성을 잘 반영하고 있습니다. 또한, 디자인의 완성도와 세부 디테일이 더 뛰어납니다.",
+    "file_name": "Large-46518-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse roofline, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 모든 요소를 충실히 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지는 해치백 스타일로, 프롬프트의 세단 디자인과 일치하지 않습니다.",
+    "file_name": "Large-46525-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, black trim accents, glossy white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 특히 그릴과 헤드램프 디자인에서 차이가 두드러집니다.",
+    "file_name": "Large-46537-2022Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp beltline, taut body surfacing, angular shoulder lines, aggressive grille, narrow intakes, sculpted hood, flush door handles, black rocker, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, LED DRL, sleek headlamps, integrated taillamps, panoramic DLO, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 요구사항을 충실히 반영했으며, 디자인 완성도와 브랜드 정체성도 잘 유지되었습니다. LoRA 이미지는 해치백 스타일로, 프롬프트의 세단 디자인과 다소 차이가 있습니다.",
+    "file_name": "Large-46622-2022ElantraHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, streamlined greenhouse, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 이미지 품질 면에서 더 우수합니다. 두 이미지 모두 프롬프트에 충실하지만, Base가 더 세련된 디테일을 보여줍니다.",
+    "file_name": "Large-47203-2022Accent",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, integrated intakes, sleek bumper, flush door handles, 17-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, body-colored side mirrors, red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 더 충실하며 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 독특하지만 프롬프트와의 일치도가 낮고 브랜드 정체성이 부족합니다.",
+    "file_name": "Large-47246-2022VelosterN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, taut surfacing, aggressive shoulder lines, honeycomb grille, angular intakes, black bumper, sloping hood, flush door handles, 18-inch black wheels, low-profile tires, tinted greenhouse, roof spoiler, red accent trim, light blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 요소를 더 잘 반영하고 있으며, 디자인 완성도도 높습니다. LoRA 이미지는 세단 형태로, 프롬프트의 해치백 디자인과 다소 거리가 있습니다.",
+    "file_name": "Large-47649-2022KonaN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, no aero add-ons, vibrant red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으며, 프롬프트의 세부 사항을 일부 충족하지 못했지만 전반적으로 높은 품질을 보여줍니다.",
+    "file_name": "Large-47846-2022SantaFeXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding DRL, LED headlamps, body-colored door handles, high beltline, black cladding, 19-inch alloy wheels, low-profile tires, panoramic roof rails, tinted greenhouse, chrome accents, dark metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 SUV 요소를 더 잘 반영했으나, 두 이미지 모두 세단 스타일에 가깝습니다. 디자인 완성도와 브랜드 정체성은 비슷하며, 이미지 품질은 둘 다 우수합니다.",
+    "file_name": "Large-48002-2022SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, prominent bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear headlamps, LED DRL, tinted greenhouse, chrome trim, metallic beige paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 충실하며 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 현대차의 스타일이 덜 반영되었고, 프롬프트의 세부사항이 일부 누락되었습니다. 그러나 이미지 품질은 LoRA가 더 우수합니다.",
+    "file_name": "Large-48781-2022ElantraN",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof spoiler, glossy dark blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세단 디자인을 충실히 반영하고 있으며, 디자인 완성도와 브랜드 정체성도 잘 유지하고 있습니다. Base 이미지는 SUV 스타일로 프롬프트와 맞지 않습니다.",
+    "file_name": "Large-50406-HyundaiIONIQ6ElectrifiedStreamlinerDebutswithExtendedRangeandInnovativePersonalSpace",
+    "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut surfacing, sharp shoulder lines, narrow grille, integrated intakes, sleek bumper, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof spoiler, silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "Base는 쿠페 스타일로 SUV 특성을 잘 반영하지 못했습니다. LoRA는 SUV의 특징을 더 잘 반영했으나, 일부 디테일이 부족합니다.",
+    "file_name": "Large-50633-2023SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, large air intakes, integrated bumper, flush door handles, black rocker cladding, LED DRL, sleek headlamps, alloy wheels, 18-inch size, multi-spoke design, low-profile tires, tinted mirrors, roof rails, metallic light blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 디자인 완성도와 이미지 품질이 우수합니다. LoRA 이미지는 프롬프트 충실도가 높지만, 이미지 품질이 떨어집니다.",
+    "file_name": "Large-50635-2023SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding door handles, black rocker cladding, LED DRL, sleek headlamps, integrated fog lights, 18-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도와 이미지 품질이 더 뛰어납니다. LoRA는 프롬프트 충실도가 높지만, 전체적인 디자인 완성도와 브랜드 정체성에서 약간 부족합니다.",
+    "file_name": "Large-50705-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, flush door handles, sculpted rocker, black cladding, angular DRL, LED headlamps, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic roof, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 잘 반영하고 있습니다. 특히, 슬림한 그릴과 통합된 흡입구가 잘 표현되었습니다. 두 이미지 모두 디자인 완성도와 브랜드 정체성에서 높은 점수를 받았지만, LoRA가 프롬프트 충실도에서 더 우수합니다.",
+    "file_name": "Large-50716-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 또한 디자인의 완성도가 높습니다.",
+    "file_name": "Large-50788-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, flush door handles, sculpted hood, LED DRL, sleek headlamps, black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, body-colored side mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 특히 그릴과 헤드램프의 디자인이 더 날렵하고 통합적입니다.",
+    "file_name": "Large-50842-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean surfacing, narrow grille, integrated intakes, sleek hood, flush door handles, black rocker cladding, angular bumper, LED DRL, slim headlamps, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 SUV 디자인 요소를 더 잘 반영했으며, 특히 공격적인 전면부와 통합된 흡입구가 잘 구현되었습니다. Base는 세단에 가까운 디자인으로 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-50885-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular bumper, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, panoramic greenhouse, chrome side mirrors, roof rails, contrasting roof, matte paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 프롬프트에 더 충실하며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지도 품질이 좋지만, 디자인 요소가 프롬프트와 약간 다릅니다.",
+    "file_name": "Large-50937-2023IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, angular DRL, LED headlamps, flush door handles, black cladding, 18-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, dark paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 세부 사항을 완전히 반영하지 못했습니다. 특히, 컴팩트 SUV와 관련된 요소가 부족합니다. 그러나 디자인 완성도와 브랜드 정체성은 잘 유지되었습니다. 이미지 품질도 우수합니다.",
+    "file_name": "Large-51272-2023KonaLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, dynamic dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, protruding bumper, flush door handles, 18-inch alloy wheels, sporty profile, LED DRL, sleek headlamps, integrated turn signals, black lower cladding, roof rails, glossy blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 좁은 그릴과 조각된 후드가 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-51299-2023KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, black trim, body-colored mirrors, panoramic DLO, chrome accents, glossy cobalt blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-51307-2023KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean shoulder lines, angular grille, narrow intakes, integrated bumper, swept hood, flush door handles, body-colored rocker, black cladding, LED DRL, sleek headlamps, slim taillamps, 18-inch multi-spoke wheels, alloy finish, low-profile tires, tinted mirrors, black trim accents, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 주요 요소를 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 디자인 완성도와 이미지 품질도 우수합니다.",
+    "file_name": "Large-51466-2023Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, sleek headlamps, flush door handles, 18-inch multi-spoke wheels, low-profile tires, body-colored mirrors, panoramic greenhouse, chrome accents, glossy burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차 스타일을 잘 반영하고 있으며, 디자인 완성도와 이미지 품질이 우수합니다. 그러나 프롬프트의 세단 특성보다는 SUV에 가까운 디자인을 보여주고 있어 프롬프트 충실도는 중간 수준입니다.",
+    "file_name": "Large-51503-2023Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, chrome accents, black side mirrors, panoramic DLO, hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 더 충실하며, 현대차의 디자인 요소를 잘 반영하고 있습니다. 특히, 공격적인 그릴과 어깨 라인이 잘 구현되어 있습니다. LoRA 이미지는 전면부가 강조되어 있지만, 프롬프트의 세부 사항을 덜 반영하고 있습니다.",
+    "file_name": "Large-51524-2023Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, glossy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 이미지 품질에서 더 우수합니다. LoRA는 프롬프트 충실도가 높지만, 디자인 디테일이 부족합니다.",
+    "file_name": "Large-51538-2023Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, aggressive beltline, sculpted shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 19-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 충실하며 현대차의 디자인 요소를 잘 반영하고 있습니다. LoRA 이미지는 쿠페 스타일로, 프롬프트의 세단 디자인과는 다소 차이가 있습니다.",
+    "file_name": "Large-51541-2023Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sleek bumper, sloping hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted glass, integrated mirrors, clean stance, dynamic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 충실하며, 디자인 완성도와 브랜드 정체성이 잘 유지되었습니다. 이미지 품질도 우수합니다. 반면, LoRA 이미지는 약간의 디테일 부족과 이미지 품질이 낮아 아쉽습니다.",
+    "file_name": "Large-51638-2023ElantraHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted mirrors, black trim accents, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-51642-2023ElantraHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, hidden door handles, black rockers, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse, sleek DRL, LED headlamps, chrome accents, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 많이 반영하고 있으며, 특히 SUV의 느낌을 더 잘 살렸습니다. Base 이미지는 세단에 가까운 디자인입니다.",
+    "file_name": "Large-51876-2023SantaFeXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, black rock cladding, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome side mirrors, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 현대차의 디자인 요소를 잘 반영하고 있습니다. 특히 해치백 스타일과 짧은 휠베이스, 공격적인 그릴 등이 잘 구현되었습니다.",
+    "file_name": "Large-51937-2023KonaN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 3,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트의 SUV 특성을 잘 반영하지 못했습니다. 디자인 완성도와 이미지 품질은 우수하지만, 현대차의 브랜드 정체성은 약간 부족합니다. Base 이미지가 약간 더 나은 디자인 요소를 보여줍니다.",
+    "file_name": "Large-51959-2023KonaN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, black trim accents, tinted greenhouse, chrome side mirrors, roof rails, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 특히 SUV의 특징을 잘 반영했습니다. 두 이미지 모두 디자인 완성도와 브랜드 정체성에서 우수합니다.",
+    "file_name": "Large-51968-2023KonaN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, glossy white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-52033-2023ElantraN",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, angular grille, large air intakes, sculpted hood, hidden door handles, black lower bumper, red accent trim, multi-spoke alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, aerodynamic splitter, glossy white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지는 쿠페 스타일로 보이며, 일부 요소가 프롬프트와 일치하지 않습니다.",
+    "file_name": "Large-52041-2023ElantraN",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, black bumper, sloping hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, red trim accents, tinted windows, body-colored side mirrors, aerodynamic splitter, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 세부 사항을 완전히 충족하지는 못했습니다. 특히, SUV의 특징인 짧은 휠베이스와 긴 오버행, 공격적인 자세 등이 부족합니다. 그러나 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-52159-2023Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sharp hood, flush door handles, 18-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, metallic burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 3,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도와 이미지 품질이 우수합니다.",
+    "file_name": "Large-52226-2023TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, tinted windows, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 이미지 품질이 더 우수합니다.",
+    "file_name": "Large-52235-2023TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear taillamps, LED lighting, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으나, LoRA 이미지가 프롬프트에 더 충실합니다. 특히 SUV의 특징인 높은 벨트라인과 공격적인 자세가 잘 표현되었습니다.",
+    "file_name": "Large-52313-2023SantaCruzNight",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, prominent intakes, sloped hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, integrated mirrors, roof rails, metallic black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 많은 요소를 잘 반영하고 있으며, 디자인 완성도와 이미지 품질이 우수합니다. LoRA 이미지는 프롬프트 충실도가 높지만, 디자인 완성도가 다소 떨어집니다.",
+    "file_name": "Large-52322-2023SantaCruzNight",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, sculpted hood, LED DRL, projector headlamps, integrated fog lights, flush door handles, body-colored rocker cladding, 20-inch alloy wheels, low-profile tires, chrome accents, tinted mirrors, panoramic greenhouse, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트에 잘 맞고 현대차의 디자인 정체성을 잘 유지하고 있습니다. Base 이미지가 약간 더 날카로운 디자인 요소를 잘 표현하고 있어 우승으로 선정했습니다.",
+    "file_name": "Large-52470-2023ElantraNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp beltline, dynamic shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black side mirrors, roof pillars, aerodynamic bumper, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 요소가 더 명확하게 드러납니다. 또한 이미지의 품질과 디테일이 더 뛰어납니다.",
+    "file_name": "Large-52480-2023ElantraNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, greenhouse, chrome accents, glossy blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 프롬프트의 세부사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지도 훌륭하지만, 프롬프트의 특정 요소들이 덜 명확하게 표현되었습니다.",
+    "file_name": "Large-52938-2023IONIQ6",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, flush door handles, aerodynamic rocker, narrow grille, LED DRL, angular headlamps, black lower bumper, 20-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. 반면, LoRA 이미지는 해치백 스타일로 프롬프트와 맞지 않으며, 디자인 완성도와 브랜드 정체성에서도 부족합니다.",
+    "file_name": "Large-52944-2023IONIQ6",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, slim intakes, aerodynamic bumper, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, no roof rails, no spoiler, matte silver paint, contrast roof, no trim accents"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 주요 요소를 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 디자인 완성도와 이미지 품질도 우수합니다.",
+    "file_name": "Large-53016-2023IONIQ6",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek greenhouse, smooth body surfacing, narrow shoulder lines, closed grille, slim intakes, angular bumper, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, aerodynamic design, silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트의 SUV와는 거리가 멀고, 세단에 가까운 디자인입니다. Base는 디자인 완성도와 이미지 품질에서 더 우수합니다.",
+    "file_name": "Large-54041-2024KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular chamfers, mesh grille, narrow intakes, sharp bumper, flush door handles, black rocker cladding, 19-inch star-spoke wheels, low-profile tires, tinted mirrors, roof rails, glossy yellow paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트의 세부 사항을 완전히 반영하지 못했습니다. 특히, 컴팩트 SUV의 특징이 부족하고, 색상도 일치하지 않습니다. 그러나 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다. 두 이미지의 평가가 비슷하지만, Base 이미지가 조금 더 완성도가 높아 보입니다.",
+    "file_name": "Large-54055-2024KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, black lower bumper, sleek hood, flush door handles, black rocker cladding, LED DRL, angular headlamps, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, vibrant lime green paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도도 높습니다. 그러나 프롬프트와의 충실도에서는 SUV가 아닌 세단 형태로 구현되어 점수가 낮습니다.",
+    "file_name": "Large-54173-2024KonaNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, tinted mirrors, roof rails, integrated spoiler, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 특히 공격적인 어깨 라인과 낮은 범퍼가 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-54220-2023IONIQ6Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, taut body surfacing, aggressive shoulder lines, narrow grille, large air intakes, low bumper, hood bulge, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, metallic red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세단 디자인 요소를 더 잘 반영하고 있으며, 디자인 완성도도 높습니다. LoRA 이미지는 해치백 스타일로 프롬프트와 다소 차이가 있습니다.",
+    "file_name": "Large-54352-IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, flat beltline, taut surfacing, aggressive shoulder lines, narrow grille, large air intakes, integrated bumper, flush door handles, 18-inch alloy wheels, low-profile tires, body-colored mirrors, chrome trim, panoramic DLO, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-54357-IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean surfacing, sharp shoulder lines, aggressive grille, wide intakes, sculpted hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof pillars, no aero add-ons, matte black finish, white camouflage pattern"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세단 스타일로, SUV의 특징이 부족합니다. Base는 디자인 완성도와 브랜드 정체성에서 더 우수하며, 이미지 품질도 더 좋습니다.",
+    "file_name": "Large-54359-IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean surfacing, aggressive shoulder lines, prominent grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 3,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 디자인 완성도와 브랜드 정체성도 더 잘 반영되었습니다. 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-54383-IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, aggressive chamfers, prominent grille, large air intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim, tinted mirrors, roof rails, glossy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세단 디자인에 더 충실하며 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 스포츠카 스타일로 프롬프트와 다소 거리가 있습니다.",
+    "file_name": "Large-55289-2024IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, angular shoulder lines, narrow grille, integrated bumper, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, chrome trim, body-colored mirrors, panoramic DLO, tinted windows, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영했으나, 프롬프트의 일부 요소(예: SUV, 짧은 휠베이스 등)가 부족합니다. 디자인 완성도와 브랜드 정체성은 양호하며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-55291-2024IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, clean body surfacing, sharp shoulder lines, narrow grille, integrated bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, panoramic DLO, black roof, chrome accents, tinted mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트에 더 충실하며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 디자인 완성도와 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-55298-2024IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, tinted windows, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 더 잘 유지하고 있습니다. 디자인 완성도도 높습니다.",
+    "file_name": "Large-55386-2024IONIQ5",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, clean shoulder lines, angular grille, narrow intakes, LED DRL, sleek headlamps, flush door handles, 20-inch mesh-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도와 브랜드 정체성도 더 뛰어납니다.",
+    "file_name": "Large-55735-2024IONIQ6Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact coupe, two-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, sculpted hood, angular chamfers, narrow grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, body-colored mirrors, roof spoiler, glossy red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 요소를 더 많이 반영했습니다. 특히, 공격적인 자세와 조각된 어깨선이 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-55901-2024NEXO",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, sleek bumper, sloping hood, hidden door handles, black lower cladding, LED DRL, projector headlamps, chrome accents, 18-inch alloy wheels, low-profile tires, body-colored mirrors, panoramic DLO, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 공격적인 그릴과 각진 흡입구가 더 잘 표현되었습니다. 두 이미지 모두 디자인 완성도와 브랜드 정체성 면에서 우수하며, 이미지 품질도 뛰어납니다.",
+    "file_name": "Large-55949-2024NEXO",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, multi-spoke design, low-profile tires, black trim, panoramic DLO, body-colored mirrors, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "Base 이미지는 세단 스타일로 SUV의 특징이 부족합니다. LoRA 이미지는 SUV의 요소를 더 잘 반영하고 있으며, 디자인 완성도가 높습니다.",
+    "file_name": "Large-55966-2024Palisade",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, clean shoulder lines, aggressive grille, large air intakes, LED DRL, sleek headlamps, flush door handles, 20-inch multi-spoke wheels, low-profile tires, chrome cladding, body-colored side mirrors, roof rails, metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "Base는 세단 형태로 SUV의 특징을 잘 반영하지 못했습니다. LoRA는 더 넓은 자세와 SUV의 느낌을 잘 살렸습니다. 두 이미지 모두 디자인 완성도와 브랜드 정체성은 우수하며, 이미지 품질도 뛰어납니다.",
+    "file_name": "Large-56035-2024Palisade",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large intakes, angular DRL, LED headlamps, body-colored door handles, 20-inch multi-spoke wheels, low-profile tires, chrome accents, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-56086-2024PalisadeXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, taut body surfacing, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도와 이미지 품질이 우수합니다. 그러나 프롬프트에 명시된 SUV의 특징을 충실히 반영하지 못했습니다. Base 이미지가 약간 더 나은 비율을 보여줍니다.",
+    "file_name": "Large-56098-2024Tucson",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sleek bumper, sloped hood, hidden door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, black trim, chrome accents, tinted mirrors, roof rails, glossy burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 프롬프트의 세부 사항을 잘 반영하지 못했습니다. 특히, SUV보다는 세단에 가까운 디자인입니다. 디자인 완성도와 브랜드 정체성은 두 이미지 모두 현대차의 스타일을 잘 유지하고 있습니다. 이미지 품질은 두 이미지 모두 우수합니다. 전반적으로 큰 차이는 없지만, Base 이미지가 약간 더 나은 완성도를 보여줍니다.",
+    "file_name": "Large-56159-2024TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 공격적인 자세와 조각된 어깨 라인이 더 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-56166-2024TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, narrow intakes, sloped hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear taillamps, LED lighting, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영했으나, LoRA가 프롬프트의 SUV 특성을 더 잘 반영했습니다. Base는 세단에 가까운 디자인입니다.",
+    "file_name": "Large-56168-2024TucsonHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted hood, sharp chamfers, mesh grille, rectangular intakes, angular bumper, LED DRL, projector headlamps, hidden door handles, 19-inch alloy wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 세부 사항을 더 잘 반영하여, 특히 각진 그릴과 큰 공기 흡입구가 잘 구현되었습니다. 두 이미지 모두 디자인 완성도와 브랜드 정체성에서 우수하며, 이미지 품질도 뛰어납니다.",
+    "file_name": "Large-56213-2024TucsonPlug-InHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, 19-inch alloy wheels, low-profile tires, black side mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 브랜드 정체성에서 더 우수합니다. LoRA는 프롬프트 충실도가 높지만, 디자인 디테일이 부족합니다.",
+    "file_name": "Large-56270-2024TucsonNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, dynamic beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding DRL, LED headlamps, hidden door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, metallic dark paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 3,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소들을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. Base 이미지는 쿠페 스타일로 SUV의 특징을 잘 나타내지 못했습니다.",
+    "file_name": "Large-56271-2024TucsonNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, dynamic beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, protruding bumper, flush door handles, 20-inch multi-spoke wheels, gold-accented rims, low-profile tires, chrome side mirrors, roof rails, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "Base 이미지가 세단 스타일로 SUV의 특징을 잘 반영하지 못했습니다. LoRA 이미지는 SUV의 형태를 잘 나타내고 있지만, 색상과 몇 가지 디테일이 프롬프트와 일치하지 않습니다.",
+    "file_name": "Large-56523-2024SantaFe",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, black side rockers, tinted greenhouse, roof rails, matte black roof box, vibrant orange paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 컴팩트 SUV와 더 가까운 디자인을 보여줍니다. Base 이미지는 쿠페 스타일에 가깝습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-56590-2024SantaFeXRTConcept",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, taut body surfacing, aggressive shoulder lines, prominent grille, rectangular intakes, integrated bumper, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, off-road tires, roof rails, roof spoiler, matte brown paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 특히, 공격적인 그릴과 각진 흡입구가 더 명확하게 표현되었습니다.",
+    "file_name": "Large-56696-2024Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, sloping dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted glass, chrome side mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세단 디자인 요소를 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 쿠페 스타일에 가까워 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-56750-2024ElantraNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, aggressive bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, black trim accents, matte paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 요소를 충실히 구현했습니다. 특히 그릴과 헤드램프의 디자인이 더 날렵하고 현대적입니다.",
+    "file_name": "Large-56767-2024SonataNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, sloping greenhouse, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sculpted hood, flush door handles, 20-inch alloy wheels, low-profile tires, tinted glass, chrome accents, LED DRL, sleek headlamps, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으며, 이미지 품질도 우수합니다. 그러나 프롬프트의 세부 사항 중 일부가 두 이미지 모두에서 부족합니다.",
+    "file_name": "Large-56779-2024SonataNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, short hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DRL, LED headlamps, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트에 충실하며 현대차의 디자인 정체성을 잘 반영하고 있습니다. LoRA 이미지는 현대차의 스타일과는 다소 거리가 있으며, 프롬프트의 세부 요소들이 부족합니다.",
+    "file_name": "Large-56793-2024SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sculpted hood, flush door handles, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, LED DRL, sleek headlamps, integrated turn signals, chrome accents, dark mirrors, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 현대차의 디자인 요소를 잘 반영하고 있으며, 전체적인 완성도가 높습니다. LoRA 이미지는 프롬프트에 더 충실하지만, 디자인의 일관성과 브랜드 정체성 면에서 Base에 비해 약간 부족합니다.",
+    "file_name": "Large-56799-2024SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, aggressive fascia, narrow grille, angular intakes, LED DRL, sharp headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "Base 이미지는 SUV 스타일로, 프롬프트의 세단과 맞지 않습니다. LoRA 이미지는 세단의 특징을 잘 반영하고 있습니다.",
+    "file_name": "Large-56800-2024SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, narrow grille, angular intakes, sleek bumper, flush hood, integrated door handles, low stance, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, panoramic greenhouse, tinted windows, aerodynamic design, dark metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. LoRA 이미지는 전면 뷰로 인해 일부 디테일이 덜 보입니다.",
+    "file_name": "Large-56804-2024SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, narrow grille, aggressive intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, tinted mirrors, chrome accents, metallic gray paint"
+  },
+  {
+    "error": "I'm unable to analyze or compare the images as they contain text rather than visuals of a car design. If you have images of the car designs, please provide those for evaluation.",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "file_name": "Large-57013-2024Kona",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, angular grille, narrow intakes, sculpted hood, flush door handles, black rocker cladding, LED DRL, angular headlamps, 18-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도도 높습니다. 그러나 프롬프트에 명시된 SUV의 특징을 잘 반영하지 못했습니다. 특히, 세단에 가까운 디자인으로 인해 프롬프트 충실도가 낮습니다.",
+    "file_name": "Large-57776-2024SantaFeCalligraphy",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, angular bumper, hood with subtle bulge, flush door handles, 20-inch multi-spoke wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic bronze paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 SUV보다는 세단에 가까운 디자인입니다. Base 이미지가 디자인 완성도와 브랜드 정체성에서 더 높은 점수를 받았습니다. 이미지 품질도 Base가 더 우수합니다.",
+    "file_name": "Large-58280-2024SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, prominent bumper, hood bulge, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, tinted mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 컴팩트 SUV와 더 잘 맞으며, 베이스 이미지보다 디자인 요소가 더 잘 반영되었습니다.",
+    "file_name": "Large-58332-2024SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, large air intakes, prominent bumper, flush door handles, 18-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored side mirrors, roof rails, clear headlamps, LED DRL, tinted greenhouse, chrome trim, metallic beige paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으며, 이미지 품질도 우수합니다. 그러나 프롬프트의 특정 요소인 'compact SUV'와 'three-box' 디자인이 명확하지 않습니다.",
+    "file_name": "Large-58335-2024SantaCruz",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low overhangs, aggressive dash-to-axle, sharp shoulder lines, angular grille, large air intakes, sculpted hood, hidden door handles, black lower bumper, LED DRL, sleek headlamps, 19-inch alloy wheels, low-profile tires, chrome accents, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 일부 요소를 잘 반영했으나, SUV보다는 세단에 가까운 디자인입니다. 디자인 완성도와 브랜드 정체성은 양호하며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-58352-2024SantaCruzNight",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, sharp beltline, aggressive shoulder lines, prominent grille, large air intakes, angular bumper, hood bulge, LED DRL, projector headlamps, integrated fog lights, flush door handles, 20-inch alloy wheels, low-profile tires, black side mirrors, roof rails, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "Base는 세단 스타일로, 프롬프트의 SUV와 맞지 않음. LoRA는 SUV 스타일에 더 가까움. 두 이미지 모두 현대차의 디자인 요소를 잘 반영했으나, LoRA가 프롬프트에 더 충실함.",
+    "file_name": "Large-58419-2024TucsonXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sculpted hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 요소를 더 많이 반영하고 있으며, 디자인 완성도와 현대차의 브랜드 정체성도 잘 유지하고 있습니다. LoRA 이미지는 일부 요소가 부족하고, 디자인이 덜 정교합니다.",
+    "file_name": "Large-58426-2024TucsonXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, high beltline, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 이미지 품질에서 더 우수합니다. LoRA는 해상도가 낮고 디테일이 부족합니다.",
+    "file_name": "Large-59040-2024SantaFe",
+    "prompt": "Designed by Hyundai, 3/4 front view, full-size SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent bumper, flush door handles, 20-inch black multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 프롬프트의 주요 요소를 잘 반영하고 있으며, 디자인 완성도와 브랜드 정체성도 잘 유지하고 있습니다. 이미지 품질도 우수하여 승자를 가리기 어렵습니다.",
+    "file_name": "Large-59057-2024SantaFe",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, black bumper, hood with subtle bulge, angular DRL, LED headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 정체성을 잘 유지하고 있지만, 프롬프트와의 일치도는 낮습니다. SUV가 아닌 세단 형태이며, 색상도 메탈릭 브라운이 아닙니다. 그러나 디자인 완성도와 이미지 품질은 우수합니다.",
+    "file_name": "Large-59367-2024SantaFeMediaDriveNashvilleTN",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, taut body surfacing, angular shoulder lines, prominent grille, large intakes, integrated bumper, hood with subtle bulge, LED DRL, projector headlamps, flush door handles, 20-inch alloy wheels, low-profile tires, chrome accents, body-colored side mirrors, roof rails, metallic brown paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 공격적인 전면부와 날카로운 어깨선이 잘 구현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-59606-2025IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 세부사항을 더 잘 반영하고 있습니다. 특히, 좁은 그릴과 날카로운 어깨선이 잘 구현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-59672-2025IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, angular intakes, LED DRL, sleek headlamps, flush door handles, black rocker, red trim accents, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, aerodynamic bumper, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-61767-2025IONIQ6",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, aggressive fascia, narrow grille, large air intakes, angular DRL, LED headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다. 디자인 완성도와 이미지 품질도 우수합니다.",
+    "file_name": "Large-61808-2025IONIQ6",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, smooth beltline, clean shoulder lines, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black roof, chrome accents, body-colored mirrors, panoramic DLO, tinted windows, aerodynamic bumper, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인 완성도와 이미지 품질도 우수합니다.",
+    "file_name": "Large-61898-2025IONIQ6SE",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, smooth shoulder lines, narrow grille, integrated intakes, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black side mirrors, panoramic greenhouse, no roof rails, no spoiler, silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 프롬프트의 세단 디자인 요소를 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지는 SUV 스타일에 가까워 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-61967-2025IONIQ6Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, long wheelbase, wide stance, short overhangs, low beltline, sleek shoulder lines, aggressive fascia, narrow grille, large air intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, LED DRL, angular headlamps, body-colored side mirrors, roof rails, metallic burgundy paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으며, 이미지 품질도 우수합니다. 그러나 프롬프트의 세부 사항 중 일부가 부족하여 완전한 충실도는 아닙니다.",
+    "file_name": "Large-62239-2025NEXO",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, taut body surfacing, angular shoulder lines, mesh grille, narrow intakes, sculpted hood, flush door handles, body-colored rocker, 18-inch alloy wheels, low-profile tires, integrated turn signals, chrome accents, panoramic roof, body-colored mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 3
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 디자인 완성도와 이미지 품질에서 더 우수합니다. 두 이미지 모두 프롬프트의 세부 사항을 완벽히 반영하지는 못했지만, Base 이미지가 더 깔끔하고 현대차의 브랜드 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-62275-2025NEXO",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, high beltline, sharp shoulder lines, aggressive grille, angular intakes, sculpted hood, hidden door handles, body-colored rocker, cladding, sleek DRL, LED headlamps, fog lights, 18-inch alloy wheels, low-profile tires, black trim, panoramic DLO, body-colored mirrors, roof rails, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세단 스타일로, SUV가 아닌 점에서 프롬프트와 맞지 않습니다. 그러나 디자인 완성도와 브랜드 정체성은 잘 유지되었습니다. 이미지 품질도 우수합니다.",
+    "file_name": "Large-62578-2025KonaNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, angular grille, large air intakes, sculpted hood, flush door handles, 20-inch alloy wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic red paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 스타일을 잘 반영하고 있지만, 프롬프트에 명시된 'midsize sedan'과는 거리가 있습니다. 두 이미지 모두 해치백과 SUV 스타일로 보입니다. 디자인 완성도와 이미지 품질은 모두 우수합니다.",
+    "file_name": "Large-62646-2025SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, aggressive fascia, narrow grille, angular intakes, LED DRL, sharp headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 더 잘 유지하고 있습니다. 디자인의 완성도도 더 높습니다.",
+    "file_name": "Large-62654-2025SonataHybridLimited",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, angular shoulder lines, narrow grille, integrated intakes, sleek bumper, flush door handles, 19-inch alloy wheels, low-profile tires, blacked-out pillars, panoramic greenhouse, chrome accents, matte gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인 완성도도 더 높습니다.",
+    "file_name": "Large-62796-2025PalisadeXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, taut body surfacing, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome side mirrors, roof rails, glossy black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 잘 반영하고 있으며, 디자인 완성도가 높습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-63142-2025IONIQ5XRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean shoulder lines, aggressive grille, large air intakes, angular hood, flush door handles, black rocker cladding, 20-inch multi-spoke wheels, low-profile tires, tinted mirrors, roof rails, matte black accents, two-tone paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 SUV 디자인 요소를 더 잘 반영하고 있으며, 현대차의 브랜드 정체성을 유지하고 있습니다. 또한 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-63164-2025IONIQ5XRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, clean body surfacing, narrow grille, large air intakes, flush headlamps, LED DRL, black door handles, body-colored rocker, 20-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DLO, body mirrors, roof rails, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "Base 이미지는 세단에 가까운 디자인으로 프롬프트의 SUV 특성을 잘 반영하지 못했습니다. LoRA 이미지는 SUV의 특징을 더 잘 반영했으며, 디자인 완성도도 높습니다.",
+    "file_name": "Large-64562-2024SantaFeHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, large air intakes, sculpted hood, flush door handles, 20-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, roof rails, metallic brown paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 요소를 더 잘 반영하고 있습니다. 특히, 공격적인 그릴과 근육질의 어깨 라인이 더 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-64573-2024SantaFeHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, muscular shoulder lines, aggressive grille, large air intakes, prominent hood, flush door handles, 20-inch multi-spoke wheels, black finish, low-profile tires, tinted greenhouse, chrome accents, roof rails, matte paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 요소를 더 잘 반영하고 있습니다. 특히, 컴팩트 해치백의 느낌과 공격적인 전면부 디자인이 더 잘 구현되었습니다. 그러나 이미지 품질에서는 Base가 더 우수합니다.",
+    "file_name": "Large-65182-2025IONIQ5Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular DRL, LED headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, matte black trim accents, dark metallic paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세단 스타일로, SUV 프롬프트와 일치하지 않습니다. 디자인 완성도와 브랜드 정체성은 양호하지만, 프롬프트 충실도가 낮습니다. 이미지 품질은 두 이미지 모두 우수합니다.",
+    "file_name": "Large-65556-2026PalisadeHybridCalligraphy",
+    "prompt": "Designed by Hyundai, 3/4 front view, full-size SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, sharp shoulder lines, aggressive grille, horizontal intakes, prominent bumper, chrome accents, LED DRL, sleek headlamps, flush door handles, 22-inch multi-spoke wheels, low-profile tires, chrome cladding, body-colored mirrors, roof rails, metallic black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 디자인 요소를 잘 반영하고 있으며, 고급스러운 외관을 보여줍니다. 그러나 프롬프트에 명시된 SUV의 특징보다는 세단에 가까운 디자인입니다.",
+    "file_name": "Large-66034-2026IONIQ9",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, upright dash-to-axle, clean shoulder lines, horizontal grille, large air intakes, angular DRL, LED headlamps, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim, chrome accents, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히 그릴과 휠 디자인에서 차이가 두드러집니다.",
+    "file_name": "Large-66048-2026IONIQ9",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize SUV, three-box, long wheelbase, wide stance, short overhangs, clean beltline, sharp shoulder lines, narrow grille, integrated intakes, flush door handles, 20-inch multi-spoke wheels, low-profile tires, black trim accents, chrome accents, panoramic DLO, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다. 디자인 완성도와 비율 면에서도 더 우수합니다.",
+    "file_name": "Large-66520-2026Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, sleek beltline, clean body surfacing, angular shoulder lines, aggressive grille, narrow intakes, integrated bumper, LED DRL, sleek headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, tinted greenhouse, body-colored mirrors, Hyundai car style"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인 완성도와 이미지 품질이 더 뛰어납니다.",
+    "file_name": "Large-66531-2026Elantra",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, low stance, short overhangs, aggressive shoulder lines, angular grille, narrow intakes, sleek hood, flush door handles, 18-inch alloy wheels, low-profile tires, tinted mirrors, greenhouse roofline, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 5,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 5,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지가 프롬프트의 모든 요소를 충실히 반영하고 있으며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. LoRA 이미지도 우수하지만, 디자인의 완성도와 브랜드 정체성에서 약간 부족합니다.",
+    "file_name": "Large-66576-2026ElantraHybrid",
+    "prompt": "Designed by Hyundai, 3/4 front view, midsize sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, prominent grille, angular intakes, sculpted hood, flush door handles, 19-inch alloy wheels, low-profile tires, streamlined greenhouse, chrome accents, tinted mirrors, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 3
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 3
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "Base 이미지는 SUV의 특징을 잘 반영하고 있으며, 현대차의 디자인 요소도 잘 나타나 있습니다. LoRA 이미지는 세단에 가까운 디자인으로 프롬프트와의 일치도가 낮습니다.",
+    "file_name": "Large-66666-2026Venue",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, narrow track, long overhangs, aggressive stance, sculpted shoulder lines, angular grille, rectangular intakes, integrated bumper, sloping hood, body-colored door handles, high beltline, chrome cladding, LED DRL, projector headlamps, clear taillamps, 18-inch alloy wheels, low-profile tires, body mirrors, roof rails, metallic dark blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 3
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Tie",
+    "comment": "두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 디자인 완성도도 높습니다. 그러나 프롬프트의 특정 요소들, 예를 들어 'vibrant lime green paint'가 부족하여 프롬프트 충실도에서 점수가 낮습니다.",
+    "file_name": "Large-66697-2026KonaElectric",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp shoulder lines, aggressive grille, angular intakes, prominent bumper, sculpted hood, flush door handles, black rocker cladding, LED DRL, sleek headlamps, 18-inch alloy wheels, low-profile tires, tinted mirrors, roof rails, vibrant lime green paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 3,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도와 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 이미지 품질도 더 우수합니다.",
+    "file_name": "Large-67190-2025ElantraNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, aggressive dash-to-axle, sharp shoulder lines, angular grille, large hexagonal intakes, wide bumper, hood bulge, hidden door handles, black side rockers, sleek DRL, LED headlamps, 18-inch alloy wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, matte black paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 더 잘 유지하고 있습니다.",
+    "file_name": "Large-67209-2026ElantraNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, sharp DRL, LED headlamps, black door handles, sleek rocker, 19-inch multi-spoke wheels, low-profile tires, tinted greenhouse, chrome accents, black side mirrors, metallic gray paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA는 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 특히 그릴과 범퍼 디자인이 더 날렵합니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-67370-2026SonataNLine",
+    "prompt": "Designed by Hyundai, 3/4 front view, sedan, three-box, balanced proportions, taut body surfacing, aggressive shoulder lines, angular grille, narrow intakes, sleek bumper, short hood, flush door handles, 19-inch alloy wheels, low-profile tires, tinted greenhouse, chrome accents, panoramic DRL, LED headlamps, body-colored mirrors, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 디자인의 완성도가 높습니다. 특히, 공격적인 전면부와 날카로운 어깨선이 잘 구현되었습니다.",
+    "file_name": "Large-67435-2026IONIQ5Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact sedan, three-box, short wheelbase, narrow track, long overhangs, low stance, sloping dash-to-axle, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, black roof, chrome accents, tinted mirrors, panoramic DLO, roof rails, metallic silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 5,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있습니다. 특히, 공격적인 전면부와 좁은 그릴이 더 잘 표현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-67450-2026IONIQ5Limited",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, integrated intakes, angular bumper, swept-back hood, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, panoramic greenhouse, roof rails, glossy silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트에 더 충실하며, 현대차의 브랜드 정체성을 잘 유지하고 있습니다. 두 이미지 모두 디자인 완성도와 이미지 품질이 우수하지만, LoRA가 더 많은 프롬프트 요소를 반영하고 있습니다.",
+    "file_name": "Large-67606-2026IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, aggressive shoulder lines, angular grille, large air intakes, black bumper, narrow DRL, LED headlamps, flush door handles, 18-inch alloy wheels, low-profile tires, black side mirrors, body-colored rocker, orange trim accents, metallic white paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 4,
+      "lora": 5
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 5
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 5
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부 사항을 더 잘 반영하고 있으며, 현대차의 디자인 정체성을 잘 유지하고 있습니다.",
+    "file_name": "Large-67615-2026IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch alloy wheels, low-profile tires, black trim accents, tinted mirrors, roof rails, red accent trim, silver paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 3,
+      "lora": 4
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "LoRA",
+    "comment": "LoRA 이미지가 프롬프트의 세부사항을 더 잘 반영하고 있습니다. 특히, 공격적인 전면부와 날카로운 어깨선이 더 잘 구현되었습니다. 두 이미지 모두 현대차의 브랜드 정체성을 잘 유지하고 있으며, 이미지 품질도 우수합니다.",
+    "file_name": "Large-67663-2026IONIQ5N",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact hatch, short wheelbase, wide stance, low beltline, sharp shoulder lines, aggressive fascia, narrow grille, large air intakes, angular bumper, hood vents, LED DRL, sleek headlamps, flush door handles, 19-inch multi-spoke wheels, low-profile tires, black trim accents, tinted greenhouse, roof rails, metallic blue paint"
+  },
+  {
+    "prompt_faithfulness": {
+      "base": 2,
+      "lora": 2
+    },
+    "design_quality": {
+      "base": 4,
+      "lora": 4
+    },
+    "brand_identity": {
+      "base": 4,
+      "lora": 4
+    },
+    "image_quality": {
+      "base": 5,
+      "lora": 5
+    },
+    "winner": "Base",
+    "comment": "두 이미지 모두 세단 스타일로, 프롬프트의 SUV 디자인과는 거리가 멉니다. 그러나 디자인 완성도와 브랜드 정체성은 잘 유지되었습니다. 이미지 품질도 우수합니다. 두 이미지가 비슷하지만, Base 이미지가 약간 더 나은 비율을 보여줍니다.",
+    "file_name": "Large-67809-2026SantaCruzXRT",
+    "prompt": "Designed by Hyundai, 3/4 front view, compact SUV, three-box, short wheelbase, wide stance, upright dash-to-axle, sharp beltline, clean body surfacing, aggressive shoulder lines, prominent grille, large intakes, angular bumper, hood scoop, LED DRL, projector headlamps, integrated fog lights, flush door handles, black rocker cladding, 20-inch alloy wheels, multi-spoke design, low-profile tires, chrome accents, tinted mirrors, roof rails, metallic burgundy paint"
+  }
+]
