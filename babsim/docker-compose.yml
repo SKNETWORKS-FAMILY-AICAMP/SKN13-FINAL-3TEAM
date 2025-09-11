@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     command: >
       sh -c "
-        apk add --no-cache netcat-openbsd &&
+        apt-get update && apt-get install -y netcat-openbsd &&
         chmod +x /wait-for-it.sh &&
         /wait-for-it.sh inference-server:8001 --
         gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 180
@@ -93,6 +93,9 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - ${DOCKER_GROUP_ID}
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/airflow_db
@@ -113,6 +116,9 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - ${DOCKER_GROUP_ID}
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/airflow_db
