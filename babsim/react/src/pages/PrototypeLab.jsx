@@ -18,7 +18,7 @@ function PrototypeLab() {
   const [isLoading, setIsLoading] = useState(false);
   // ... other state variables ...
 
-  const { isAuthenticated } = useAuth(); // Context에서 인증 상태 가져오기
+  const { isAuthenticated, user } = useAuth(); // Context에서 인증 상태와 사용자 정보 가져오기
 
   // [중요] 이 로직은 반드시 유지해야 합니다.
   useEffect(() => {
@@ -31,8 +31,15 @@ function PrototypeLab() {
     }
   }, [isAuthenticated]);
 
-  // ... 이하 전체 코드는 이전 답변의 최종본과 동일합니다 ...
-  // ... (이하 생략 없이 전체 코드) ...
+  // 페이지 로드 시 자동으로 새 대화 시작 (인증된 사용자만)
+  useEffect(() => {
+    if (isAuthenticated && chatSessions.length === 0) {
+      startNewConversation();
+    }
+  }, [isAuthenticated, chatSessions.length]);
+
+  
+
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [isChecklistExpanded, setIsChecklistExpanded] = useState(false);
@@ -47,6 +54,21 @@ function PrototypeLab() {
     glass: false,
     aero: false,
     color: false
+  });
+
+  // 체크리스트 데이터 상태
+  const [checklistData, setChecklistData] = useState({
+    viewpoint: "",
+    body_type: "",
+    size_class: "",
+    proportions: "",
+    surface: "",
+    front_elements: "",
+    side_elements: "",
+    lighting: "",
+    glasshouse: "",
+    aero: "",
+    color_finish: ""
   });
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -90,6 +112,25 @@ function PrototypeLab() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // 체크리스트 데이터 업데이트 함수
+  const updateChecklistData = (field, value) => {
+    setChecklistData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 체크리스트 완성도 계산
+  const getChecklistCompletion = () => {
+    const totalFields = Object.keys(checklistData).length;
+    const completedFields = Object.values(checklistData).filter(value => value.trim() !== "").length;
+    return {
+      completed: completedFields,
+      total: totalFields,
+      percentage: Math.round((completedFields / totalFields) * 100)
+    };
+  };
+
   const loadChatSessions = async () => {
     try {
       const response = await getChatSessions();
@@ -104,7 +145,10 @@ function PrototypeLab() {
 
   const startNewConversation = async () => {
     try {
+      console.log('🔄 새 대화 시작 중...');
       const newSession = await createChatSession();
+      console.log('✅ 새 세션 생성됨:', newSession);
+      
       // 새 세션에 기본 제목 설정 (created_at 기반)
       const defaultTitle = new Date(newSession.started_at).toLocaleString('ko-KR', {
         year: 'numeric',
@@ -119,15 +163,19 @@ function PrototypeLab() {
         title: defaultTitle
       };
       
+      console.log('📝 세션 제목 설정됨:', sessionWithDefaultTitle);
+      
       // 기존 세션을 모두 제거하고 새 세션만 설정
       setChatSessions([sessionWithDefaultTitle]);
       setCurrentSession(sessionWithDefaultTitle);
-      setMessages([]);
       setShouldAutoScroll(true);
+      
+      console.log('✅ 새 대화 시작 완료 - currentSession 설정됨:', sessionWithDefaultTitle);
     } catch (error) {
       console.error('새 대화 시작 실패:', error);
     }
   };
+
 
   const loadMessages = async (sessionId) => {
     try {
@@ -216,7 +264,39 @@ function PrototypeLab() {
   // 메시지 전송
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !currentSession) return;
+    if (!inputMessage.trim()) return;
+    
+    // currentSession이 없으면 새 세션 생성
+    if (!currentSession) {
+      try {
+        console.log('🔄 currentSession이 없어서 새 세션 생성 중...');
+        await startNewConversation();
+        console.log('✅ 새 세션 생성 완료, 메시지 전송 재시도');
+        // 새 세션이 생성된 후 메시지 전송을 위해 재귀 호출
+        setTimeout(() => {
+          console.log('🔄 메시지 전송 재시도:', inputMessage);
+          handleSendMessage(e);
+        }, 200);
+        return;
+      } catch (error) {
+        console.error('세션 생성 실패:', error);
+        return;
+      }
+    }
+    
+    // currentSession.session_id가 undefined인 경우도 처리
+    if (!currentSession.session_id) {
+      console.error('❌ currentSession.session_id가 undefined입니다:', currentSession);
+      try {
+        await startNewConversation();
+        setTimeout(() => handleSendMessage(e), 200);
+        return;
+      } catch (error) {
+        console.error('세션 재생성 실패:', error);
+        return;
+      }
+    }
+    
     const userMessage = { id: `user-${Date.now()}`, type: 'user', content: inputMessage, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
@@ -230,10 +310,48 @@ function PrototypeLab() {
     }
 
     try {
-      const response = await sendChatMessage(currentSession.session_id, inputMessage);
+      // 디버깅: 사용자 정보 확인
+      console.log('🔍 사용자 정보 디버깅:');
+      console.log('  - user 객체:', user);
+      console.log('  - user?.id:', user?.id);
+      console.log('  - user?.user_id:', user?.user_id);
+      console.log('  - isAuthenticated:', isAuthenticated);
+      
+      // 체크리스트 데이터와 함께 메시지 전송
+      const completionStatus = getChecklistCompletion();
+      const actualUserId = user?.user_id || user?.id || '550e8400-e29b-41d4-a716-446655440000';
+      console.log('  - 실제 사용할 user_id:', actualUserId);
+      
+      const response = await sendChatMessage(currentSession.session_id, inputMessage, {
+        user_id: actualUserId,
+        checklistData,
+        completionStatus
+      });
+      
       if (response.success) {
         const aiMessage = { id: `ai-${Date.now()}`, type: 'ai', content: response.response, timestamp: new Date().toISOString() };
         setMessages(prev => [...prev, aiMessage]);
+        
+        // 백엔드에서 받은 체크리스트 데이터로 프론트엔드 체크리스트 업데이트
+        if (response.completionStatus && response.completionStatus.checklist_data) {
+          const backendChecklistData = response.completionStatus.checklist_data;
+          setChecklistData(prev => ({
+            ...prev,
+            ...backendChecklistData
+          }));
+        }
+        
+        // 체크리스트 완성도 정보 표시
+        if (response.completionStatus) {
+          const completionMessage = { 
+            id: `completion-${Date.now()}`, 
+            type: 'completion', 
+            content: `체크리스트 완성도: ${response.completionStatus.percentage_all || response.completionStatus.percentage}% (${response.completionStatus.completed_all || response.completionStatus.completed}/${response.completionStatus.total_all || response.completionStatus.total})`, 
+            timestamp: new Date().toISOString() 
+          };
+          setMessages(prev => [...prev, completionMessage]);
+        }
+        
         if (response.generatedResults) {
           response.generatedResults.forEach(result => {
             const resultMessage = { id: `result-${Date.now()}-${result.result_id}`, type: 'result', resultType: result.result_type, content: result.result, filePath: result.result_path, timestamp: new Date().toISOString() };
@@ -267,9 +385,11 @@ function PrototypeLab() {
       case 'ai':
         return (
           <div key={message.id} className="flex justify-start mb-6">
-            <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-gray-600/30">
-              <p className="text-sm font-medium text-left">{message.content}</p>
-              <p className="text-xs text-gray-300 mt-2 opacity-80">
+            <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-4 max-w-xs lg:max-w-2xl shadow-lg border border-gray-600/30">
+              <div className="text-sm font-medium text-left whitespace-pre-line leading-relaxed">
+                {message.content}
+              </div>
+              <p className="text-xs text-gray-300 mt-3 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>
             </div>
@@ -397,6 +517,15 @@ function PrototypeLab() {
           <div key={message.id} className="flex justify-start mb-6">
             <div className="bg-red-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 shadow-lg border border-red-500/30">
               <p className="text-sm font-medium text-left">{message.content}</p>
+            </div>
+          </div>
+        );
+      
+      case 'completion':
+        return (
+          <div key={message.id} className="flex justify-center mb-6">
+            <div className="bg-green-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 shadow-lg border border-green-500/30">
+              <p className="text-sm font-medium text-center">{message.content}</p>
             </div>
           </div>
         );
@@ -555,6 +684,22 @@ function PrototypeLab() {
               <div className="text-left">
                 <h3 className="text-xl font-bold text-white">🚗 디자인 체크리스트</h3>
                 <p className="text-gray-400 text-sm mt-2">자동차 프로토타입 생성 가이드</p>
+                {/* 체크리스트 완성도 표시 */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-400">완성도</span>
+                    <span className="text-xs text-blue-400">{getChecklistCompletion().percentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getChecklistCompletion().percentage}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {getChecklistCompletion().completed}/{getChecklistCompletion().total} 항목 완료
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -628,19 +773,39 @@ function PrototypeLab() {
                   {selectedCategories.viewpoint && (
                     <div className="space-y-2 mt-3 pt-3 border-t border-gray-600/30">
                       <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                        <input 
+                          type="checkbox" 
+                          checked={checklistData.viewpoint === "front view"}
+                          onChange={(e) => updateChecklistData('viewpoint', e.target.checked ? "front view" : "")}
+                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" 
+                        />
                         <span className="text-sm text-gray-300">Front view</span>
                       </label>
                       <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                        <input 
+                          type="checkbox" 
+                          checked={checklistData.viewpoint === "3/4 view"}
+                          onChange={(e) => updateChecklistData('viewpoint', e.target.checked ? "3/4 view" : "")}
+                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" 
+                        />
                         <span className="text-sm text-gray-300">3/4 front view</span>
                       </label>
                       <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                        <input 
+                          type="checkbox" 
+                          checked={checklistData.viewpoint === "side view"}
+                          onChange={(e) => updateChecklistData('viewpoint', e.target.checked ? "side view" : "")}
+                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" 
+                        />
                         <span className="text-sm text-gray-300">Side view</span>
                       </label>
                       <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" />
+                        <input 
+                          type="checkbox" 
+                          checked={checklistData.viewpoint === "rear view"}
+                          onChange={(e) => updateChecklistData('viewpoint', e.target.checked ? "rear view" : "")}
+                          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2" 
+                        />
                         <span className="text-sm text-gray-300">Rear view</span>
                       </label>
                     </div>
@@ -663,15 +828,33 @@ function PrototypeLab() {
                     <div className="space-y-3 mt-3 pt-3 border-t border-gray-600/30">
                       <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">크기 등급:</label>
-                        <input type="text" placeholder="소형/준중형/중형/대형" className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" />
+                        <input 
+                          type="text" 
+                          placeholder="소형/준중형/중형/대형" 
+                          value={checklistData.size_class}
+                          onChange={(e) => updateChecklistData('size_class', e.target.value)}
+                          className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">차체 유형:</label>
-                        <input type="text" placeholder="SUV/세단/쿠페/해치백" className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" />
+                        <input 
+                          type="text" 
+                          placeholder="SUV/세단/쿠페/해치백" 
+                          value={checklistData.body_type}
+                          onChange={(e) => updateChecklistData('body_type', e.target.value)}
+                          className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">형태:</label>
-                        <input type="text" placeholder="two-box/three-box" className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" />
+                        <input 
+                          type="text" 
+                          placeholder="two-box/three-box" 
+                          value={checklistData.proportions}
+                          onChange={(e) => updateChecklistData('proportions', e.target.value)}
+                          className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
+                        />
                       </div>
                     </div>
                   )}
@@ -955,7 +1138,13 @@ function PrototypeLab() {
                     <div className="space-y-3 mt-3 pt-3 border-t border-gray-600/30">
                       <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">차체 색상:</label>
-                        <input type="text" placeholder="metallic teal, titanium gray" className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" />
+                        <input 
+                          type="text" 
+                          placeholder="metallic teal, titanium gray" 
+                          value={checklistData.color_finish}
+                          onChange={(e) => updateChecklistData('color_finish', e.target.value)}
+                          className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">루프 대비 색상:</label>

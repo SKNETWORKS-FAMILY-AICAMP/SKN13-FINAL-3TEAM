@@ -10,31 +10,48 @@ def index(request):
     return render(request, 'home.html')
 
 @csrf_exempt
-async def chatbot_api(request):
+def chatbot_api(request, session_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)
 
     try:
         data = json.loads(request.body)
         user_message = data.get('message')
-        user_id = data.get('user_id')  # 기본값 설정
+        user_id = data.get('user_id', '550e8400-e29b-41d4-a716-446655440000')  # UUID 형식의 기본값 설정
+        checklist_data = data.get('checklistData', {})
+        completion_status = data.get('completionStatus', {})
+        
+        # 디버깅: 받은 데이터 확인
+        print(f"🔍 config/views.py 디버깅:")
+        print(f"  - 받은 user_id: {user_id}")
+        print(f"  - user_id 타입: {type(user_id)}")
+        print(f"  - 전체 data: {data}")
         
         if not user_message:
             return JsonResponse({'error': '메시지가 비어있습니다.'}, status=400)
 
-        # Pipeline 서비스를 사용하여 응답 생성
-        result = babsim_pipeline_service.process_user_message(user_id, user_message)
+        # Pipeline 서비스를 사용하여 응답 생성 (체크리스트 데이터 포함)
+        result = babsim_pipeline_service.process_query(
+            user_message,
+            user_id=user_id,
+            session_id=session_id,
+            checklist_data=checklist_data,
+            completion_status=completion_status,
+        )
         
         if 'error' in result:
             return JsonResponse({'error': result['error']}, status=500)
         
         return JsonResponse({
             'reply': result['response'],
-            'intent': result.get('intent', ''),
+            'intent': result.get('initial_intent', ''),
             'is_form_complete': result.get('is_form_complete', False),
             'image_query': result.get('image_query', ''),
             'session_id': result.get('session_id', ''),
-            'prompt_id': result.get('prompt_id', '')
+            'prompt_id': result.get('prompt_id', ''),
+            'generated_results': result.get('generated_results', []),
+            'completion_status': result.get('completion_status', {}),
+            'checklist_data': result.get('checklist_data', {})
         })
 
     except Exception as e:

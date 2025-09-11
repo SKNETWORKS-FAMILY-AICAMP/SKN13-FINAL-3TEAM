@@ -48,7 +48,7 @@ class StandardResultSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'     # 클라이언트가 ?page_size= 로 조절
     max_page_size = 100                     # 상한
 
-class ChatAPIView(APIView):
+# class ChatAPIView(APIView):
     """
     사용자 채팅 요청을 처리하는 API 뷰 (동기 버전).
     1) 키워드 기반 라우팅 우선 처리
@@ -166,7 +166,9 @@ class ChatAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         user_prompt = request.data.get("message")
-        session_id = request.data.get("session_id")
+        session_id = kwargs.get("session_id")  # URL 파라미터에서 가져오기
+        checklist_data = request.data.get("checklistData", {})
+        completion_status = request.data.get("completionStatus", {})
 
         if not user_prompt or not session_id:
             return Response(
@@ -177,19 +179,28 @@ class ChatAPIView(APIView):
         try:
             # 파이프라인 서비스를 사용하여 완전한 AI 응답 생성
             logger.info(f"파이프라인 처리 시작: {user_prompt}")
+            logger.info(f"체크리스트 데이터: {checklist_data}")
+            logger.info(f"완성도 상태: {completion_status}")
             
-            # 파이프라인 서비스 호출
-            pipeline_result = babsim_pipeline_service.process_query(user_prompt)
+            # 파이프라인 서비스 호출 (체크리스트 데이터 포함)
+            pipeline_result = babsim_pipeline_service.process_query(
+                user_prompt, 
+                user_id=session_id,  # session_id를 user_id로 사용
+                checklist_data=checklist_data,
+                completion_status=completion_status
+            )
             
             # 파이프라인 결과에서 응답 추출
             if pipeline_result and 'response' in pipeline_result:
                 text_answer = pipeline_result['response']
                 generated_results = pipeline_result.get('generated_results', [])
+                pipeline_completion_status = pipeline_result.get('completion_status', {})
             else:
                 # 파이프라인 실패 시 폴백
                 logger.warning("파이프라인 처리 실패, 폴백 응답 사용")
                 text_answer = get_chatbot_response(user_prompt)
                 generated_results = []
+                pipeline_completion_status = {}
 
             # Log the prompt and response (인증된 사용자만)
             if request.user.is_authenticated:
@@ -205,11 +216,19 @@ class ChatAPIView(APIView):
             else:
                 logger.info("인증되지 않은 사용자 - DB 저장 건너뜀")
 
-            # Final response
-            return Response(
-                {"success": True, "response": text_answer, "generatedResults": []},
-                status=status.HTTP_200_OK,
-            )
+            # Final response with completion status and checklist data
+            response_data = {
+                "success": True, 
+                "ai_response": text_answer, 
+                "generated_results": generated_results,
+                "completion_status": pipeline_completion_status
+            }
+            
+            # 체크리스트 데이터가 있으면 응답에 포함
+            if pipeline_completion_status and 'checklist_data' in pipeline_completion_status:
+                response_data["completion_status"]["checklist_data"] = pipeline_completion_status['checklist_data']
+            
+            return Response(response_data, status=status.HTTP_200_OK)
 
         except Exception as e:
             logger.exception(f"ChatAPIView 처리 중 오류 발생: {e}")

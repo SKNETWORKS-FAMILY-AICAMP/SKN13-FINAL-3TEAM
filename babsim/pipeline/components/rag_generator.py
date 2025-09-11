@@ -4,13 +4,16 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 import sys
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 파이프라인 루트 경로를 Python 경로에 추가
 PIPELINE_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PIPELINE_ROOT))
 
-from pipeline.config import config
-from pipeline.llm_provider import kanana_llm_model
+from ..config import config
+from ..llm_provider import kanana_llm_model
 
 class RAGGenerator:
     """RAG 기반 답변 생성 컴포넌트 (babsim Vector DB 사용)"""
@@ -104,10 +107,12 @@ class RAGGenerator:
             "Content-Type": "application/json"
         }
         
+        # RunPod 임베딩 API 요청 형식 수정
         data = {
             "input": {
-                "texts": [query],
-                "model": "BAAI/bge-m3"
+                "model": "BAAI/bge-m3",
+                "input": [query]
+
             }
         }
         
@@ -116,23 +121,50 @@ class RAGGenerator:
             response.raise_for_status()
             
             result = response.json()
+            print(f"RunPod 임베딩 API 응답: {result}")  # 디버깅용 로그
+            
             if result.get("status") == "COMPLETED":
-                embeddings = result["output"]["embeddings"]
-                return embeddings[0]  # 첫 번째 (유일한) 임베딩 반환
+                output = result.get("output", {})
+                # 오류 응답 확인
+                if "code" in output and output["code"] != 200:
+                    print(f"RunPod API 오류 응답: {output}")
+                    raise Exception(f"RunPod API 오류: {output.get('message', 'Unknown error')}")
+                
+                if "embeddings" in output:
+                    embeddings = output["embeddings"]
+                    return embeddings[0]  # 첫 번째 (유일한) 임베딩 반환
+                else:
+                    print(f"RunPod API 응답에 'embeddings' 키가 없음: {output}")
+                    raise Exception(f"RunPod API 응답에 'embeddings' 키가 없음: {output}")
             else:
-                raise Exception(f"RunPod API 오류: {result}")
+                print(f"RunPod API 상태 오류: {result}")
+                raise Exception(f"RunPod API 상태 오류: {result.get('status', 'Unknown status')}")
                 
         except Exception as e:
             print(f"RunPod 임베딩 API 호출 실패: {e}")
             # 폴백: 로컬 모델 사용
+            print("RunPod API 실패, 로컬 임베딩 모델로 폴백")
             if self.embedding_model is None:
-                from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-                self.embedding_model = HuggingFaceBgeEmbeddings(
-                    model_name="sentence-transformers/all-MiniLM-L6-v2",
-                    model_kwargs={'device': 'cpu'},
-                    encode_kwargs={'normalize_embeddings': True}
-                )
-            return self.embedding_model.embed_query(query)
+                try:
+                    from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+                    self.embedding_model = HuggingFaceBgeEmbeddings(
+                        model_name="BAAI/bge-m3",
+                        model_kwargs={'device': 'cpu'},
+                        encode_kwargs={'normalize_embeddings': True}
+                    )
+                    print("로컬 BAAI/bge-m3 임베딩 모델 로드 성공")
+                except Exception as e:
+                    print(f"로컬 BAAI/bge-m3 임베딩 모델 로드 실패: {e}")
+                    # 최종 폴백: 더미 임베딩 반환
+                    print("더미 임베딩 반환")
+                    return [0.0] * 1024  # bge-m3의 기본 차원
+            
+            try:
+                return self.embedding_model.embed_query(query)
+            except Exception as e:
+                print(f"로컬 임베딩 모델 쿼리 실패: {e}")
+                # 최종 폴백: 더미 임베딩 반환
+                return [0.0] * 1024
     
     def _build_context(self, relevant_docs: List[Dict[str, Any]]) -> str:
         """관련 문서들을 컨텍스트로 구성"""
