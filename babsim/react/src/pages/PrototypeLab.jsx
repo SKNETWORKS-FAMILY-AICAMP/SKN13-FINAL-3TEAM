@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,7 +19,7 @@ function PrototypeLab() {
   const [isLoading, setIsLoading] = useState(false);
   // ... other state variables ...
 
-  const { isAuthenticated, user } = useAuth(); // Context에서 인증 상태와 사용자 정보 가져오기
+  const { isAuthenticated } = useAuth(); // Context에서 인증 상태 가져오기
 
   // [중요] 이 로직은 반드시 유지해야 합니다.
   useEffect(() => {
@@ -164,9 +165,9 @@ function PrototypeLab() {
       };
       
       console.log('📝 세션 제목 설정됨:', sessionWithDefaultTitle);
-      
-      // 기존 세션을 모두 제거하고 새 세션만 설정
-      setChatSessions([sessionWithDefaultTitle]);
+            
+      // 기존 세션들을 유지하고 새 세션을 맨 앞에 추가
+      setChatSessions(prev => [sessionWithDefaultTitle, ...prev]);
       setCurrentSession(sessionWithDefaultTitle);
       setShouldAutoScroll(true);
       
@@ -211,7 +212,7 @@ function PrototypeLab() {
   // 메시지 내용을 간단하게 요약하는 함수
   const generateTitleFromMessage = (message) => {
     // 메시지가 너무 길면 앞부분만 사용
-    const maxLength = 50;
+    const maxLength = 20;
     if (message.length <= maxLength) {
       return message;
     }
@@ -261,6 +262,7 @@ function PrototypeLab() {
     }
   };
 
+
   // 메시지 전송
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -300,7 +302,6 @@ function PrototypeLab() {
     const userMessage = { id: `user-${Date.now()}`, type: 'user', content: inputMessage, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-    setIsLoading(true);
     setShouldAutoScroll(true);
 
     // 첫 번째 메시지인 경우 제목 자동 생성
@@ -359,16 +360,105 @@ function PrototypeLab() {
           });
         }
       }
+      // user_id만 사용
+      const userId = isAuthenticated ? user?.user_id : 'anonymous_user';
+      
+      console.log('🔍 API 호출 시작:', { sessionId: currentSession.session_id, message: inputMessage, userId });
+      
+      // 스트리밍 메시지 ID 생성
+      const streamingMessageId = `ai-streaming-${Date.now()}`;
+      
+      // 실시간 스트리밍 업데이트 콜백
+      const onStreamingUpdate = (partialResponse) => {
+        console.log('🔄 onStreamingUpdate 호출됨!');
+        console.log('🔄 partialResponse:', partialResponse);
+        console.log('🔄 partialResponse 타입:', typeof partialResponse);
+        
+        console.log('🔄 스트리밍 청크 수신:', { // 이상없음. 계속 청크마다 누적하는 중.
+          streamingMessageId,
+          partialResponse: partialResponse.substring(0, 100) + (partialResponse.length > 100 ? '...' : ''),
+          responseLength: partialResponse.length,
+          timestamp: new Date().toISOString()
+        });
+        
+        flushSync(() => {
+          // 여기서는 이미 존재하는 스트리밍 메시지 업데이트만
+          setMessages(prev => prev.map(msg => 
+              msg.id === streamingMessageId 
+                ? { ...msg, content: partialResponse }
+                : msg
+            ));
+        
+            // // 스트리밍 메시지가 있으면 업데이트
+            // const timestamp = new Date().toLocaleTimeString('ko-KR', { 
+            //   hour12: false, 
+            //   hour: '2-digit', 
+            //   minute: '2-digit', 
+            //   second: '2-digit',
+            //   fractionalSecondDigits: 3
+            // });
+            // console.log(`[${timestamp}] 🔄 메시지 업데이트됨:`, {
+            //   messageId: streamingMessageId,
+            //   newContent: partialResponse.substring(0, 50) + '...',
+            //   isStreaming: true
+            // });
+            
+            // return updatedMessages;
+          // );
+        });
+        
+        // 강제 리렌더링 트리거
+        setForceRender(prev => prev + 1);
+      };
+      
+        // 스트리밍 시작 (await 제거!)
+        sendChatMessage(currentSession.session_id, inputMessage, userId, onStreamingUpdate, setMessages, streamingMessageId)
+        .then(response => {
+          console.log('✅ 스트리밍 완료 - 최종 응답:', {
+            streamingMessageId,
+            finalResponse: response.response?.substring(0, 100) + (response.response?.length > 100 ? '...' : ''),
+            responseLength: response.response?.length,
+            timestamp: new Date().toISOString()
+          });
+          
+          // 스트리밍 완료 - isStreaming을 false로 변경
+          setMessages(prev => prev.map(msg => 
+            msg.id === streamingMessageId 
+              ? { ...msg, isStreaming: false }
+              : msg
+          ));
+          
+          if (response.generatedResults) {
+            response.generatedResults.forEach(result => {
+              const resultMessage = { id: `result-${Date.now()}-${result.result_id}`, type: 'result', resultType: result.result_type, content: result.result, filePath: result.result_path, timestamp: new Date().toISOString() };
+              setMessages(prev => [...prev, resultMessage]);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('❌ API 호출 실패:', error);
+          const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: `API 호출 실패: ${error.message || '알 수 없는 오류'}`, timestamp: new Date().toISOString() };
+          setMessages(prev => [...prev, errorMessage]);
+        });
     } catch (error) {
       console.error('메시지 전송 실패:', error);
       const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: '메시지 전송에 실패했습니다. 다시 시도해주세요.', timestamp: new Date().toISOString() };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
+      // 스트리밍이 완료되면 로딩 상태 해제
       setIsLoading(false);
     }
   };
   
   const renderMessage = (message) => {
+    console.log('🎨 renderMessage 실행:', {
+      messageId: message.id,
+      messageType: message.type,
+      content: message.content?.substring(0, 50) + (message.content?.length > 50 ? '...' : ''),
+      isStreaming: message.isStreaming,
+      timestamp: new Date().toISOString()
+    });
+    
     switch (message.type) {
       case 'user':
         return (
@@ -391,6 +481,9 @@ function PrototypeLab() {
               </div>
               <p className="text-xs text-gray-300 mt-3 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
+                {message.isStreaming && (
+                  <span className="ml-2 text-blue-400">스트리밍 중...</span>
+                )}
               </p>
             </div>
           </div>
@@ -555,7 +648,7 @@ function PrototypeLab() {
             transition: 'top 0.1s ease-out'
           }}
         >
-          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[80vh]">
+          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[60vh] max-h-[80vh]">
             {/* Fixed Header */}
             <div className="p-6 border-b border-gray-700">
               <h3 className="text-xl font-bold text-white text-center">내 대화</h3>
@@ -569,7 +662,7 @@ function PrototypeLab() {
             </div>
             
             {/* Scrollable Content */}
-            <div className="p-6 flex-1 min-h-[calc(80vh-120px)] overflow-y-auto">
+            <div className="p-6 flex-1 min-h-[calc(60vh-120px)] max-h-[calc(80vh-120px)] overflow-y-auto">
               <div className="space-y-4">
                 {chatSessions.map((session) => (
                   <div
@@ -623,8 +716,33 @@ function PrototypeLab() {
                 <div className={`space-y-6 px-4 ${
                   isChecklistExpanded ? 'mr-[calc(100vw-4rem)]' : 'mr-95'
                 } h-[calc(100vh-200px)] overflow-y-auto pb-20`}>
-                  {messages.map((message) => renderMessage(message))}
-                  {isLoading && (
+                  {/* 디버깅용 주석처리
+                  {(() => {
+                    console.log('🔄 messages.map 실행 - 총 메시지 수:', messages.length);
+                    console.log('🔄 messages 배열:', messages);
+                    return messages.map((message, index) => {
+                      console.log(`🔄 메시지 ${index}:`, message);
+                      const jsx = renderMessage(message);
+                      console.log(`🔄 메시지 ${index} JSX 반환:`, jsx);
+                      return jsx;
+                    });
+                  })()}
+                  */}
+                  
+                  {/* 디버깅용: 마지막 메시지 텍스트 내용 표시 */}
+                  {messages.length > 0 && (
+                    <div className="bg-yellow-100 border border-yellow-400 rounded p-4 mb-4">
+                      <h3 className="font-bold text-yellow-800">디버깅: 마지막 메시지 내용</h3>
+                      <div className="text-sm text-yellow-700 mt-2 p-2 bg-yellow-50 rounded border">
+                        <strong>ID:</strong> {messages[messages.length - 1].id}<br/>
+                        <strong>Type:</strong> {messages[messages.length - 1].type}<br/>
+                        <strong>Content:</strong> {messages[messages.length - 1].content}<br/>
+                        <strong>isStreaming:</strong> {messages[messages.length - 1].isStreaming ? 'true' : 'false'}<br/>
+                        <strong>Length:</strong> {messages[messages.length - 1].content?.length || 0} characters
+                      </div>
+                    </div>
+                  )}
+                  {isLoading && !messages.some(msg => msg.isStreaming) && (
                     <div className="flex justify-start mb-4">
                       <div className="bg-gray-700/90 backdrop-blur-sm text-white rounded-lg px-4 py-2 border border-gray-600/50">
                         <div className="flex items-center space-x-2">
@@ -643,6 +761,8 @@ function PrototypeLab() {
                 <div className="bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl p-4">
                   <form onSubmit={handleSendMessage} className="flex space-x-4">
                     <input
+                      id="chat-input"
+                      name="chatMessage"
                       type="text"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
@@ -653,6 +773,10 @@ function PrototypeLab() {
                     <button
                       type="submit"
                       disabled={!inputMessage.trim() || !currentSession || isLoading}
+                      onClick={(e) => {
+                        console.log('🔍 버튼 클릭됨!');
+                        handleSendMessage(e);
+                      }}
                       className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-xl px-6 py-3 transition-all disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
                     >
                       <span>전송</span>
@@ -669,7 +793,7 @@ function PrototypeLab() {
 
         {/* Right Sidebar - 체크리스트 */}
         <div 
-          className={`fixed right-2 z-50 transition-all duration-500 ease-in-out ${
+          className={`fixed right-2 z-40 transition-all duration-500 ease-in-out ${
             isChecklistExpanded ? 'w-[calc(100vw-4rem)]' : 'w-96'
           } mt-5`}
           style={{
@@ -678,7 +802,7 @@ function PrototypeLab() {
             transition: 'top 0.1s ease-out'
           }}
         >
-          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl h-[calc(100vh-120px)]">
+          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[60vh] max-h-[80vh]">
             {/* Fixed Header */}
             <div className="p-6 border-b border-gray-700 flex items-center justify-between">
               <div className="text-left">
@@ -754,7 +878,7 @@ function PrototypeLab() {
             </div>
             
             {/* Content - 계층적 체크리스트 */}
-            <div className="p-6 h-[calc(100vh-240px)] overflow-y-auto">
+            <div className="p-6 min-h-[calc(60vh-240px)] max-h-[calc(80vh-240px)] overflow-y-auto">
               <div className={`space-y-4 ${
                 isChecklistExpanded ? 'grid grid-cols-3 gap-4' : 'space-y-4'
               }`}>

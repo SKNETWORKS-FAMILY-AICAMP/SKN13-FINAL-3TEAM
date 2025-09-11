@@ -74,8 +74,6 @@ class AssetLibrary(models.Model):
     title = models.CharField(max_length=200)
     summary = models.TextField(blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
-    documents = models.FileField(upload_to='assets/', blank=True, null=True)  # 파일 업로드용
-    cover_photo = models.ImageField(upload_to='assets_cover_image/', blank=True, null=True)  # 이미지 업로드용
     lib_name = models.CharField(max_length=255, blank=True, null=True)  # 원본 파일명 저장용
     pdf_path = models.CharField(max_length=255, blank=True, null=True)  # S3 URL 저장용
     img_path = models.CharField(max_length=255, blank=True, null=True)  # S3 URL 저장용

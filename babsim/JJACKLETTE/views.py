@@ -347,33 +347,82 @@ class AssetLibraryListCreateView(generics.ListCreateAPIView):
         # 파일 저장 로직
         instance = serializer.save(user=self.request.user)
         
-        # documents 파일을 S3에 저장
+        # PDF 파일을 S3에 저장
         if 'documents' in self.request.FILES:
             documents_file = self.request.FILES['documents']
-            # 파일명을 안전하게 처리
-            safe_filename = f"{instance.title}_{documents_file.name}"
             
-            # S3에 업로드
-            s3_url = self.upload_to_s3(documents_file, 'assets', safe_filename)
-            
-            # 모델에 정보 저장
-            instance.documents = documents_file.name
-            instance.pdf_path = s3_url
-            instance.save()
+            try:
+                # 파일 검증
+                self._validate_document_file(documents_file)
+                
+                # 파일명을 안전하게 처리
+                safe_filename = f"{instance.title}_{documents_file.name}"
+                
+                # S3에 업로드
+                s3_url = self.upload_to_s3(documents_file, 'assets', safe_filename)
+                
+                # 모델에 정보 저장 (S3 URL과 원본 파일명만 저장)
+                instance.pdf_path = s3_url
+                instance.lib_name = documents_file.name
+                instance.save()
+                
+            except ValueError as e:
+                # 검증 실패 시 인스턴스 삭제하고 오류 반환
+                instance.delete()
+                from rest_framework.response import Response
+                from rest_framework import status
+                raise serializers.ValidationError({"documents": str(e)})
         
-        # cover_photo 파일을 S3에 저장
+        # 커버 이미지를 S3에 저장
         if 'cover_photo' in self.request.FILES:
             cover_photo = self.request.FILES['cover_photo']
-            # 파일명을 안전하게 처리
-            safe_filename = f"{instance.lib_id}_{cover_photo.name}"
             
-            # S3에 업로드
-            s3_url = self.upload_to_s3(cover_photo, 'assets_cover_image', safe_filename)
-            
-            # 모델에 정보 저장
-            instance.img_path = s3_url
-            instance.save()
+            try:
+                # 파일 검증
+                self._validate_image_file(cover_photo)
+                
+                # 파일명을 안전하게 처리
+                safe_filename = f"{instance.lib_id}_{cover_photo.name}"
+                
+                # S3에 업로드
+                s3_url = self.upload_to_s3(cover_photo, 'assets_cover_image', safe_filename)
+                
+                # 모델에 정보 저장 (S3 URL만 저장)
+                instance.img_path = s3_url
+                instance.save()
+                
+            except ValueError as e:
+                # 검증 실패 시 인스턴스 삭제하고 오류 반환
+                instance.delete()
+                from rest_framework.response import Response
+                from rest_framework import status
+                raise serializers.ValidationError({"cover_photo": str(e)})
+    
+    def _validate_document_file(self, file):
+        """문서 파일 검증"""
+        # 파일 크기 검증 (100MB 제한)
+        if file.size > 100 * 1024 * 1024:
+            raise ValueError("파일 크기는 100MB를 초과할 수 없습니다.")
+        
+        # 파일 형식 검증
+        allowed_extensions = ['.pdf', '.doc', '.docx', '.txt']
+        file_extension = os.path.splitext(file.name)[1].lower()
+        if file_extension not in allowed_extensions:
+            raise ValueError(f"지원하지 않는 파일 형식입니다. 허용된 형식: {', '.join(allowed_extensions)}")
+    
+    def _validate_image_file(self, file):
+        """이미지 파일 검증"""
+        # 파일 크기 검증 (10MB 제한)
+        if file.size > 10 * 1024 * 1024:
+            raise ValueError("이미지 파일 크기는 10MB를 초과할 수 없습니다.")
+        
+        # 이미지 형식 검증
+        allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        file_extension = os.path.splitext(file.name)[1].lower()
+        if file_extension not in allowed_extensions:
+            raise ValueError(f"지원하지 않는 이미지 형식입니다. 허용된 형식: {', '.join(allowed_extensions)}")
 
+# 댓글 목록 조회/생성 API
 class LibraryCommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = LibraryCommentsSerializer
@@ -381,7 +430,26 @@ class LibraryCommentListCreateView(generics.ListCreateAPIView):
         return LibraryComments.objects.filter(asset_library_id=self.kwargs.get('lib_id')).order_by('-created_at')
     def perform_create(self, serializer):
         asset_library = get_object_or_404(AssetLibrary, lib_id=self.kwargs.get('lib_id'))
-        serializer.save(user=self.request.user, asset_library=asset_library)
+        comment = serializer.save(user=self.request.user, asset_library=asset_library)
+        # 댓글 수 증가
+        asset_library.comment_count += 1
+        asset_library.save()
+
+# 댓글 상세/수정/삭제 API
+class LibraryCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LibraryCommentsSerializer
+    lookup_field = 'comment_id'
+    
+    def get_queryset(self):
+        return LibraryComments.objects.all()
+    
+    def perform_destroy(self, instance):
+        # 댓글 삭제 시 comment_count 감소
+        asset_library = instance.asset_library
+        asset_library.comment_count = max(0, asset_library.comment_count - 1)
+        asset_library.save()
+        instance.delete()
 
 # --- 7-11. 인사이트 ---
 class InsightTrendsListView(generics.ListAPIView):
@@ -409,3 +477,131 @@ class UserReviewListView(generics.ListAPIView):
     serializer_class = UserReviewSerializer
     def get_queryset(self): 
         return UserReview.objects.filter(car_model_id=self.kwargs['car_model_id'])
+
+# --- 좋아요 관련 API ---
+# 에셋 좋아요 토글 API
+class AssetLikeToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, lib_id):
+        """에셋 좋아요 토글 - 좋아요 추가/제거"""
+        try:
+            asset = get_object_or_404(AssetLibrary, lib_id=lib_id)
+            user = request.user
+            
+            # 기존 좋아요 확인
+            like, created = AssetLikes.objects.get_or_create(
+                asset_library=asset,
+                user=user
+            )
+            
+            if created:
+                # 좋아요 추가
+                asset.likes += 1
+                asset.save()
+                user_liked = True
+            else:
+                # 좋아요 제거
+                like.delete()
+                asset.likes = max(0, asset.likes - 1)
+                asset.save()
+                user_liked = False
+            
+            return Response({
+                'likes': asset.likes,
+                'user_liked': user_liked
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Asset like toggle error: {e}")
+            return Response(
+                {'error': '좋아요 처리 중 오류가 발생했습니다.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 댓글 좋아요 토글 API
+class CommentLikeToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, comment_id):
+        """댓글 좋아요 토글 - 좋아요 추가/제거"""
+        try:
+            comment = get_object_or_404(LibraryComments, comment_id=comment_id)
+            user = request.user
+            
+            # 기존 좋아요 확인
+            like, created = CommentLikes.objects.get_or_create(
+                comment=comment,
+                user=user
+            )
+            
+            if created:
+                # 좋아요 추가
+                comment.likes += 1
+                comment.save()
+                user_liked = True
+            else:
+                # 좋아요 제거
+                like.delete()
+                comment.likes = max(0, comment.likes - 1)
+                comment.save()
+                user_liked = False
+            
+            return Response({
+                'likes': comment.likes,
+                'user_liked': user_liked
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Comment like toggle error: {e}")
+            return Response(
+                {'error': '좋아요 처리 중 오류가 발생했습니다.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ChatHistoryUpdateView(APIView):
+    """채팅 기록 업데이트 API"""
+    
+    def post(self, request, session_id):
+        try:
+            data = request.data
+            user_id = data.get('user_id')
+            user_message = data.get('user_message')
+            assistant_response = data.get('assistant_response')
+            
+            if not all([user_id, user_message, assistant_response]):
+                return Response(
+                    {'error': '필수 필드가 누락되었습니다.'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 세션 확인
+            try:
+                session = ChatSession.objects.get(session_id=session_id, user_id=user_id)
+            except ChatSession.DoesNotExist:
+                return Response(
+                    {'error': '세션을 찾을 수 없습니다.'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # 프롬프트 로그 생성
+            prompt_log = PromptLog.objects.create(
+                session=session,
+                user_prompt=user_message,
+                ai_response=assistant_response,
+                response_time=0  # 스트리밍이므로 0으로 설정
+            )
+            
+            return Response({
+                'success': True,
+                'prompt_id': prompt_log.prompt_id,
+                'message': '채팅 기록이 업데이트되었습니다.'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Chat history update error: {e}")
+            return Response(
+                {'error': '채팅 기록 업데이트 중 오류가 발생했습니다.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

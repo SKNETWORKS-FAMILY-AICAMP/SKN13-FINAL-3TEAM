@@ -1,6 +1,7 @@
 import { createMockResponse } from './mockData';
 import { apiRequest } from './authService';
 import httpLogger from '../utils/httpLogger';
+import { flushSync } from 'react-dom';
 
 // const API_BASE_URL = 'http://localhost:8000/api';
 const API_BASE_URL = '/api';
@@ -250,8 +251,37 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 };
 
 // 챗봇 메시지 전송 (AI 응답 시뮬레이션)
-export const sendChatMessage = async (sessionId, message, additionalData = {}) => {
-  console.log('💬 챗봇 메시지 전송:', { sessionId, message, additionalData });
+export const sendChatMessage = async (sessionId, message, userId, onStreamingUpdate = null, setMessages = null, streamingMessageId = null) => {
+  console.log('💬 챗봇 메시지 전송:', { sessionId, message, userId, onStreamingUpdate });
+  
+  // 목업 모드일 때는 Django 서버 연결 시도하지 않음
+  if (USE_MOCK_DATA) {
+    console.log('🔄 목업 모드: 목업 응답 생성');
+    
+    // 목업 응답 생성
+    const mockResponse = generateMockResponse(message);
+    
+    // 프롬프트 로그 생성
+    // const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
+    
+    // 생성 결과가 있으면 저장
+    // if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
+    //   for (const result of mockResponse.generatedResults) {
+    //     await createGeneratedResult(
+    //       promptLog.prompt_id,
+    //       result.result_type,
+    //       result.result_path,
+    //       result.result
+    //     );
+    //   }
+    // }
+    
+    return {
+      success: true,
+      response: mockResponse.aiResponse,
+      generatedResults: mockResponse.generatedResults || []
+    };
+  }
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {
@@ -290,6 +320,99 @@ export const sendChatMessage = async (sessionId, message, additionalData = {}) =
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+    
+    setMessages(prev => {
+      // 초기 스트리밍 메시지 새로 생성
+      return [...prev, { 
+        id: streamingMessageId, 
+        type: 'ai', 
+        content: '', 
+        timestamp: new Date().toISOString(),
+        isStreaming: true
+      }];
+    })
+    
+    console.log('🔍 [StreamingHttpResponse] ReadableStream 시작 - response.body:', response.body);
+    console.log('🔍 [StreamingHttpResponse] ReadableStream locked:', response.body.locked);
+    
+    // StreamingHttpResponse를 ReadableStream으로 처리
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    
+    console.log('🔍 [StreamingHttpResponse] Reader 생성 완료:', reader);
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();  
+        if (done) break;
+        
+        console.log('🔍 [StreamingHttpResponse] 새로 들어온 ChunkValue:', value);
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n'); // 각각의 줄이 하나하나의 이벤트(청크)
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataContent = line.slice(6).trim();
+            
+            // [DONE] 신호 처리
+            if (dataContent === '[DONE]') {
+              console.log('✅ 스트리밍 완료: [DONE]');
+              break;
+            }
+            
+            try {
+              const data = JSON.parse(dataContent);
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              if (data.choices[0].delta.content) {
+                fullResponse += data.choices[0].delta.content;
+                // 실시간으로 UI 업데이트
+                const timestamp = new Date().toLocaleTimeString('ko-KR', { 
+                  hour12: false, 
+                  hour: '2-digit', 
+                  minute: '2-digit', 
+                  second: '2-digit',
+                  fractionalSecondDigits: 3
+                });
+                console.log(`[${timestamp}] 스트리밍 청크:`, data.choices[0].delta.content);
+                
+                // 실시간 스트리밍 메시지 업데이트를 위한 콜백 호출
+                if (onStreamingUpdate) {
+                  console.log('🔄 onStreamingUpdate 호출:', fullResponse);
+                  onStreamingUpdate(fullResponse);
+                }
+              } else {
+                console.log('⚠️ content가 없습니다:', data.choices[0].delta);
+              }
+            } catch (e) {
+              console.error('JSON 파싱 오류:', e, '원본 데이터:', dataContent);
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    
+    console.log('✅ 스트리밍 응답 완료:', fullResponse);
+    
+    // 스트리밍 완료 후 대화 기록 업데이트
+    try {
+      await updateChatHistory(sessionId, userId, message, fullResponse);
+      console.log('✅ 대화 기록 업데이트 완료');
+    } catch (error) {
+      console.error('❌ 대화 기록 업데이트 실패:', error);
+    }
+    
+    return {
+      success: true,
+      response: fullResponse,
+      generatedResults: []
+    };
+    
   } catch (error) {
     console.error('❌ Django 서버 연동 실패:', error);
     throw error;
@@ -358,6 +481,35 @@ const generateMockResponse = (message) => {
     aiResponse: `"${message}"에 대한 답변입니다. 현대차는 Fluidic Sculpture 디자인 철학을 바탕으로 미래지향적이고 역동적인 디자인을 추구합니다. 더 구체적인 질문이 있으시면 말씀해주세요.`,
     generatedResults: []
   };
+};
+
+// 스트리밍 완료 후 대화 기록 업데이트
+const updateChatHistory = async (sessionId, userId, userMessage, assistantResponse) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}/update-history/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        user_message: userMessage,
+        assistant_response: assistantResponse
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    return result;
+    
+  } catch (error) {
+    console.error('대화 기록 업데이트 API 호출 실패:', error);
+    throw error;
+  }
 };
 
 export default {

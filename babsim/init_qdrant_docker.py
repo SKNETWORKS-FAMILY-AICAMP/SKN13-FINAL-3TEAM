@@ -12,19 +12,22 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
+from qdrant_client.http.exceptions import UnexpectedResponse
 from tqdm import tqdm
 from typing import List
 from uuid import uuid4
 import requests
 from dotenv import load_dotenv
 
+load_dotenv()
+
 # Qdrant 설정 (Docker 컨테이너 내부에서 접근)
-HOST = os.getenv("QDRANT_HOST", "qdrant")
+# HOST = os.getenv("QDRANT_HOST", "qdrant")
+HOST = os.getenv("AWS_PUBLIC_IP", os.getenv("QDRANT_HOST", "qdrant"))
 PORT = int(os.getenv("QDRANT_PORT_REST", "6333"))
 COLLECTION_NAME = "babsim_rag_db"
 
 # 임베딩 모델 설정
-load_dotenv()
 EMBEDDING_MODEL = "BAAI/bge-m3"
 EMBEDDING_ENDPOINT_ID = os.getenv("EMBEDDING_ENDPOINT_ID")
 RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
@@ -58,23 +61,22 @@ def load_documents(json_path):
         print(f"문서 로드 실패: {e}")
         return []
 
-def ensure_qdrant_collection(client, collection_name):
+def ensure_qdrant_collection(client: QdrantClient, collection_name: str = "babsim_rag_db"):
     """
-    Qdrant Collection 생성 확인
+    지정한 단일 컬렉션이 있으면 삭제 후 새로 생성
     """
-    try:
-        if not client.collection_exists(collection_name):
-            print(f"컬렉션 '{collection_name}' 생성 중...")
-            # BAAI/bge-m3 모델의 임베딩 차원은 1024
-            client.create_collection(
-                collection_name=collection_name,
-                vectors_config=VectorParams(size=1024, distance=Distance.COSINE),
-            )
-            print(f"컬렉션 '{collection_name}' 생성 완료")
-        else:
-            print(f"컬렉션 '{collection_name}' 이미 존재")
-    except Exception as e:
-        print(f"컬렉션 생성/확인 실패: {e}")
+    collections = [c.name for c in client.get_collections().collections]
+
+    if collection_name in collections:
+        print(f"컬렉션 '{collection_name}' 이미 존재 → 삭제 중... ❌")
+        client.delete_collection(collection_name=collection_name)
+
+    print(f"컬렉션 '{collection_name}' 생성 중... 🚀")
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config=VectorParams(size=1024, distance=Distance.COSINE),
+    )
+    print(f"컬렉션 '{collection_name}' 새로 생성 완료 ✅")
 
 def get_existing_titles(client, collection_name):
     """
@@ -165,7 +167,7 @@ def get_embedding_from_runpod(endpoint_id, texts):
     return vectors
 
 
-def upload_docs_to_qdrant_batch(client, collection_name, docs, endpoint_id, batch_size=32):
+def upload_docs_to_qdrant_batch(client, collection_name, docs, endpoint_id, batch_size=8):
     """
     문서를 배치로 Qdrant에 업로드
     """

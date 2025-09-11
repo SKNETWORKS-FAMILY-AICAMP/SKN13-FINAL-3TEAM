@@ -28,7 +28,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-gray-800 rounded-t-lg" style={{ borderBottom: '1px solid #374151' }}>
+    <header className="bg-gray-800 rounded-t-lg fixed top-0 left-0 right-0 z-50" style={{ borderBottom: '1px solid #374151' }}>
       <div className="w-full px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo - Left */}

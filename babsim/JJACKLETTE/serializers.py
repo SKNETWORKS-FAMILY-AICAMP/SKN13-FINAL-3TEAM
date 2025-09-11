@@ -115,28 +115,20 @@ class PromptLogSerializer(serializers.ModelSerializer):
 class AssetLibrarySerializer(serializers.ModelSerializer):
     user_id = serializers.UUIDField(source='user.user_id', read_only=True)
     user_name = serializers.CharField(source='user.user_name', read_only=True) # 작성자 이름 추가
-    documents = serializers.FileField(required=False, allow_null=True)  # 파일 업로드용
-    cover_photo = serializers.FileField(required=False, allow_null=True)  # 이미지 업로드용
     lib_name = serializers.CharField(read_only=True)  # 파일명 저장용
 
     class Meta:
         model = AssetLibrary
         fields = (
             'lib_id', 'user_id', 'user_name', 'title', 'summary', 'category', 
-            'documents', 'cover_photo', 'lib_name', 'pdf_path', 'img_path', 'upload_date', 
+            'lib_name', 'pdf_path', 'img_path', 'upload_date', 
             'likes', 'comment_count', 'created_at', 'updated_at'
         )
         read_only_fields = ('lib_id', 'user_id', 'user_name', 'lib_name', 'pdf_path', 'img_path', 'upload_date', 'likes', 'comment_count', 'created_at', 'updated_at')
 
     def create(self, validated_data):
-        """파일 업로드 시 파일명을 lib_name에 저장"""
+        """모델 인스턴스 생성"""
         instance = super().create(validated_data)
-        
-        # documents 파일명을 lib_name에 저장
-        if 'documents' in validated_data and validated_data['documents']:
-            instance.lib_name = validated_data['documents'].name
-            instance.save()
-        
         return instance
 
     def validate_title(self, value):
@@ -147,40 +139,7 @@ class AssetLibrarySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("제목은 200자를 초과할 수 없습니다.")
         return value.strip()
 
-    def validate_documents(self, value):
-        """문서 파일 검증"""
-        if value:
-            # 파일 크기 검증 (100MB 제한)
-            if value.size > 100 * 1024 * 1024:
-                raise serializers.ValidationError("파일 크기는 100MB를 초과할 수 없습니다.")
-            
-            # 파일 형식 검증
-            allowed_extensions = ['.pdf', '.doc', '.docx', '.txt']
-            file_extension = os.path.splitext(value.name)[1].lower()
-            if file_extension not in allowed_extensions:
-                raise serializers.ValidationError(f"지원하지 않는 파일 형식입니다. 허용된 형식: {', '.join(allowed_extensions)}")
-        
-        return value
 
-    def validate_img_path(self, value):
-        """이미지 파일 검증"""
-        if value:
-            # 파일 크기 검증 (10MB 제한)
-            if value.size > 10 * 1024 * 1024:
-                raise serializers.ValidationError("이미지 파일 크기는 10MB를 초과할 수 없습니다.")
-            
-            # 이미지 형식 검증
-            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
-            file_extension = os.path.splitext(value.name)[1].lower()
-            if file_extension not in allowed_extensions:
-                raise serializers.ValidationError(f"지원하지 않는 이미지 형식입니다. 허용된 형식: {', '.join(allowed_extensions)}")
-        
-        return value
-
-class AssetLibraryCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AssetLibrary
-        fields = ('documents', 'img_path')
 
 # --- 5. 라이브러리 댓글 ---
 class LibraryCommentsSerializer(serializers.ModelSerializer):
@@ -190,7 +149,7 @@ class LibraryCommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LibraryComments
         fields = ('comment_id', 'asset_library', 'user_id', 'user_name', 'comments', 'likes', 'created_at', 'updated_at')
-        read_only_fields = ('comment_id', 'user_id', 'created_at', 'updated_at')
+        read_only_fields = ('comment_id', 'asset_library', 'user_id', 'user_name', 'created_at', 'updated_at')
 
 # --- 6. 인사이트 ---
 class EngineeringSpecSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 # BABSIM/config/views.py
 from django.shortcuts import render
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from pipeline.services import babsim_pipeline_service
 
@@ -16,6 +16,7 @@ def chatbot_api(request, session_id):
 
     try:
         data = json.loads(request.body)
+        # print(data)  # 디버깅을 위한 요청 데이터 출력
         user_message = data.get('message')
         user_id = data.get('user_id', '550e8400-e29b-41d4-a716-446655440000')  # UUID 형식의 기본값 설정
         checklist_data = data.get('checklistData', {})
@@ -42,6 +43,13 @@ def chatbot_api(request, session_id):
         if 'error' in result:
             return JsonResponse({'error': result['error']}, status=500)
         
+        # 스트리밍 응답인 경우 직접 반환
+        if 'streaming_response' in result:
+            print(f"views.py 가 받은 result : {result}")
+            
+            return result["streaming_response"]
+        
+        # 일반 응답인 경우 JsonResponse로 반환
         return JsonResponse({
             'reply': result['response'],
             'intent': result.get('initial_intent', ''),

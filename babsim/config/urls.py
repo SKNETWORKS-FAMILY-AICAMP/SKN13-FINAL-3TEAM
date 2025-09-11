@@ -16,6 +16,6 @@ urlpatterns = [
     path('api/pipeline/chat/', views.chatbot_api, name='pipeline-chat'),
     path('api/pipeline/history/', views.chat_history_api, name='pipeline-history'),
     path('api/pipeline/clear-session/', views.clear_session_api, name='pipeline-clear-session'),
-
-    path('chat/sessions/<uuid:session_id>/prompts/', views.chatbot_api, name='chat-message')
+    # path('api/chat/sessions/<uuid:session_id>/message/', views.chatbot_api, name='chat-message'),
+    
 ]

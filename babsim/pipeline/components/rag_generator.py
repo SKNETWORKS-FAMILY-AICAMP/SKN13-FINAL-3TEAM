@@ -254,5 +254,6 @@ class RAGGenerator:
             print(f"Fallback LLM 응답 실패: {e}")
             return "죄송합니다. 현재 답변을 생성할 수 없습니다. 다시 시도해 주세요."
 
+
 # 전역 RAG 생성기 인스턴스
 rag_generator = RAGGenerator()

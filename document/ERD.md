@@ -47,7 +47,7 @@
 | title | VARCHAR(200) | | | ✅ | 자료 제목 |
 | summary | TEXT | | | | 자료 요약 |
 | category | VARCHAR(100) | | | | 카테고리 |
-| documents | TEXT | | | | 업로드 문서 |
+| lib_name | VARCHAR(255) | | | | 원본 파일명 저장용 |
 | pdf_path | VARCHAR(255) | | | | PDF 파일 경로 (S3 URL) |
 | img_path | VARCHAR(255) | | | | 이미지 경로 (S3 URL 또는 Unsplash URL) |
 | upload_date | DATE | | | | 업로드 날짜 |
@@ -56,18 +56,26 @@
 | created_at | TIMESTAMP | | | ✅ | 업로드 시간 |
 | updated_at | TIMESTAMP | | | | 수정 시간 |
 
+**변경사항:**
+- ❌ **제거**: `documents` 필드 (FileField) - S3 업로드로 대체
+- ❌ **제거**: `cover_photo` 필드 (ImageField) - S3 업로드로 대체  
+- ✅ **추가**: `lib_name` 필드 - 원본 파일명 저장용
+
 ### 5. Library_comments (라이브러리 댓글)
 | 필드명 | 데이터 타입 | PK | FK | Not Null | 설명 |
 |--------|-------------|----|----|----------|------|
 | comment_id | UUID | ✅ | | ✅ | 댓글 고유 ID |
-| lib_id | UUID | | asset_library | ✅ | 대상 라이브러리 ID |
+| asset_library | UUID | | asset_library | ✅ | 대상 라이브러리 ID |
 | user_id | UUID | | users | ✅ | 댓글 작성자 ID |
-| username | VARCHAR(50) | | | | 사용자명 |
 | comments | TEXT | | | ✅ | 댓글 내용 |
 | likes | INTEGER | | | | 좋아요 수 |
-| user_liked | BOOLEAN | | | | 현재 사용자의 좋아요 여부 |
 | created_at | TIMESTAMP | | | ✅ | 작성 시간 |
 | updated_at | TIMESTAMP | | | | 수정 시간 |
+
+**변경사항:**
+- ❌ **제거**: `username` 필드 - `user.user_name`으로 대체
+- ❌ **제거**: `user_liked` 필드 - 별도 좋아요 테이블로 관리
+- ✅ **변경**: `lib_id` → `asset_library` (ForeignKey 필드명 변경)
 
 ### 6. Insight_trends (인사이트 트렌드)
 | 필드명 | 데이터 타입 | PK | FK | Not Null | 설명 |
@@ -117,17 +125,25 @@
 | 필드명 | 데이터 타입 | PK | FK | Not Null | 설명 |
 |--------|-------------|----|----|----------|------|
 | like_id | UUID | ✅ | | ✅ | 좋아요 고유 ID |
-| lib_id | UUID | | asset_library | ✅ | 라이브러리 ID |
-| user_id | UUID | | users | ✅ | 사용자 ID |
+| asset_library | UUID | | asset_library | ✅ | 라이브러리 ID (lib_id 참조) |
+| user | UUID | | users | ✅ | 사용자 ID (user_id 참조) |
 | created_at | TIMESTAMP | | | ✅ | 좋아요 시간 |
+
+**특징:**
+- **유니크 제약**: `(asset_library, user)` - 한 사용자가 한 에셋에 한 번만 좋아요
+- **토글 방식**: 좋아요 추가/제거를 동일한 API로 처리
 
 ### 11. Comment_likes (댓글 좋아요)
 | 필드명 | 데이터 타입 | PK | FK | Not Null | 설명 |
 |--------|-------------|----|----|----------|------|
 | like_id | UUID | ✅ | | ✅ | 좋아요 고유 ID |
-| comment_id | UUID | | library_comments | ✅ | 댓글 ID |
-| user_id | UUID | | users | ✅ | 사용자 ID |
+| comment | UUID | | library_comments | ✅ | 댓글 ID (comment_id 참조) |
+| user | UUID | | users | ✅ | 사용자 ID (user_id 참조) |
 | created_at | TIMESTAMP | | | ✅ | 좋아요 시간 |
+
+**특징:**
+- **유니크 제약**: `(comment, user)` - 한 사용자가 한 댓글에 한 번만 좋아요
+- **토글 방식**: 좋아요 추가/제거를 동일한 API로 처리
 
 ## 테이블 간 관계
 
@@ -146,6 +162,12 @@
 - **Asset_library** ↔ **Library_comments**: 1:N (라이브러리 하나에 여러 댓글)
 - **Asset_library** ↔ **Asset_likes**: 1:N (에셋 하나에 여러 좋아요)
 - **Library_comments** ↔ **Comment_likes**: 1:N (댓글 하나에 여러 좋아요)
+
+**API 엔드포인트:**
+- **댓글 관리**: `GET/POST /library/assets/{lib_id}/comments/`
+- **댓글 상세**: `GET/PUT/DELETE /library/comments/{comment_id}/`
+- **에셋 좋아요**: `POST /library/assets/{lib_id}/like/`
+- **댓글 좋아요**: `POST /library/comments/{comment_id}/like/`
 
 ### **인사이트 트렌드 관계**
 - **Insight_trends** ↔ **Engineering_spec**: 1:N (차량 모델별 공학적 스펙)

@@ -12,6 +12,7 @@ import Chatbot from './pages/Chatbot';
 import Profile from './pages/Profile';
 import MyWorkspace from './pages/MyWorkspace';
 import OAuthCallback from './pages/OAuthCallback';
+import TestPage from './pages/TestPage';
 import './App.css';
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
               <MyWorkspace />
             </ProtectedRoute>
           } />
+          <Route path="/test" element={<TestPage />} />
         </Routes>
       </Router>
     </AuthProvider>

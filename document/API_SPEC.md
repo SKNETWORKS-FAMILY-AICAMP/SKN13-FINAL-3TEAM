@@ -762,7 +762,7 @@ Authorization: Bearer <access_token>
 ```
 
 #### 4.5 디자인 자료 좋아요/취소
-**POST** `/library/assets/{asset_id}/like/`
+**POST** `/library/assets/{lib_id}/like/`
 
 **Headers:**
 ```
@@ -773,15 +773,19 @@ Authorization: Bearer <access_token>
 ```json
 {
   "likes": 15,
-  "user_liked": true,
-  "message": "좋아요가 추가되었습니다."
+  "user_liked": true
 }
 ```
+
+**특징:**
+- **토글 방식**: 이미 좋아요한 경우 취소, 안 한 경우 추가
+- **실시간 카운트**: 좋아요 수가 실시간으로 업데이트
+- **사용자 상태**: 현재 사용자의 좋아요 상태 반환
 
 ### 5. Library_comments 테이블 관련 API
 
 #### 5.1 댓글 조회
-**GET** `/library/assets/{asset_id}/comments/`
+**GET** `/library/assets/{lib_id}/comments/`
 
 **Query Parameters:**
 ```
@@ -798,30 +802,25 @@ Authorization: Bearer <access_token>
 ```json
 {
   "count": 15,
-  "next": "http://localhost:8000/api/library/assets/{asset_id}/comments/?page=2",
+  "next": "http://localhost:8000/api/library/assets/{lib_id}/comments/?page=2",
   "previous": null,
   "results": [
     {
       "comment_id": "uuid",
-      "lib_id": "uuid",
+      "asset_library": "uuid",
       "user_id": "uuid",
-      "username": "string",
+      "user_name": "string",
       "comments": "string",
       "created_at": "2024-01-01T10:30:00Z",
       "updated_at": "2024-01-01T10:30:00Z",
-      "likes": 5,
-      "user_liked": false,
-      "user": {
-        "user_id": "uuid",
-        "user_name": "string"
-      }
+      "likes": 5
     }
   ]
 }
 ```
 
 #### 5.2 댓글 작성
-**POST** `/library/assets/{asset_id}/comments/`
+**POST** `/library/assets/{lib_id}/comments/`
 
 **Headers:**
 ```
@@ -839,41 +838,62 @@ Content-Type: application/json
 **Response (201 Created):**
 ```json
 {
-  "message": "댓글이 성공적으로 작성되었습니다.",
-  "comment": {
-    "comment_id": "uuid",
-    "lib_id": "uuid",
-    "user_id": "uuid",
-    "username": "string",
-    "comments": "string",
-    "created_at": "2024-01-01T10:30:00Z",
-    "updated_at": "2024-01-01T10:30:00Z",
-    "likes": 0,
-    "user_liked": false
-  }
+  "comment_id": "uuid",
+  "asset_library": "uuid",
+  "user_id": "uuid",
+  "user_name": "string",
+  "comments": "string",
+  "created_at": "2024-01-01T10:30:00Z",
+  "updated_at": "2024-01-01T10:30:00Z",
+  "likes": 0
 }
 ```
 
-#### 5.3 댓글 삭제
-**DELETE** `/library/assets/{asset_id}/comments/{comment_id}/`
+**특징:**
+- **자동 카운트**: 댓글 생성 시 `comment_count` 자동 증가
+- **사용자 정보**: JWT 토큰에서 사용자 정보 자동 추출
+
+#### 5.3 댓글 상세/수정/삭제
+**GET/PUT/DELETE** `/library/comments/{comment_id}/`
 
 **Headers:**
 ```
 Authorization: Bearer <access_token>
+Content-Type: application/json (PUT 요청 시)
 ```
 
-**Response (204 No Content):**
+**PUT Request Body:**
+```json
+{
+  "comments": "string"
+}
+```
+
+**GET Response (200 OK):**
+```json
+{
+  "comment_id": "uuid",
+  "asset_library": "uuid",
+  "user_id": "uuid",
+  "user_name": "string",
+  "comments": "string",
+  "created_at": "2024-01-01T10:30:00Z",
+  "updated_at": "2024-01-01T10:30:00Z",
+  "likes": 5
+}
+```
+
+**DELETE Response (204 No Content):**
 ```
 삭제 성공 (응답 본문 없음)
 ```
 
-**참고사항:**
-- 댓글 작성자만 삭제할 수 있습니다.
-- 댓글 삭제 시 해당 댓글의 좋아요 정보도 함께 삭제됩니다.
-- 삭제된 댓글은 복구할 수 없습니다.
+**특징:**
+- **자동 카운트**: 댓글 삭제 시 `comment_count` 자동 감소
+- **권한 확인**: 댓글 작성자만 수정/삭제 가능
 
 #### 5.4 댓글 좋아요/취소
-**POST** `/library/assets/{asset_id}/comments/{comment_id}/like/`
+**POST** `/library/comments/{comment_id}/like/`
 
 **Headers:**
 ```
@@ -884,10 +904,14 @@ Authorization: Bearer <access_token>
 ```json
 {
   "likes": 8,
-  "user_liked": true,
-  "message": "댓글 좋아요가 추가되었습니다."
+  "user_liked": true
 }
 ```
+
+**특징:**
+- **토글 방식**: 이미 좋아요한 경우 취소, 안 한 경우 추가
+- **실시간 카운트**: 좋아요 수가 실시간으로 업데이트
+- **사용자 상태**: 현재 사용자의 좋아요 상태 반환
 
 ### 6. Insight_trends 테이블 관련 API
 

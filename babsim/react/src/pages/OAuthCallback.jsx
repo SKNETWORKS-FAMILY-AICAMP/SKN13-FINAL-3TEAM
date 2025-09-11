@@ -40,7 +40,7 @@ function OAuthCallback() {
 
           // login 함수가 완료될 때까지 기다림
           // await login(userData); 
-                      login({ userId, e_mail: email }); // Pass user data object to login function
+                      login({ user_id: userId, e_mail: email }); // Pass user data object to login function
 
           // 홈페이지로 리디렉션
           navigate('/', { replace: true });

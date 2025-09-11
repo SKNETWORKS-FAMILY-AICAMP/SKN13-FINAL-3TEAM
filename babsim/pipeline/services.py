@@ -57,6 +57,20 @@ class BabsimPipelineService:
         logger.info(f"새 사용자 생성: {email} (user_id: {user_id})")
         return user
     
+    def create_chat_session(self, user_id: str, session_id: uuid4) -> ChatSession:
+        """새 채팅 세션 생성"""
+        user = self.get_user_by_id(user_id)
+        if not user:
+            user = self.create_user(user_id)
+        
+        from django.utils import timezone
+        session = ChatSession.objects.create(
+            session_id=session_id,
+            user=user,
+            started_at=timezone.now()
+        )
+        return session
+    
     def get_or_create_chat_session(self, user: Users) -> ChatSession:
         """사용자의 활성 채팅 세션 조회 또는 생성"""
         # 가장 최근의 활성 세션 조회
@@ -110,6 +124,80 @@ class BabsimPipelineService:
         
         return chat_history
     
+    def process_user_message(self, user_id: str, session_id: uuid4, user_query: str) -> Dict[str, Any]:
+        """사용자 메시지 처리 및 파이프라인 실행"""
+        try:
+            # 사용자 조회 또는 생성
+            user = self.get_user_by_id(user_id)
+            if not user:
+                user = self.create_user(user_id)
+            
+            # 채팅 세션 조회
+            try:
+                session = ChatSession.objects.get(session_id=session_id)
+            except ChatSession.DoesNotExist:
+                # 세션이 없으면 새로 생성
+                session = self.create_chat_session(user_id, session_id)
+            
+            # 파이프라인용 대화 기록 준비
+            chat_history = self.get_chat_history_for_pipeline(session)
+            
+            # LangGraph 파이프라인 실행
+            initial_state = {
+                "user_query": user_query,
+                "intent": "",
+                "chat_history": chat_history,
+                "response": "",
+                "image_query": "",
+                "is_form_complete": False,
+                "messages_summarized": False
+            }
+            
+            pipeline_result = text_pipeline.invoke(initial_state)
+            
+            # 스트리밍 응답인 경우 StreamingHttpResponse를 그대로 반환
+            if hasattr(pipeline_result.get('response'), 'streaming_content'):
+                print("StreamingHttpResponse 를 받아 넘겨줌!!")
+                return {"streaming_response": pipeline_result['response']}
+            
+            # 결과 추출
+            response = pipeline_result.get('response', '')
+            intent = pipeline_result.get('intent', '')
+            is_form_complete = pipeline_result.get('is_form_complete', False)
+            image_query = pipeline_result.get('image_query', '')
+            updated_history = pipeline_result.get('chat_history', chat_history)
+            
+            # 결과를 Django 모델에 저장
+            prompt_log = self.save_prompt_log(session, user_query, response)
+            
+            # 이미지 쿼리가 생성된 경우 결과 저장
+            if image_query:
+                self.save_generated_result(
+                    prompt_log, 
+                    'image', 
+                    image_query
+                )
+            
+            # 응답 데이터 구성
+            response_data = {
+                'response': response,
+                'intent': intent,
+                'is_form_complete': is_form_complete,
+                'image_query': image_query,
+                'session_id': str(session.session_id),
+                'prompt_id': str(prompt_log.prompt_id),
+                'user_id': user_id
+            }
+            
+            return response_data
+            
+        except Exception as e:
+            logger.error(f"메시지 처리 실패: {e}")
+            return {
+                'error': str(e),
+                'response': '죄송합니다. 처리 중 오류가 발생했습니다.',
+                'user_id': user_id
+            }
     
     def get_session_history(self, user_id: str) -> List[Dict[str, Any]]:
         """사용자의 채팅 세션 기록 조회"""
@@ -332,6 +420,84 @@ class BabsimPipelineService:
                 "prompt_id": None,
                 "user_id": user_id
             }
+
+    def update_chat_history(self, user_id: str, session_id: uuid4, user_message: str, assistant_response: str) -> bool:
+        """스트리밍 완료 후 대화 기록 업데이트"""
+        try:
+            logger.info(f"대화 기록 업데이트: user_id={user_id}, session_id={session_id}")
+            
+            # 채팅 세션 조회
+            session = ChatSession.objects.filter(session_id=session_id).first()
+            if not session:
+                logger.error(f"세션을 찾을 수 없음: {session_id}")
+                return False
+            
+            # 사용자 조회
+            user = self.get_user_by_id(user_id)
+            if not user:
+                logger.error(f"사용자를 찾을 수 없음: {user_id}")
+                return False
+            
+            # 대화 기록 업데이트 (기존 임시 기록을 실제 응답으로 교체)
+            # 현재 대화 기록 가져오기
+            current_history = self.get_chat_history_for_pipeline(session)
+            
+            # 마지막 assistant 메시지가 "[스트리밍 응답]"인 경우 실제 응답으로 교체
+            if current_history and current_history[-1].get('role') == 'assistant' and current_history[-1].get('content') == '[스트리밍 응답]':
+                current_history[-1]['content'] = assistant_response
+            else:
+                # 새로운 대화 기록 추가
+                current_history = self.chat_manager.add_message(current_history, "user", user_message)
+                current_history = self.chat_manager.add_message(current_history, "assistant", assistant_response)
+            
+            # Django 모델에 저장
+            self.save_prompt_log(session, user_message, assistant_response)
+            
+            logger.info("대화 기록 업데이트 완료")
+            return True
+            
+        except Exception as e:
+            logger.error(f"대화 기록 업데이트 실패: {e}")
+            return False
+
+    def update_chat_history(self, user_id: str, session_id: uuid4, user_message: str, assistant_response: str) -> bool:
+        """스트리밍 완료 후 대화 기록 업데이트"""
+        try:
+            logger.info(f"대화 기록 업데이트: user_id={user_id}, session_id={session_id}")
+            
+            # 채팅 세션 조회
+            session = ChatSession.objects.filter(session_id=session_id).first()
+            if not session:
+                logger.error(f"세션을 찾을 수 없음: {session_id}")
+                return False
+            
+            # 사용자 조회
+            user = self.get_user_by_id(user_id)
+            if not user:
+                logger.error(f"사용자를 찾을 수 없음: {user_id}")
+                return False
+            
+            # 대화 기록 업데이트 (기존 임시 기록을 실제 응답으로 교체)
+            # 현재 대화 기록 가져오기
+            current_history = self.get_chat_history_for_pipeline(session)
+            
+            # 마지막 assistant 메시지가 "[스트리밍 응답]"인 경우 실제 응답으로 교체
+            if current_history and current_history[-1].get('role') == 'assistant' and current_history[-1].get('content') == '[스트리밍 응답]':
+                current_history[-1]['content'] = assistant_response
+            else:
+                # 새로운 대화 기록 추가
+                current_history = self.chat_manager.add_message(current_history, "user", user_message)
+                current_history = self.chat_manager.add_message(current_history, "assistant", assistant_response)
+            
+            # Django 모델에 저장
+            self.save_prompt_log(session, user_message, assistant_response)
+            
+            logger.info("대화 기록 업데이트 완료")
+            return True
+            
+        except Exception as e:
+            logger.error(f"대화 기록 업데이트 실패: {e}")
+            return False
 
 
 # 전역 서비스 인스턴스

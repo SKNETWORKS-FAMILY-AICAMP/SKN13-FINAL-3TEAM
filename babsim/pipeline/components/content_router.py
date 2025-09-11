@@ -4,7 +4,7 @@
 """
 
 from typing import Dict, Any
-from .base_state import PipelineState
+from ..base_state import PipelineState
 
 
 def route_content_generation(state: PipelineState) -> str:

@@ -405,8 +405,10 @@ export const createComment = async (libId, comment) => {
   try {
     const response = await apiRequest(`${API_BASE_URL}/library/assets/${libId}/comments/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        lib_id: libId,
         comments: comment
       })
     });
