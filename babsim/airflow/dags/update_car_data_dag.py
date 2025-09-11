@@ -25,7 +25,7 @@ with DAG(
     # 2. DB 데이터 임포트 (리뷰 + 집계)
     import_data_task = BashOperator(
         task_id="import_car_data",
-        bash_command="docker-compose exec django_gunicorn python manage.py import_data",
+        bash_command="docker compose exec django_gunicorn python manage.py import_data",
     )
 
     crawl_reviews_task >> import_data_task
