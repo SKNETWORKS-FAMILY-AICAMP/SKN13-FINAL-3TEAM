@@ -12,11 +12,14 @@ class BabsimRAGAdapter:
     def __init__(self):
         self.qdrant_client = QdrantClient(host="localhost", port=6333)
         self.collection_name = "babsim_rag_db"
-        self.embedding_model = SentenceTransformer('BAAI/bge-m3')
+        self.embedding_model = None  # 지연 로딩
     
     def search_relevant_documents(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
         """babsim Vector DB에서 관련 문서 검색"""
         try:
+            # 지연 로딩
+            if self.embedding_model is None:
+                self.embedding_model = SentenceTransformer('BAAI/bge-m3')
             # 쿼리 임베딩 생성
             query_vector = self.embedding_model.encode(query).tolist()
             

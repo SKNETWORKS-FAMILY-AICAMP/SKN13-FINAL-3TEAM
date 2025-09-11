@@ -29,9 +29,9 @@ def generate_vllm_response(prompt: str, max_length: int = 512, temperature: floa
     """
     vLLM API 서버를 호출하여 모델의 응답을 생성합니다.
     """
-    # 기본값 설정 - 로컬 inference-server 사용
-    api_url = getattr(settings, 'VLLM_API_URL', "https://ifms1tvpam2z8w-8001.proxy.runpod.net/v1/chat/completions")
-    model_name = getattr(settings, 'VLLM_MODEL_NAME', 'kakaocorp/kanana-1.5-8b-instruct-2505')
+    # 기본값 설정 - 환경변수 또는 기본값 사용
+    api_url = os.getenv('VLLM_API_URL', "https://avmh2qvis1qzct-8001.proxy.runpod.net/v1/chat/completions")
+    model_name = os.getenv('VLLM_MODEL_NAME', 'kakaocorp/kanana-1.5-8b-instruct-2505')
 
     headers = {"Content-Type": "application/json"}
     

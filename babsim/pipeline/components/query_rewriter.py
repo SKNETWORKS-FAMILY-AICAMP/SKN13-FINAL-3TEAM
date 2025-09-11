@@ -8,7 +8,7 @@ from pathlib import Path
 PIPELINE_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PIPELINE_ROOT))
 
-from pipeline.llm_provider import kanana_llm_model
+from ..llm_provider import kanana_llm_model
 
 class QueryRewriter:
     def hyde_expand_and_rewrite(self, user_query: str):

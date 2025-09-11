@@ -8,219 +8,177 @@ import json
 import requests
 import boto3
 import io
+import base64
+import hashlib
 from typing import Dict, Any, Optional
-from django.conf import settings
 from langgraph.graph import StateGraph, END
-from ..text_pipeline import PipelineState
+from ..base_state import PipelineState
+from django.conf import settings
+from PIL import Image
+from ..llm_provider import kanana_llm_model
 
 
-def modify_image(state: PipelineState) -> PipelineState:
+class ImageModifier:
     """
-    기존 이미지를 기반으로 수정 요청을 처리하여 새로운 이미지 생성
+    이미지 수정을 담당하는 클래스
+    Input:
+        state["image_query"] - 수정 요청 텍스트
+        state["s3_url"] - 기존 이미지 S3 URL (필수사항)
+    Output:
+        state["s3_url"] - 수정된 이미지의 S3 URL
+        state["response"] - 수정에 대한 상세 설명
     """
-    try:
-        # 이미지 쿼리와 기존 이미지 가져오기
-        image_query = state.get("image_query", "")
-        input_image = state.get("generated_image", None)
+    
+    def __init__(self):
+        """
+        ImageModifier 초기화
+        """
+        self.api_url = getattr(settings, 'RUNPOD_IMAGE_API_URL', '')
+        self.api_key = getattr(settings, 'RUNPOD_API_KEY', '')
+        self.s3_client = None
+        self._initialize_s3_client()
+    
+    def _initialize_s3_client(self):
+        """
+        S3 클라이언트 초기화
+        """
         
-        if not image_query:
-            state["error"] = "이미지 수정 쿼리가 없습니다."
-            return state
-        
-        print(f"✏️ 이미지 수정 시작: {image_query}")
-        
-        # 기존 이미지가 있는지 확인
-        if input_image is None:
-            print("⚠️ 기존 이미지가 없어서 새로 생성합니다.")
-            return generate_new_image(state)
-        
-        # 문자열(경로)이면 PIL.Image로 변환
-        if isinstance(input_image, str):
-            if os.path.exists(input_image):
-                from PIL import Image
-                input_image = Image.open(input_image)
+        try:
+            self.s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+        except Exception as e:
+            print(f"❌ S3 클라이언트 초기화 오류: {e}")
+            self.s3_client = None
+    
+    def modify_image(self, state: PipelineState) -> PipelineState:
+        """
+        기존 이미지를 기반으로 수정 요청을 처리하여 새로운 이미지 생성
+        """
+        try:
+            # 이미지 쿼리와 기존 이미지 가져오기
+            image_query = state.get("image_query", "")
+            s3_url = state.get("s3_url", "https://babsim-media.s3.ap-southeast-2.amazonaws.com/images/1757566389_hyundai_car_image_generation.png"
+        )
+            
+            if not image_query:
+                state["error"] = "이미지 수정 쿼리가 없습니다."
+                return state
+            
+            print(f"✏️ 이미지 수정 시작: {image_query}")
+            
+            # S3 URL에서 이미지 바이너리 다운로드
+            image_binary = self._download_image_from_s3(s3_url)
+            
+            if image_binary is None:
+                state["error"] = "이미지 다운로드에 실패했습니다."
+                return state
+            
+            # RunPod 이미지 수정 API 호출
+            modified_image_url = self._call_runpod_image_modification(image_query, image_binary)
+            
+            # 이미지 수정에 대한 상세 설명 생성
+            detailed_description = self._generate_modification_description(image_query)
+            
+            print(f"✅ 이미지 수정 완료: {modified_image_url}")
+
+            return detailed_description, modified_image_url
+                
+        except Exception as e:
+            print(f"❌ 이미지 수정 오류: {e}")
+            state["error"] = f"이미지 수정 중 오류가 발생했습니다: {str(e)}"
+
+        return state
+    
+    def _download_image_from_s3(self, s3_url: str) -> Optional[bytes]:
+        """
+        S3 URL에서 이미지 바이너리를 다운로드
+        """
+        try:
+            print(f"📥 S3에서 이미지 다운로드: {s3_url}")
+            
+            # HTTP 요청으로 이미지 다운로드
+            response = requests.get(s3_url, timeout=30)
+            response.raise_for_status()
+            
+            print(f"✅ 이미지 다운로드 완료: {len(response.content)} bytes")
+            
+            return response.content
+            
+        except Exception as e:
+            print(f"❌ 이미지 다운로드 오류: {e}")
+            return None
+    
+    def _call_runpod_image_modification(self, prompt: str, image_binary: bytes) -> Optional[str]:
+        """
+        RunPod을 통해 이미지 수정 API 호출
+        """
+        try:
+            # 이미지 바이너리를 base64로 인코딩
+            img_str = base64.b64encode(image_binary).decode()
+            
+            # API 요청 데이터
+            data = {
+                "prompt": prompt,
+                "image": img_str
+            }
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            }
+            
+            print(f"🚀 RunPod 이미지 수정 API 호출: {self.api_url}")
+            
+            response = requests.post(self.api_url, json=data, headers=headers, timeout=120)
+            response.raise_for_status()
+            
+            result = response.json()
+            print(f"🔍 RunPod 응답: {result}")
+            
+            if result.get("status") == "COMPLETED":
+                return result.get("s3_url")
             else:
-                print("⚠️ 이미지 파일을 찾을 수 없어서 새로 생성합니다.")
-                return generate_new_image(state)
-        
-        # RunPod 이미지 수정 API 호출
-        modified_image_url = call_runpod_image_modification(image_query, input_image)
-        
-        if modified_image_url:
-            # S3에 업로드
-            s3_url = upload_to_s3(modified_image_url, f"modified_{state.get('session_id', 'unknown')}")
-            
-            # 결과 저장
-            state.update({
-                "generated_image": s3_url,
-                "image_generation_status": "completed",
-                "image_type": "modified",
-                "response": f"이미지 수정이 완료되었습니다! 🎨\n\n수정된 이미지: {s3_url}"
-            })
-            
-            print(f"✅ 이미지 수정 완료: {s3_url}")
-        else:
-            state["error"] = "이미지 수정에 실패했습니다."
-            
-    except Exception as e:
-        print(f"❌ 이미지 수정 오류: {e}")
-        state["error"] = f"이미지 수정 중 오류가 발생했습니다: {str(e)}"
-    
-    return state
-
-
-def generate_new_image(state: PipelineState) -> PipelineState:
-    """
-    새로운 이미지 생성 (기존 이미지가 없을 때)
-    """
-    try:
-        image_query = state.get("image_query", "")
-        print(f"📸 새 이미지 생성 중: {image_query}")
-        
-        # RunPod 새 이미지 생성 API 호출
-        new_image_url = call_runpod_image_generation(image_query)
-        
-        if new_image_url:
-            # S3에 업로드
-            s3_url = upload_to_s3(new_image_url, f"new_{state.get('session_id', 'unknown')}")
-            
-            # 결과 저장
-            state.update({
-                "generated_image": s3_url,
-                "image_generation_status": "completed",
-                "image_type": "new",
-                "response": f"새로운 이미지가 생성되었습니다! 🎨\n\n생성된 이미지: {s3_url}"
-            })
-            
-            print(f"✅ 새 이미지 생성 완료: {s3_url}")
-        else:
-            state["error"] = "이미지 생성에 실패했습니다."
-            
-    except Exception as e:
-        print(f"❌ 이미지 생성 오류: {e}")
-        state["error"] = f"이미지 생성 중 오류가 발생했습니다: {str(e)}"
-    
-    return state
-
-
-def call_runpod_image_modification(prompt: str, input_image) -> Optional[str]:
-    """
-    RunPod을 통해 이미지 수정 API 호출
-    """
-    try:
-        # RunPod API 설정
-        api_url = getattr(settings, 'RUNPOD_IMAGE_API_URL', 'https://your-runpod-endpoint.com')
-        
-        # 이미지를 base64로 인코딩
-        import base64
-        from io import BytesIO
-        
-        buffer = BytesIO()
-        input_image.save(buffer, format='PNG')
-        img_str = base64.b64encode(buffer.getvalue()).decode()
-        
-        # API 요청 데이터
-        data = {
-            "input": {
-                "prompt": prompt,
-                "image": img_str,
-                "guidance_scale": 4.5,
-                "num_inference_steps": 20
-            }
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {getattr(settings, 'RUNPOD_API_KEY', '')}"
-        }
-        
-        response = requests.post(api_url, json=data, headers=headers, timeout=120)
-        response.raise_for_status()
-        
-        result = response.json()
-        
-        if result.get("status") == "COMPLETED":
-            return result.get("output", {}).get("image_url")
-        else:
-            print(f"RunPod API 오류: {result}")
+                print(f"❌ RunPod API 오류: {result}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ RunPod 이미지 수정 API 호출 오류: {e}")
             return None
+    
+    def _generate_modification_description(self, image_query: str) -> str:
+        """
+        이미지 수정에 대한 상세 설명을 vLLM으로 생성
+        """
+        try:
+            prompt = f"""
+다음 이미지 수정 요청에 대해 상세하고 매력적인 설명을 작성해주세요:
+
+수정 요청: {image_query}
+
+다음 요소들을 포함하여 설명해주세요:
+1. 어떤 부분이 수정되었는지
+2. 수정된 이미지의 새로운 특징과 변화
+3. 수정 후 이미지의 시각적 개선점
+4. 사용자가 기대할 수 있는 결과물의 모습
+
+설명은 친근하고 전문적인 톤으로 작성하고, 2-3문장으로 간결하게 작성해주세요.
+"""
             
-    except Exception as e:
-        print(f"RunPod 이미지 수정 API 호출 오류: {e}")
-        return None
-
-
-def call_runpod_image_generation(prompt: str) -> Optional[str]:
-    """
-    RunPod을 통해 새 이미지 생성 API 호출
-    """
-    try:
-        # RunPod API 설정
-        api_url = getattr(settings, 'RUNPOD_IMAGE_API_URL', 'https://your-runpod-endpoint.com')
-        
-        # API 요청 데이터
-        data = {
-            "input": {
-                "prompt": prompt,
-                "guidance_scale": 30,
-                "num_inference_steps": 20
-            }
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {getattr(settings, 'RUNPOD_API_KEY', '')}"
-        }
-        
-        response = requests.post(api_url, json=data, headers=headers, timeout=120)
-        response.raise_for_status()
-        
-        result = response.json()
-        
-        if result.get("status") == "COMPLETED":
-            return result.get("output", {}).get("image_url")
-        else:
-            print(f"RunPod API 오류: {result}")
-            return None
+            # vLLM을 사용하여 설명 생성
+            description = kanana_llm_model.generate_response(prompt, max_length=200)
             
-    except Exception as e:
-        print(f"RunPod 이미지 생성 API 호출 오류: {e}")
-        return None
+            # 기본 설명이 생성되지 않은 경우 폴백
+            if not description or len(description.strip()) < 10:
+                description = f"'{image_query}'에 따라 이미지를 수정했습니다. 요청하신 내용에 맞게 이미지가 개선되었습니다."
+            
+            return description.strip()
+            
+        except Exception as e:
+            print(f"❌ 이미지 수정 설명 생성 오류: {e}")
 
-
-def upload_to_s3(image_url: str, filename: str) -> str:
-    """
-    이미지를 S3에 업로드하고 URL 반환
-    """
-    try:
-        # S3 설정
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=getattr(settings, 'AWS_ACCESS_KEY_ID', ''),
-            aws_secret_access_key=getattr(settings, 'AWS_SECRET_ACCESS_KEY', ''),
-            region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'ap-northeast-2')
-        )
-        
-        bucket_name = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'babsim-images')
-        
-        # 이미지 다운로드
-        response = requests.get(image_url)
-        response.raise_for_status()
-        
-        # S3에 업로드
-        s3_key = f"generated_images/{filename}.png"
-        s3_client.put_object(
-            Bucket=bucket_name,
-            Key=s3_key,
-            Body=response.content,
-            ContentType='image/png'
-        )
-        
-        # S3 URL 생성
-        s3_url = f"https://{bucket_name}.s3.{getattr(settings, 'AWS_S3_REGION_NAME', 'ap-northeast-2')}.amazonaws.com/{s3_key}"
-        
-        return s3_url
-        
-    except Exception as e:
-        print(f"S3 업로드 오류: {e}")
-        return image_url  # 원본 URL 반환
+# ImageModifier 인스턴스 생성
+image_modifier = ImageModifier()

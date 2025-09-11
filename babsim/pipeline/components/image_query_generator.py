@@ -24,9 +24,12 @@ class ImageQueryGenerator:
 {유리/그린하우스}, {공기역학/추가 요소}, {색상 & 마감}"
 """
     
-    def generate_image_query(self, chat_history: List[Dict[str, str]]) -> str:
-        """대화 기록을 바탕으로 이미지 생성 쿼리 생성"""
+    def generate_image_query(self, state) -> str:
+        """state에서 chat_history를 가져와서 이미지 생성 쿼리 생성"""
         try:
+            # state에서 chat_history 추출
+            chat_history = state.get("chat_history", [])
+            
             # 대화 기록에서 폼 정보 추출
             form_data = self._extract_form_data(chat_history)
             
@@ -136,7 +139,7 @@ class ImageQueryGenerator:
 
 위 템플릿을 사용하여 완성된 이미지 생성 쿼리를 생성해주세요. 
 빈 필드는 적절한 기본값으로 채워주시고, 대화 내용에서 추출한 정보를 반영해주세요.
-쿼리는 영어로 작성해주세요.
+쿼리는 영어로 작성해주세요. 77 CLIP token 이내로 작성해주세요.
 
 이미지 생성 쿼리:
 """

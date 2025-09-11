@@ -12,8 +12,8 @@ load_dotenv()
 PIPELINE_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PIPELINE_ROOT))
 
-from pipeline.config import config
-from pipeline.llm_provider import kanana_llm_model
+from ..config import config
+from ..llm_provider import kanana_llm_model
 
 class RAGGenerator:
     """RAG 기반 답변 생성 컴포넌트 (babsim Vector DB 사용)"""

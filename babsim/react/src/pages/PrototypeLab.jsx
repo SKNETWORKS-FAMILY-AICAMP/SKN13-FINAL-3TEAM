@@ -18,7 +18,7 @@ function PrototypeLab() {
   const [isLoading, setIsLoading] = useState(false);
   // ... other state variables ...
 
-  const { isAuthenticated } = useAuth(); // Context에서 인증 상태 가져오기
+  const { isAuthenticated, user } = useAuth(); // Context에서 인증 상태와 사용자 정보 가져오기
 
   // [중요] 이 로직은 반드시 유지해야 합니다.
   useEffect(() => {
@@ -38,38 +38,7 @@ function PrototypeLab() {
     }
   }, [isAuthenticated, chatSessions.length]);
 
-  // 초기 메시지가 항상 표시되도록 보장
-  useEffect(() => {
-    if (isAuthenticated && currentSession && messages.length === 0) {
-      setMessages([initialWelcomeMessage]);
-    }
-  }, [isAuthenticated, currentSession, messages.length]);
-
-  // 고정 초기 메시지
-  const initialWelcomeMessage = {
-    id: 'welcome-message',
-    type: 'ai',
-    content: `안녕하세요! 🚗 현대자동차 Prototype Lab에 오신 것을 환영합니다!
-
-저는 AI 어시스턴트로, 세 가지 주요 기능을 제공합니다:
-
-🎨 **새로운 자동차 이미지 생성**
-   - 체크리스트 기반 단계별 가이드로 상세한 디자인 생성
-   - 자유롭게 바로 이미지 생성
-
-🖼️ **이미지 수정**
-   - 기존 자동차 이미지를 업로드하여 원하는 부분을 수정
-   - 색상, 디자인 요소, 스타일 변경 등
-
-📚 **현대자동차 & 디자인 지식 질문**
-   - 현대자동차의 디자인 철학, 기술, 역사 등에 대한 전문 지식 제공
-
-어떤 것을 도와드릴까요?
-1️⃣ 새로운 자동차 이미지를 생성하고 싶으시다면 "이미지 생성"이라고 말씀해주세요
-2️⃣ 기존 이미지를 수정하고 싶으시다면 "이미지 수정"이라고 말씀해주세요
-3️⃣ 현대자동차나 디자인에 대해 궁금한 것이 있으시다면 자유롭게 질문해주세요`,
-    timestamp: new Date().toISOString()
-  };
+  
 
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [scrollY, setScrollY] = useState(0);
@@ -199,8 +168,6 @@ function PrototypeLab() {
       // 기존 세션을 모두 제거하고 새 세션만 설정
       setChatSessions([sessionWithDefaultTitle]);
       setCurrentSession(sessionWithDefaultTitle);
-      // 고정 초기 메시지를 바로 표시 (AI의 첫 번째 메시지로 무조건 고정)
-      setMessages([initialWelcomeMessage]);
       setShouldAutoScroll(true);
       
       console.log('✅ 새 대화 시작 완료 - currentSession 설정됨:', sessionWithDefaultTitle);
@@ -343,9 +310,20 @@ function PrototypeLab() {
     }
 
     try {
+      // 디버깅: 사용자 정보 확인
+      console.log('🔍 사용자 정보 디버깅:');
+      console.log('  - user 객체:', user);
+      console.log('  - user?.id:', user?.id);
+      console.log('  - user?.user_id:', user?.user_id);
+      console.log('  - isAuthenticated:', isAuthenticated);
+      
       // 체크리스트 데이터와 함께 메시지 전송
       const completionStatus = getChecklistCompletion();
+      const actualUserId = user?.user_id || user?.id || '550e8400-e29b-41d4-a716-446655440000';
+      console.log('  - 실제 사용할 user_id:', actualUserId);
+      
       const response = await sendChatMessage(currentSession.session_id, inputMessage, {
+        user_id: actualUserId,
         checklistData,
         completionStatus
       });

@@ -293,11 +293,18 @@ export const sendChatMessage = async (sessionId, message, additionalData = {}) =
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {
+    // 디버깅: additionalData 확인
+    console.log('🔍 chatService 디버깅:');
+    console.log('  - additionalData:', additionalData);
+    console.log('  - additionalData.user_id:', additionalData.user_id);
+    
     const requestBody = {
-      session_id: sessionId,
+      user_id: additionalData.user_id || '550e8400-e29b-41d4-a716-446655440000',  // UUID 형식의 기본값 사용
       message: message,
       ...additionalData  // 체크리스트 데이터와 완성도 정보 포함
     };
+    
+    console.log('  - 최종 requestBody.user_id:', requestBody.user_id);
     
     const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/message/`, {
       method: 'POST',
@@ -310,9 +317,13 @@ export const sendChatMessage = async (sessionId, message, additionalData = {}) =
       
       return {
         success: true,
-        response: data.ai_response,  // Django에서 ai_response로 반환
+        response: data.reply,  // config/views.py에서 reply로 반환
         generatedResults: data.generated_results || [],
-        completionStatus: data.completion_status || null  // 체크리스트 완성도 정보
+        completionStatus: data.completion_status || null,  // 체크리스트 완성도 정보
+        checklistData: data.checklist_data || {},
+        intent: data.intent || '',
+        isFormComplete: data.is_form_complete || false,
+        imageQuery: data.image_query || ''
       };
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

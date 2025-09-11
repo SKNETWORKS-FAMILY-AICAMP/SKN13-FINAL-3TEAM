@@ -5,11 +5,10 @@ import os
 import json
 import re
 from pathlib import Path
-from pipeline.llm_provider import kanana_llm_model
-
 # 파이프라인 루트 경로를 Python 경로에 추가
 PIPELINE_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PIPELINE_ROOT))
+from ..llm_provider import kanana_llm_model
 
 # 필수 요소 (우선순위 높음)
 REQUIRED_FIELDS = [
@@ -32,19 +31,44 @@ class ChecklistGenerator:
         self.optional_fields = OPTIONAL_FIELDS
         self.all_fields = ALL_FIELDS
         self.field_descriptions = {
-            "viewpoint": "시점 (앞면, 측면, 3/4 뷰 등)",
-            "body_type": "차체 타입 (SUV, 세단, 쿠페, 해치백 등)",
-            "size_class": "크기 분류 (소형, 중형, 대형 등)",
-            "proportions": "비율 (전장, 전폭, 전고 비율)",
-            "surface": "표면 처리 (곡선, 직선, 각진 형태)",
-            "front_elements": "전면 요소 (그릴, 헤드라이트, 범퍼)",
-            "side_elements": "측면 요소 (도어, 휠, 사이드 미러)",
-            "lighting": "조명 (헤드라이트, 테일라이트, DRL)",
-            "glasshouse": "유리창 (윈드실드, 사이드 윈도우, 선루프)",
-            "aero": "공기역학 (스포일러, 디퓨저, 공기 흐름)",
-            "color_finish": "색상 및 마감 (메탈릭, 펄, 매트 등)",
-            "wheel": "휠 디자인 (휠 모양, 크기, 색상 등)"
-        }
+    "viewpoint": "차량을 바라보는 시점 (예: 정면(front view), 측면(side view), 후면(rear view), 또는 3/4 사선 뷰). "
+                 "시점에 따라 차량의 전체 비율과 디자인 요소가 강조되는 방식이 달라집니다. "
+                 "예: '3/4 front view'는 차량 앞부분과 측면을 동시에 보여주는 전형적인 카탈로그용 시점입니다.",
+
+    "body_type": "차체 유형 (예: SUV, 세단, 쿠페, 해치백, 크로스오버, 픽업트럭 등). "
+                 "차체 유형은 전체적인 실루엣과 비율을 결정하며, 차량의 용도와 성격(스포티, 패밀리, 럭셔리 등)에 큰 영향을 줍니다.",
+
+    "size_class": "차량 크기 등급 (예: 소형(Compact), 준중형(Mid-size), 중형(Standard), 대형(Full-size), 럭셔리(Luxury)). "
+                  "차량의 크기 등급은 전반적인 비율, 실내 공간, 휠 크기 등에 반영되며 시장 포지셔닝을 보여줍니다.",
+
+    "proportions": "차체 비율 및 자세 (예: 긴 보닛(long hood), 짧은 오버행(short overhang), 넓은 차폭(wide stance), 낮은 차체(low profile)). "
+                   "프로포션은 자동차의 첫인상을 좌우하며, 안정감·스포티함·고급스러움 등을 표현합니다.",
+
+    "surface": "차체 표면 처리 방식 (예: 유려한 곡선(curved surfaces), 날카로운 직선(sharp lines), 각진 구조(boxy shape)). "
+               "서페이스는 빛 반사와 그림자 형성을 통해 차량의 감각적 매력을 만들어냅니다.",
+
+    "front_elements": "차량 전면부의 주요 디자인 요소 (예: 라디에이터 그릴, 헤드라이트 형태, 범퍼 디자인, 주간주행등(DRL) 패턴). "
+                      "전면 요소는 브랜드 아이덴티티와 첫인상을 결정하는 가장 중요한 부분입니다.",
+
+    "side_elements": "차량 측면부 디자인 (예: 도어 라인, 플러시 도어 핸들, 사이드 미러 형태, 휠 아치, 캐릭터 라인). "
+                     "측면 요소는 비율과 공기역학적 실루엣을 강조합니다.",
+
+    "lighting": "조명 디자인 (예: LED 헤드램프, 매트릭스 헤드램프, 픽셀형 DRL, 테일램프, 턴시그널 패턴). "
+                "조명은 야간 주행 안전성을 넘어, 차량만의 시그니처 아이덴티티를 표현하는 핵심 요소입니다.",
+
+    "glasshouse": "차량 유리창 비율과 형태 (예: 루프라인, 윈드실드 각도, 사이드 윈도우 크기, 파노라마 선루프). "
+                  "글래스하우스는 실내 개방감과 외부에서 보이는 세련됨을 동시에 좌우합니다.",
+
+    "aero": "공기역학적 요소 (예: 리어 스포일러, 디퓨저, 액티브 에어 플랩, 공기 커튼, 언더바디 패널). "
+            "공기저항(Cd) 계수를 줄여 성능과 연비를 향상시키며, 스포티한 이미지를 강화합니다.",
+
+    "color_finish": "차체 색상 및 마감 (예: 메탈릭 실버, 펄 화이트, 매트 블랙, 글로시 레드, 투톤 컬러). "
+                    "페인트 마감은 차량의 개성을 표현하는 가장 직관적인 요소로, 고급감·스포티함·트렌디함을 결정합니다.",
+
+    "wheel": "휠 디자인 (예: 스포크 휠, 터빈 휠, 에어로 커버 휠, 대구경 블랙 휠). "
+             "휠 크기와 디자인은 차량의 스탠스와 퍼포먼스 이미지를 크게 좌우합니다."
+}
+
         self.field_examples = {
             "viewpoint": "front 3/4 view, front view, side view, rear view",
             "body_type": "SUV, sedan, coupe, hatchback, crossover",
@@ -343,23 +367,16 @@ class ChecklistGenerator:
                 next_field = missing_required[0]
                 field_desc = self.field_descriptions.get(next_field, next_field)
                 examples = self.field_examples.get(next_field, "")
-                
-                if examples:
-                    return f"다음으로 {field_desc}에 대해 알려주세요.\n\n예시: {examples}\n\n어떤 {field_desc}를 원하시나요?"
-                else:
-                    return f"다음으로 {field_desc}에 대해 알려주세요.\n\n어떤 {field_desc}를 원하시나요?"
-            
+                return f"""이제부터 이미지 생성을 위해 체크리스트를 AI 어시스턴트와 함께 채워보겠습니다.\n\n 
+                관련 정보에 대한 디자인 트랜드나 지식에 대해 알고 싶으시다면 무엇이든 질문해주세요!\n\n
+                {next_field}에 대해 알려주세요.\n\n{field_desc}\n\n예시: {examples}"""
             # 필수 필드가 모두 채워졌으면 선택 필드
             elif missing_optional:
                 next_field = missing_optional[0]
                 field_desc = self.field_descriptions.get(next_field, next_field)
                 examples = self.field_examples.get(next_field, "")
-                
-                if examples:
-                    return f"추가로 {field_desc}에 대해 알려주세요. (선택사항)\n\n예시: {examples}\n\n어떤 {field_desc}를 원하시나요?"
-                else:
-                    return f"추가로 {field_desc}에 대해 알려주세요. (선택사항)\n\n어떤 {field_desc}를 원하시나요?"
-            
+                return f"이제 필수 요소들은 모두 채워졌습니다.\n\n추가로 {next_field}에 대해 알려주세요.\n\n{field_desc}\n\n예시: {examples}"
+               
             # 모든 필드가 채워졌으면
             else:
                 return "모든 정보를 수집했습니다! 이제 이미지를 생성하겠습니다. 🎨"

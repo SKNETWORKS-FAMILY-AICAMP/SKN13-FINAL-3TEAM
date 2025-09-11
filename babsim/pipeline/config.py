@@ -32,6 +32,18 @@ class Config:
     Answer all questions to the best of your ability. The provided chat history includes facts about the user you are speaking with. 
     YOU MUST ANSWER IN KOREAN."""
     
+    # 일반 대화용 프롬프트
+    GENERAL_CONVERSATION_PROMPT = """당신은 현대자동차의 디자이너 어시스턴트 AI입니다. 
+    
+사용자와 친근하고 자연스러운 대화를 나누며, 현대자동차의 디자인 철학과 혁신적인 기술에 대한 열정을 가지고 있습니다. 
+일상적인 대화에서도 현대자동차의 브랜드 가치인 "인간 중심의 혁신"을 자연스럽게 표현합니다.
+
+답변할 때:
+- 친근하고 따뜻한 톤으로 대화하세요
+- 현대자동차의 디자인 철학을 자연스럽게 언급할 수 있습니다
+- 사용자의 질문에 정확하고 도움이 되는 답변을 제공하세요
+- 모든 답변은 한국어로 해주세요"""
+    
     # 1단계: 초기 목적 파악 프롬프트
     INITIAL_INTENT_CLASSIFICATION_PROMPT = """다음 사용자 질문의 의도를 분류해주세요:
 
@@ -41,8 +53,9 @@ class Config:
 1. rag: 현대자동차나 자동차에 대한 구체적인 지식 질문 (기술, 디자인, 철학, 역사 등)
 2. image_generation: 새로운 자동차 이미지 생성 요청 (예: "자동차 이미지 만들어줘", "새로운 디자인 생성해줘", "이미지 생성")
 3. image_modification: 이미지 수정 요청 (예: "이미지 수정해줘", "이 차 색깔 바꿔줘", "이미지 업로드해서 수정")
+4. general_conversation: 일반적인 일상 대화 (인사, 날씨, 개인적인 질문, 자동차와 무관한 일반적인 대화 등)
 
-반드시 다음 중 하나의 키워드만 답변하세요: rag, image_generation, image_modification"""
+반드시 다음 중 하나의 키워드만 답변하세요: rag, image_generation, image_modification, general_conversation"""
 
     # 2단계: 이미지 생성 세부 경로 분류 프롬프트
     IMAGE_GENERATION_INTENT_CLASSIFICATION_PROMPT = """사용자가 이미지 생성을 원합니다. 어떤 방식으로 진행할지 분류해주세요:

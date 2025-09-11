@@ -47,7 +47,7 @@ class StandardResultSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'     # 클라이언트가 ?page_size= 로 조절
     max_page_size = 100                     # 상한
 
-class ChatAPIView(APIView):
+# class ChatAPIView(APIView):
     """
     사용자 채팅 요청을 처리하는 API 뷰 (동기 버전).
     1) 키워드 기반 라우팅 우선 처리
@@ -184,6 +184,7 @@ class ChatAPIView(APIView):
             # 파이프라인 서비스 호출 (체크리스트 데이터 포함)
             pipeline_result = babsim_pipeline_service.process_query(
                 user_prompt, 
+                user_id=session_id,  # session_id를 user_id로 사용
                 checklist_data=checklist_data,
                 completion_status=completion_status
             )

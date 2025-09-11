@@ -11,7 +11,7 @@ import io
 from typing import Dict, Any
 from django.conf import settings
 from langgraph.graph import StateGraph, END
-from ..text_pipeline import PipelineState
+from ..base_state import PipelineState
 
 
 def generate_3d_model(state: PipelineState) -> PipelineState:
