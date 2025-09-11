@@ -1,0 +1,26 @@
+# ===== 핵심 런타임 (필수) =====
+fastapi==0.115.0
+uvicorn==0.30.6
+runpod==1.7.13
+requests==2.32.3
+pydantic==2.9.2
+boto3==1.35.28
+
+# ===== AI/ML 가속 =====
+accelerate==0.34.2
+transformers==4.45.0
+
+# ===== 이미지/비디오 처리 =====
+imageio==2.36.0
+imageio-ffmpeg==0.5.1
+
+# ===== HuggingFace =====
+huggingface-hub==0.25.2
+safetensors==0.4.5
+
+# ===== 3D 처리 =====
+trimesh==4.5.0
+
+# ===== 유틸리티 =====
+tqdm==4.66.5
+colorama==0.4.6
