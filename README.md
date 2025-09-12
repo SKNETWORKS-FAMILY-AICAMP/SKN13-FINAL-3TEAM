@@ -427,5 +427,5 @@
  - 🐣전진혁: React master
  - 🐥강지윤: "image to text" InternVL3 master 
  - 🐓최호연: ComfyUI master
- - 🍗우민규: Image Generate master
+ - 🍗우민규: MultiModal master
 
