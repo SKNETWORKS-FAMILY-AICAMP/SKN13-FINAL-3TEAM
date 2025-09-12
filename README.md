@@ -423,9 +423,9 @@
 
 ## 🐥 10. 한 줄 회고
 
- - 🥚기원준: AWS EC2 "Legend Server"
+ - 🥚기원준: 아 배고프다
  - 🐣전진혁: React master
- - 🐥강지윤: "image to text" InternVL3 master 
+ - 🐥강지윤: Human in the Loop master
  - 🐓최호연: ComfyUI master
  - 🍗우민규: MultiModal master
 
