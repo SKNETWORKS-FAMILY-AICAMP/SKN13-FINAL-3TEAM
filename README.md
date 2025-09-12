@@ -22,7 +22,7 @@
       <img src="https://github.com/user-attachments/assets/7d5d501e-a319-4704-8f15-e593fcf2f90f" width="100"/><br/>최호연🐓
     </td>
     <td align="center">
-      <img src="https://github.com/user-attachments/assets/a7b70ca4-d2bc-4688-98fe-d45f8180a41b" width="100"/><br/>우민규🍗
+      <img src="https://github.com/user-attachments/assets/11b99726-249d-4b55-957d-c42890a2609b" width="100"/><br/>우민규🍗
     </td>
   </tr>
   <tr>
