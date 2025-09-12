@@ -27,6 +27,147 @@ const generateUniqueId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
+// 스트리밍 응답 처리 함수
+const handleStreamingResponse = async (response, onStreamingUpdate, setMessages, streamingMessageId) => {
+  console.log('🔍 [StreamingHttpResponse] ReadableStream 시작 - response.body:', response.body);
+  console.log('🔍 [StreamingHttpResponse] ReadableStream locked:', response.body.locked);
+  
+  // HTTP 헤더에서 메타데이터 읽기
+  const metadata = {
+    sessionId: response.headers.get('X-Session-ID') || '',
+    promptId: response.headers.get('X-Prompt-ID') || '',
+    intent: response.headers.get('X-Intent') || '',
+    isFormComplete: response.headers.get('X-Is-Form-Complete') === 'true',
+    imageQuery: response.headers.get('X-Image-Query') || '',
+    generatedResultsCount: parseInt(response.headers.get('X-Generated-Results') || '0'),
+    completionStatus: response.headers.get('X-Completion-Status') || '{}',
+    checklistData: response.headers.get('X-Checklist-Data') || '{}',
+    userId: response.headers.get('X-User-ID') || 'default_user',
+    userMessage: response.headers.get('X-User-Message') || '사용자 메시지'
+  };
+  
+  console.log('🔍 스트리밍 응답 메타데이터:', metadata);
+  
+  // 초기 스트리밍 메시지 생성
+  if (setMessages) {
+    setMessages(prev => {
+      return [...prev, { 
+        id: streamingMessageId, 
+        type: 'ai', 
+        content: '', 
+        timestamp: new Date().toISOString(),
+        isStreaming: true
+      }];
+    });
+  }
+  
+  // StreamingHttpResponse를 ReadableStream으로 처리
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullResponse = '';
+  
+  console.log('🔍 [StreamingHttpResponse] Reader 생성 완료:', reader);
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();  
+      if (done) break;
+      
+      console.log('🔍 [StreamingHttpResponse] 새로 들어온 ChunkValue:', value);
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n'); // 각각의 줄이 하나하나의 이벤트(청크)
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataContent = line.slice(6).trim();
+          
+          // [DONE] 신호 처리
+          if (dataContent === '[DONE]') {
+            console.log('✅ 스트리밍 완료: [DONE]');
+            break;
+          }
+          
+          try {
+            const data = JSON.parse(dataContent);
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            if (data.content) {
+              fullResponse += data.content;
+              // 실시간으로 UI 업데이트
+              const timestamp = new Date().toLocaleTimeString('ko-KR', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                fractionalSecondDigits: 3
+              });
+              console.log(`[${timestamp}] 스트리밍 청크:`, data.content);
+              
+              // 실시간 스트리밍 메시지 업데이트를 위한 콜백 호출
+              if (onStreamingUpdate) {
+                console.log('🔄 onStreamingUpdate 호출:', fullResponse);
+                onStreamingUpdate(fullResponse);
+              }
+            } else {
+              console.log('⚠️ content가 없습니다:', data);
+            }
+          } catch (e) {
+            console.warn('JSON 파싱 실패, 원본 데이터 사용:', e.message, '원본 데이터:', dataContent);
+            // JSON 파싱 실패 시 원본 데이터를 그대로 사용
+            if (dataContent && dataContent.trim()) {
+              fullResponse += dataContent;
+              if (onStreamingUpdate) {
+                onStreamingUpdate(fullResponse);
+              }
+            }
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  
+  console.log('✅ 스트리밍 응답 완료:', fullResponse);
+  
+  // 스트리밍 완료 후 대화 기록 업데이트
+  try {
+    console.log('🔄 대화 기록 업데이트 시작:', {
+      sessionId: metadata.sessionId,
+      userId: metadata.userId,
+      userMessage: metadata.userMessage,
+      responseLength: fullResponse.length
+    });
+    
+    // 올바른 데이터 전달
+    await updateChatHistory(
+      metadata.sessionId, 
+      metadata.userId || 'default_user', 
+      metadata.userMessage || '사용자 메시지', 
+      fullResponse
+    );
+    console.log('✅ 대화 기록 업데이트 완료');
+  } catch (error) {
+    console.error('❌ 대화 기록 업데이트 실패:', error);
+    // 오류가 발생해도 스트리밍 응답은 정상적으로 반환
+  }
+  
+  return {
+    success: true,
+    response: fullResponse,
+    generatedResults: [],
+    completionStatus: metadata.completionStatus ? JSON.parse(metadata.completionStatus) : {},
+    checklistData: metadata.checklistData ? JSON.parse(metadata.checklistData) : {},
+    intent: metadata.intent,
+    isFormComplete: metadata.isFormComplete,
+    imageQuery: metadata.imageQuery,
+    sessionId: metadata.sessionId,
+    promptId: metadata.promptId
+  };
+};
+
 // 챗봇 세션 관련 API
 export const getChatSessions = async (page = 1, pageSize = 10) => {
   if (USE_MOCK_DATA) {
@@ -251,8 +392,8 @@ export const createGeneratedResult = async (promptId, resultType, resultPath, re
 };
 
 // 챗봇 메시지 전송 (AI 응답 시뮬레이션)
-export const sendChatMessage = async (sessionId, message, userId, onStreamingUpdate = null, setMessages = null, streamingMessageId = null) => {
-  console.log('💬 챗봇 메시지 전송:', { sessionId, message, userId, onStreamingUpdate });
+export const sendChatMessage = async (sessionId, message, userId, onStreamingUpdate = null, setMessages = null, streamingMessageId = null, checklistData = {}, completionStatus = {}) => {
+  console.log('💬 챗봇 메시지 전송:', { sessionId, message, userId, onStreamingUpdate, checklistData, completionStatus });
   
   // 목업 모드일 때는 Django 서버 연결 시도하지 않음
   if (USE_MOCK_DATA) {
@@ -285,15 +426,15 @@ export const sendChatMessage = async (sessionId, message, userId, onStreamingUpd
   
   // 실제 서버 모드일 때만 Django 서버 연결 시도
   try {
-    // 디버깅: additionalData 확인
+    // 디버깅: userId 확인
     console.log('🔍 chatService 디버깅:');
-    console.log('  - additionalData:', additionalData);
-    console.log('  - additionalData.user_id:', additionalData.user_id);
+    console.log('  - userId:', userId);
     
     const requestBody = {
-      user_id: additionalData.user_id || '550e8400-e29b-41d4-a716-446655440000',  // UUID 형식의 기본값 사용
+      user_id: userId || '550e8400-e29b-41d4-a716-446655440000',  // UUID 형식의 기본값 사용
       message: message,
-      ...additionalData  // 체크리스트 데이터와 완성도 정보 포함
+      checklistData: checklistData,
+      completionStatus: completionStatus
     };
     
     console.log('  - 최종 requestBody.user_id:', requestBody.user_id);
@@ -304,114 +445,34 @@ export const sendChatMessage = async (sessionId, message, userId, onStreamingUpd
     });
     
     if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Django 서버 응답:', data);
+      // Content-Type 확인하여 스트리밍 응답인지 판단
+      const contentType = response.headers.get('content-type');
+      console.log('🔍 응답 Content-Type:', contentType);
       
-      return {
-        success: true,
-        response: data.reply,  // config/views.py에서 reply로 반환
-        generatedResults: data.generated_results || [],
-        completionStatus: data.completion_status || null,  // 체크리스트 완성도 정보
-        checklistData: data.checklist_data || {},
-        intent: data.intent || '',
-        isFormComplete: data.is_form_complete || false,
-        imageQuery: data.image_query || ''
-      };
+      if (contentType && contentType.includes('text/event-stream')) {
+        // 스트리밍 응답 처리
+        console.log('🔄 스트리밍 응답 감지 - 스트리밍 처리 시작');
+        return await handleStreamingResponse(response, onStreamingUpdate, setMessages, streamingMessageId);
+      } else {
+        // 일반 JSON 응답 처리
+        console.log('✅ Django 서버 일반 응답: response', response);
+        const data = await response.json();
+        
+        return {
+          success: true,
+          response: data.reply,  // config/views.py에서 reply로 반환
+          generatedResults: data.generated_results || [],
+          completionStatus: data.completion_status || null,  // 체크리스트 완성도 정보
+          checklistData: data.checklist_data || {},
+          intent: data.intent || '',
+          isFormComplete: data.is_form_complete || false,
+          imageQuery: data.image_query || ''
+        };
+      }
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
-    setMessages(prev => {
-      // 초기 스트리밍 메시지 새로 생성
-      return [...prev, { 
-        id: streamingMessageId, 
-        type: 'ai', 
-        content: '', 
-        timestamp: new Date().toISOString(),
-        isStreaming: true
-      }];
-    })
-    
-    console.log('🔍 [StreamingHttpResponse] ReadableStream 시작 - response.body:', response.body);
-    console.log('🔍 [StreamingHttpResponse] ReadableStream locked:', response.body.locked);
-    
-    // StreamingHttpResponse를 ReadableStream으로 처리
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-    
-    console.log('🔍 [StreamingHttpResponse] Reader 생성 완료:', reader);
-    
-    try {
-      while (true) {
-        const { done, value } = await reader.read();  
-        if (done) break;
-        
-        console.log('🔍 [StreamingHttpResponse] 새로 들어온 ChunkValue:', value);
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n'); // 각각의 줄이 하나하나의 이벤트(청크)
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataContent = line.slice(6).trim();
-            
-            // [DONE] 신호 처리
-            if (dataContent === '[DONE]') {
-              console.log('✅ 스트리밍 완료: [DONE]');
-              break;
-            }
-            
-            try {
-              const data = JSON.parse(dataContent);
-              if (data.error) {
-                throw new Error(data.error);
-              }
-              if (data.choices[0].delta.content) {
-                fullResponse += data.choices[0].delta.content;
-                // 실시간으로 UI 업데이트
-                const timestamp = new Date().toLocaleTimeString('ko-KR', { 
-                  hour12: false, 
-                  hour: '2-digit', 
-                  minute: '2-digit', 
-                  second: '2-digit',
-                  fractionalSecondDigits: 3
-                });
-                console.log(`[${timestamp}] 스트리밍 청크:`, data.choices[0].delta.content);
-                
-                // 실시간 스트리밍 메시지 업데이트를 위한 콜백 호출
-                if (onStreamingUpdate) {
-                  console.log('🔄 onStreamingUpdate 호출:', fullResponse);
-                  onStreamingUpdate(fullResponse);
-                }
-              } else {
-                console.log('⚠️ content가 없습니다:', data.choices[0].delta);
-              }
-            } catch (e) {
-              console.error('JSON 파싱 오류:', e, '원본 데이터:', dataContent);
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    
-    console.log('✅ 스트리밍 응답 완료:', fullResponse);
-    
-    // 스트리밍 완료 후 대화 기록 업데이트
-    try {
-      await updateChatHistory(sessionId, userId, message, fullResponse);
-      console.log('✅ 대화 기록 업데이트 완료');
-    } catch (error) {
-      console.error('❌ 대화 기록 업데이트 실패:', error);
-    }
-    
-    return {
-      success: true,
-      response: fullResponse,
-      generatedResults: []
-    };
     
   } catch (error) {
     console.error('❌ Django 서버 연동 실패:', error);
@@ -500,11 +561,26 @@ const updateChatHistory = async (sessionId, userId, userMessage, assistantRespon
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // 서버 응답 텍스트를 먼저 읽어서 오류 내용 확인
+      const errorText = await response.text();
+      console.error('❌ 서버 오류 응답:', errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
     }
     
-    const result = await response.json();
-    return result;
+    // Content-Type 확인
+    const contentType = response.headers.get('content-type');
+    console.log('🔍 updateChatHistory 응답 Content-Type:', contentType);
+    
+    if (contentType && contentType.includes('application/json')) {
+      const result = await response.json();
+      console.log('✅ updateChatHistory JSON 응답:', result);
+      return result;
+    } else {
+      // JSON이 아닌 경우 텍스트로 처리
+      const result = await response.text();
+      console.log('✅ updateChatHistory 텍스트 응답:', result);
+      return { success: true, message: result };
+    }
     
   } catch (error) {
     console.error('대화 기록 업데이트 API 호출 실패:', error);

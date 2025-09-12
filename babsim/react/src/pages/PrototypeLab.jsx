@@ -17,9 +17,10 @@ function PrototypeLab() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [forceRender, setForceRender] = useState(0);
   // ... other state variables ...
 
-  const { isAuthenticated } = useAuth(); // Context에서 인증 상태 가져오기
+  const { isAuthenticated, user } = useAuth(); // Context에서 인증 상태 가져오기
 
   // [중요] 이 로직은 반드시 유지해야 합니다.
   useEffect(() => {
@@ -69,7 +70,7 @@ function PrototypeLab() {
     lighting: "",
     glasshouse: "",
     aero: "",
-    color_finish: ""
+    color_finish: "",
   });
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -115,10 +116,18 @@ function PrototypeLab() {
 
   // 체크리스트 데이터 업데이트 함수
   const updateChecklistData = (field, value) => {
-    setChecklistData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setChecklistData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      // 완성도 실시간 업데이트를 위한 로그
+      const completed = Object.values(updated).filter(v => v.trim() !== "").length;
+      const total = Object.keys(updated).length;
+      const percentage = Math.round((completed / total) * 100);
+      console.log(`[체크리스트] ${field} 업데이트: "${value}" -> 완성도: ${percentage}% (${completed}/${total})`);
+      return updated;
+    });
   };
 
   // 체크리스트 완성도 계산
@@ -147,7 +156,9 @@ function PrototypeLab() {
   const startNewConversation = async () => {
     try {
       console.log('🔄 새 대화 시작 중...');
+      console.log('🔍 createChatSession 호출 전');
       const newSession = await createChatSession();
+      console.log('🔍 createChatSession 호출 후:', newSession);
       console.log('✅ 새 세션 생성됨:', newSession);
       
       // 새 세션에 기본 제목 설정 (created_at 기반)
@@ -323,14 +334,15 @@ function PrototypeLab() {
       const actualUserId = user?.user_id || user?.id || '550e8400-e29b-41d4-a716-446655440000';
       console.log('  - 실제 사용할 user_id:', actualUserId);
       
-      const response = await sendChatMessage(currentSession.session_id, inputMessage, {
-        user_id: actualUserId,
-        checklistData,
-        completionStatus
-      });
+      const response = await sendChatMessage(currentSession.session_id, inputMessage, actualUserId, null, null, null, checklistData, completionStatus);
       
       if (response.success) {
-        const aiMessage = { id: `ai-${Date.now()}`, type: 'ai', content: response.response, timestamp: new Date().toISOString() };
+        const aiMessage = { 
+          id: `ai-${Date.now()}`, 
+          type: 'ai', 
+          content: response.response || response.reply || response.content || '', 
+          timestamp: new Date().toISOString() 
+        };
         setMessages(prev => [...prev, aiMessage]);
         
         // 백엔드에서 받은 체크리스트 데이터로 프론트엔드 체크리스트 업데이트
@@ -342,16 +354,7 @@ function PrototypeLab() {
           }));
         }
         
-        // 체크리스트 완성도 정보 표시
-        if (response.completionStatus) {
-          const completionMessage = { 
-            id: `completion-${Date.now()}`, 
-            type: 'completion', 
-            content: `체크리스트 완성도: ${response.completionStatus.percentage_all || response.completionStatus.percentage}% (${response.completionStatus.completed_all || response.completionStatus.completed}/${response.completionStatus.total_all || response.completionStatus.total})`, 
-            timestamp: new Date().toISOString() 
-          };
-          setMessages(prev => [...prev, completionMessage]);
-        }
+        // 체크리스트 완성도는 체크리스트 박스에서 표시하므로 별도 메시지 제거
         
         if (response.generatedResults) {
           response.generatedResults.forEach(result => {
@@ -360,6 +363,8 @@ function PrototypeLab() {
           });
         }
       }
+      
+      // 스트리밍 응답 처리 부분
       // user_id만 사용
       const userId = isAuthenticated ? user?.user_id : 'anonymous_user';
       
@@ -412,7 +417,7 @@ function PrototypeLab() {
       };
       
         // 스트리밍 시작 (await 제거!)
-        sendChatMessage(currentSession.session_id, inputMessage, userId, onStreamingUpdate, setMessages, streamingMessageId)
+        sendChatMessage(currentSession.session_id, inputMessage, userId, onStreamingUpdate, setMessages, streamingMessageId, checklistData, completionStatus)
         .then(response => {
           console.log('✅ 스트리밍 완료 - 최종 응답:', {
             streamingMessageId,
@@ -454,12 +459,15 @@ function PrototypeLab() {
     console.log('🎨 renderMessage 실행:', {
       messageId: message.id,
       messageType: message.type,
-      content: message.content?.substring(0, 50) + (message.content?.length > 50 ? '...' : ''),
-      isStreaming: message.isStreaming,
+      content: message.content,
+      isStreaming: message.isStreaming, 
       timestamp: new Date().toISOString()
     });
     
-    switch (message.type) {
+    // 메시지 타입이 없거나 'ai'가 아닌 경우 'ai'로 처리
+    const messageType = message.type || 'ai';
+    
+    switch (messageType) {
       case 'user':
         return (
           <div key={message.id} className="flex justify-end mb-6">
@@ -473,11 +481,13 @@ function PrototypeLab() {
         );
       
       case 'ai':
+        // Django 응답에서 오는 메시지 처리
+        const content = message.content || message.response || message.reply || '';
         return (
           <div key={message.id} className="flex justify-start mb-6">
             <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-4 max-w-xs lg:max-w-2xl shadow-lg border border-gray-600/30">
               <div className="text-sm font-medium text-left whitespace-pre-line leading-relaxed">
-                {message.content}
+                {content}
               </div>
               <p className="text-xs text-gray-300 mt-3 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
@@ -624,7 +634,21 @@ function PrototypeLab() {
         );
       
       default:
-        return null;
+        // 알 수 없는 메시지 타입은 'ai'로 처리
+        console.log('⚠️ 알 수 없는 메시지 타입:', messageType, '-> ai로 처리');
+        const defaultContent = message.content || message.response || message.reply || '';
+        return (
+          <div key={message.id} className="flex justify-start mb-6">
+            <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-4 max-w-xs lg:max-w-2xl shadow-lg border border-gray-600/30">
+              <div className="text-sm font-medium text-left whitespace-pre-line leading-relaxed">
+                {defaultContent}
+              </div>
+              <p className="text-xs text-gray-300 mt-3 opacity-80">
+                {new Date(message.timestamp).toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        );
     }
   };
   
@@ -641,7 +665,7 @@ function PrototypeLab() {
       <div className="flex min-h-screen pt-16">
         {/* Left Sidebar - 대화 세션 이력 */}
         <div 
-          className="fixed left-2 z-50 w-60"
+          className="fixed left-2 z-30 w-60"
           style={{
             top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
             transform: 'none',
@@ -653,7 +677,10 @@ function PrototypeLab() {
             <div className="p-6 border-b border-gray-700">
               <h3 className="text-xl font-bold text-white text-center">내 대화</h3>
               <button
-                onClick={startNewConversation}
+                onClick={() => {
+                  console.log('🖱️ 새 대화 버튼 클릭됨!');
+                  startNewConversation();
+                }}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 mt-4"
               >
                 <span className="text-lg">+</span>
@@ -716,32 +743,8 @@ function PrototypeLab() {
                 <div className={`space-y-6 px-4 ${
                   isChecklistExpanded ? 'mr-[calc(100vw-4rem)]' : 'mr-95'
                 } h-[calc(100vh-200px)] overflow-y-auto pb-20`}>
-                  {/* 디버깅용 주석처리
-                  {(() => {
-                    console.log('🔄 messages.map 실행 - 총 메시지 수:', messages.length);
-                    console.log('🔄 messages 배열:', messages);
-                    return messages.map((message, index) => {
-                      console.log(`🔄 메시지 ${index}:`, message);
-                      const jsx = renderMessage(message);
-                      console.log(`🔄 메시지 ${index} JSX 반환:`, jsx);
-                      return jsx;
-                    });
-                  })()}
-                  */}
+                  {messages.map((message, index) => renderMessage(message, index))}
                   
-                  {/* 디버깅용: 마지막 메시지 텍스트 내용 표시 */}
-                  {messages.length > 0 && (
-                    <div className="bg-yellow-100 border border-yellow-400 rounded p-4 mb-4">
-                      <h3 className="font-bold text-yellow-800">디버깅: 마지막 메시지 내용</h3>
-                      <div className="text-sm text-yellow-700 mt-2 p-2 bg-yellow-50 rounded border">
-                        <strong>ID:</strong> {messages[messages.length - 1].id}<br/>
-                        <strong>Type:</strong> {messages[messages.length - 1].type}<br/>
-                        <strong>Content:</strong> {messages[messages.length - 1].content}<br/>
-                        <strong>isStreaming:</strong> {messages[messages.length - 1].isStreaming ? 'true' : 'false'}<br/>
-                        <strong>Length:</strong> {messages[messages.length - 1].content?.length || 0} characters
-                      </div>
-                    </div>
-                  )}
                   {isLoading && !messages.some(msg => msg.isStreaming) && (
                     <div className="flex justify-start mb-4">
                       <div className="bg-gray-700/90 backdrop-blur-sm text-white rounded-lg px-4 py-2 border border-gray-600/50">
@@ -795,9 +798,9 @@ function PrototypeLab() {
         <div 
           className={`fixed right-2 z-40 transition-all duration-500 ease-in-out ${
             isChecklistExpanded ? 'w-[calc(100vw-4rem)]' : 'w-96'
-          } mt-5`}
+          }`}
           style={{
-            top: `${Math.max(24, window.innerHeight / 2 - 400 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
+            top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
             transform: 'none',
             transition: 'top 0.1s ease-out'
           }}
