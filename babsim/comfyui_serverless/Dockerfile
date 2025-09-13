@@ -25,7 +25,8 @@ RUN mkdir -p /wheels && \
 FROM runpod/worker-comfyui:5.4.1-base AS runtime
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    git curl ca-certificates ffmpeg wget unzip libglib2.0-0 libgomp1 && \
+    git curl ca-certificates ffmpeg wget unzip libglib2.0-0 libgomp1 \
+    sqlite3 libsqlite3-dev && \
     rm -rf /var/lib/apt/lists/*
 
 ENV WORKDIR=/workspace \
@@ -40,17 +41,16 @@ ENV WORKDIR=/workspace \
 WORKDIR ${WORKDIR}
 EXPOSE 8188 3000
 
-# Python 의존성 설치 (타임아웃 설정)
-RUN python -m pip install --index-url https://download.pytorch.org/whl/cu128 \
-    torch==2.8.0 torchvision torchaudio --break-system-packages --timeout 600 --retries 3
-
 RUN python -m pip install \
     "numpy==1.26.4" \
     "pillow>=9.0.0,<11.0.0" \
     "opencv-python-headless==4.10.0.84" --break-system-packages --timeout 600 --retries 3
 
 COPY requirements.txt /tmp/requirements.txt
+# RUN pip install -r /tmp/requirements.txt --break-system-packages --timeout 600 --retries 3
+
 RUN pip install -r /tmp/requirements.txt --break-system-packages --timeout 600 --retries 3
+RUN pip install pymeshlab --break-system-packages --timeout 600 --retries 3
 
 # ComfyUI 및 Custom Nodes 설치
 RUN git clone --depth 1 https://github.com/comfyanonymous/ComfyUI /opt/ComfyUI && \
@@ -60,10 +60,11 @@ ENV CUSTOMDIR=/opt/ComfyUI/custom_nodes
 RUN git clone --depth 1 https://github.com/Lightricks/ComfyUI-LTXVideo "${CUSTOMDIR}/ComfyUI-LTXVideo" && \
     git clone --depth 1 https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite "${CUSTOMDIR}/ComfyUI-VideoHelperSuite" && \
     git clone --depth 1 https://github.com/kijai/ComfyUI-Hunyuan3DWrapper "${CUSTOMDIR}/ComfyUI-Hunyuan3DWrapper" && \
-    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack "${CUSTOMDIR}/ComfyUI-Impact-Pack"
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack "${CUSTOMDIR}/ComfyUI-Impact-Pack" && \
+    git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials "${CUSTOMDIR}/ComfyUI_essentials"
 
-# Custom Node 의존성 (SAM2 등 대용량 모델 제외)
-RUN for node_dir in ComfyUI-LTXVideo ComfyUI-VideoHelperSuite; do \
+# Custom Node 의존성 (기본 패키지 제외)
+RUN for node_dir in ComfyUI-LTXVideo ComfyUI-VideoHelperSuite ComfyUI-Hunyuan3DWrapper ComfyUI_essentials; do \
         if [ -f "${CUSTOMDIR}/${node_dir}/requirements.txt" ]; then \
             echo "Processing ${node_dir} dependencies..."; \
             grep -v -E '^(numpy|torch|torchvision|torchaudio|opencv-python|pillow|scipy)' \
@@ -74,60 +75,68 @@ RUN for node_dir in ComfyUI-LTXVideo ComfyUI-VideoHelperSuite; do \
         fi; \
     done
 
-# Impact-Pack: SAM2 관련 의존성 완전 제거 (git URL 포함)
-RUN if [ -f "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" ]; then \
-        echo "=== Processing Impact-Pack dependencies (excluding SAM2) ==="; \
-        echo "Original requirements:"; \
-        cat "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" | head -20; \
-        echo "=== Filtering out SAM2, git URLs, and large packages ==="; \
-        grep -v -E '^(numpy|torch|torchvision|torchaudio|opencv-python|pillow|scipy)' \
-            "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" | \
-        grep -v -E '(sam2|segment.?anything|facebookresearch|ultralytics)' | \
-        grep -v -E '^git\+.*' | \
-        grep -v -E '^-e git\+.*' | \
-        grep -v -E '://.*sam' | \
-        grep -v -E '://.*segment' > "/tmp/impact-light.txt" || true; \
-        echo "Filtered requirements:"; \
-        cat "/tmp/impact-light.txt" || echo "(No valid dependencies found)"; \
-        if [ -s "/tmp/impact-light.txt" ]; then \
-            echo "Installing filtered Impact-Pack dependencies..."; \
-            pip install -r "/tmp/impact-light.txt" --break-system-packages || echo "Some Impact-Pack deps failed (non-critical)"; \
-        else \
-            echo "✓ No additional Impact-Pack dependencies to install (SAM2 successfully excluded)"; \
-        fi; \
-    fi
+# Essentials의 배경제거 노드가 기대하는 런타임 의존성
+# GPU용 onnxruntime이 안 맞으면 CPU onnxruntime로 폴백
+RUN /opt/venv/bin/python -m pip install --no-cache-dir transparent-background "rembg[gpu]" onnxruntime-gpu || \
+    /opt/venv/bin/python -m pip install --no-cache-dir rembg onnxruntime
 
-# Impact-Pack에서 SAM2 관련 노드들 물리적 제거 (강화)
+# Hunyuan3DWrapper 추가 의존성 (xatlas 등)
+RUN pip install xatlas --break-system-packages --timeout 600 --retries 3 || echo "xatlas install failed"
+
+# Impact-Pack: SAM2 관련 의존성 설치 (git URL 포함)
+RUN if [ -f "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" ]; then \
+    echo "=== Processing Impact-Pack dependencies (including SAM2) ==="; \
+    echo "Original requirements:"; \
+    cat "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" | head -20; \
+    echo "=== Installing all Impact-Pack dependencies including SAM2 ==="; \
+    # SAM2 관련 패키지들을 명시적으로 설치
+    echo "Installing SAM2 dependencies..."; \
+    pip install segment-anything --break-system-packages --timeout 600 --retries 3 || echo "SAM installation failed"; \
+    pip install git+https://github.com/facebookresearch/segment-anything-2.git --break-system-packages --timeout 600 --retries 3 || echo "SAM2 git install failed"; \
+    # 기존 requirements.txt에서 SAM2 제외하고 설치 (기본 패키지들만)
+    grep -v -E '^(numpy|torch|torchvision|torchaudio|opencv-python|pillow|scipy)' \
+        "${CUSTOMDIR}/ComfyUI-Impact-Pack/requirements.txt" | \
+    grep -v -E '(sam2|segment.?anything|facebookresearch)' > "/tmp/impact-base.txt" || true; \
+    echo "Base requirements (SAM2 handled separately):"; \
+    cat "/tmp/impact-base.txt" || echo "(No additional base dependencies found)"; \
+    if [ -s "/tmp/impact-base.txt" ]; then \
+        echo "Installing base Impact-Pack dependencies..."; \
+        pip install -r "/tmp/impact-base.txt" --break-system-packages || echo "Some Impact-Pack base deps failed (non-critical)"; \
+    else \
+        echo "✓ Base Impact-Pack dependencies installed"; \
+    fi; \
+fi
+
+# Impact-Pack에서 SAM2 관련 노드들 활성화 확인
 RUN cd "${CUSTOMDIR}/ComfyUI-Impact-Pack" && \
-    find . -name "*sam*" -type f -delete 2>/dev/null || true && \
-    find . -name "*segment*" -type f -delete 2>/dev/null || true && \
-    find . -name "*SAM*" -type f -delete 2>/dev/null || true && \
-    find . -name "*facebook*" -type f -delete 2>/dev/null || true && \
-    rm -rf modules/sam* modules/segment* modules/SAM* 2>/dev/null || true && \
-    rm -rf nodes/*sam* nodes/*segment* nodes/*SAM* 2>/dev/null || true && \
-    rm -rf impact_pack/sam* impact_pack/segment* 2>/dev/null || true && \
-    echo "✓ SAM2 related files completely removed from Impact-Pack"
+    echo "✓ SAM2 related files preserved in Impact-Pack" && \
+    python -c "import sys; sys.path.append('.'); print('Impact-Pack modules available')"
 
 # 디렉토리 구조 생성
-RUN mkdir -p ${MODELSDIR}/{checkpoints,text_encoders,hunyuan3d} && \
+RUN mkdir -p ${MODELSDIR}/{checkpoints,text_encoders,diffusion_models,hunyuan3d} && \
     mkdir -p ${OUTPUT_DIR}/{images,videos,models,inputs}
 
 # 워크플로우에서 실제 사용하는 모델들만 다운로드
 RUN echo "=== Downloading Workflow-Required Models ===" && \
     echo "Creating model directories..." && \
-    mkdir -p ${MODELSDIR}/checkpoints ${MODELSDIR}/text_encoders && \
+    mkdir -p /opt/ComfyUI/models/checkpoints /opt/ComfyUI/models/text_encoders /opt/ComfyUI/models/diffusion_models && \
     echo "Starting parallel downloads..." && \
     curl -L --fail --retry 5 --max-time 3600 --http1.1 \
-        -o ${MODELSDIR}/checkpoints/ltxv-2b-0.9.8-distilled.safetensors \
+        -o /opt/ComfyUI/models/checkpoints/ltxv-2b-0.9.8-distilled.safetensors \
         "https://huggingface.co/Lightricks/LTX-Video/resolve/main/ltxv-2b-0.9.8-distilled.safetensors" & \
     curl -L --fail --retry 5 --max-time 3600 --http1.1 \
-        -o ${MODELSDIR}/checkpoints/hunyuan3d-dit-v2_fp16.safetensors \
+        -o /opt/ComfyUI/models/diffusion_models/hunyuan3d-dit-v2_fp16.safetensors \
         "https://huggingface.co/Kijai/Hunyuan3D-2_safetensors/resolve/main/hunyuan3d-dit-v2-0-fp16.safetensors" & \
     curl -L --fail --retry 5 --max-time 3600 --http1.1 \
-        -o ${MODELSDIR}/text_encoders/t5xxl_fp16.safetensors \
+        -o /opt/ComfyUI/models/text_encoders/t5xxl_fp16.safetensors \
         "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors" & \
     wait && \
     echo "=== Core Models Downloaded ==="
+
+# (선택) CLIP 호환 폴더 생성 (T5 가중치 심볼릭 링크)
+RUN mkdir -p /opt/ComfyUI/models/clip && \
+    ln -sf /opt/ComfyUI/models/text_encoders/t5xxl_fp16.safetensors \
+            /opt/ComfyUI/models/clip/t5xxl_fp16.safetensors
 
 # Hunyuan3D 서브모델들 (핵심 가중치 파일만 다운로드)
 RUN echo "=== Downloading Hunyuan3D Sub-models ===" && \
@@ -169,7 +178,9 @@ RUN if ls /tmp/wheels/*.whl >/dev/null 2>&1; then \
     rm -rf /tmp/wheels /tmp/*.txt
 
 # 디렉토리 링크 설정
-RUN ln -sf /workspace/models /opt/ComfyUI/models && \
+RUN ln -sf /opt/ComfyUI/models /workspace/models && \
+    mkdir -p /workspace/outputs && \
+    rm -rf /opt/ComfyUI/output && \
     ln -sf /workspace/outputs /opt/ComfyUI/output
 
 # Workflows 복사
@@ -193,7 +204,7 @@ RUN echo "=== Optimizing Image Size ===" && \
     # 불필요한 개발 파일들 정리
     find /opt -name "*.md" -delete 2>/dev/null || true && \
     find /opt -name "*.txt" -path "*/docs/*" -delete 2>/dev/null || true && \
-    find /opt -name "example*" -type f -delete 2>/dev/null || true && \
+    find /opt/ComfyUI -name "example*" -type f -delete 2>/dev/null || true && \
     # pip 캐시 정리
     pip cache purge 2>/dev/null || true && \
     echo "✓ Image size optimized"

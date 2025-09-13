@@ -11,6 +11,30 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $(date '+%H:%M:%S') $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $(date '+%H:%M:%S') $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $(date '+%H:%M:%S') $1"; }
 
+# --- GPU preflight: 환경변수/가용성 대기 ---
+export CUDA_DEVICE_ORDER=PCI_BUS_ID
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True,max_split_size_mb:256"
+
+wait_for_gpu() {
+  log_info "Waiting for NVIDIA driver & GPU..."
+  for i in {1..30}; do
+    if nvidia-smi >/dev/null 2>&1; then
+      python - <<'PY'
+import torch, sys
+sys.exit(0 if torch.cuda.is_available() else 1)
+PY
+      if [[ $? -eq 0 ]]; then
+        log_info "✓ CUDA is available. GPU ready."
+        return 0
+      fi
+    fi
+    sleep 2
+  done
+  log_error "GPU still not visible; exiting so RunPod reschedules this worker."
+  exit 88
+}
+
 # ====================================================================
 # 1. 환경변수 검증 (RunPod Serverless 필수)
 # ====================================================================
@@ -54,16 +78,25 @@ setup_directories() {
     mkdir -p /workspace/models/{checkpoints,text_encoders,hunyuan3d}
     mkdir -p /workspace/outputs/{images,videos,models,inputs}
     
-    # ComfyUI 심볼릭 링크 (이미 존재하는지 확인)
-    if [[ ! -L /opt/ComfyUI/models ]] && [[ -d /workspace/models ]]; then
-        ln -sf /workspace/models /opt/ComfyUI/models
-        log_info "✓ Models symlink created"
+    # models 경로 자가복구: /workspace/models → /opt/ComfyUI/models
+    if [[ ! -e /workspace/models ]]; then
+        ln -s /opt/ComfyUI/models /workspace/models
+        log_info "✓ /workspace/models -> /opt/ComfyUI/models (symlink created)"
+    elif [[ -d /workspace/models ]] && [[ -z "$(ls -A /workspace/models 2>/dev/null)" ]]; then
+        # 빈 디렉토리로 마운트된 경우, 폴더를 링크로 교체
+        rm -rf /workspace/models
+        ln -s /opt/ComfyUI/models /workspace/models
+        log_info "✓ /workspace/models was empty dir; replaced with symlink to /opt/ComfyUI/models"
+    else
+        log_info "ℹ /workspace/models exists and is not empty; leaving as-is"
     fi
     
-    if [[ ! -L /opt/ComfyUI/output ]] && [[ -d /workspace/outputs ]]; then
-        ln -sf /workspace/outputs /opt/ComfyUI/output
-        log_info "✓ Output symlink created"
-    fi
+    # output 경로 정규화: ComfyUI는 /opt/ComfyUI/output을 쓰고, 실제 파일은 /workspace/outputs에 저장
+    rm -rf /opt/ComfyUI/output 2>/dev/null || true
+    mkdir -p /workspace/outputs
+    ln -sf /workspace/outputs /opt/ComfyUI/output
+    log_info "✓ /opt/ComfyUI/output -> /workspace/outputs (symlink ensured)"
+
     
     # Workflows 복사
     if [[ -d /opt/baked_workflows ]] && [[ -n "$(ls -A /opt/baked_workflows 2>/dev/null)" ]]; then
@@ -103,6 +136,8 @@ print('✓ All critical modules imported successfully')
 start_comfyui() {
     log_info "=== Starting ComfyUI Server ==="
     
+    wait_for_gpu
+
     cd /opt/ComfyUI
     
     # ComfyUI 서버 시작 (백그라운드, 로그 파이프)
@@ -164,6 +199,22 @@ except:
     fi
     
     log_info "✓ ComfyUI server startup completed"
+
+    # 모델 존재 및 인덱싱 확인 (필수 체크포인트/클립)
+    have() { [[ -f "$1" ]]; }
+    if ! have /workspace/models/checkpoints/ltxv-2b-0.9.8-distilled.safetensors && \
+       ! have /opt/ComfyUI/models/checkpoints/ltxv-2b-0.9.8-distilled.safetensors; then
+        log_error "Missing LTX-Video checkpoint (checked /workspace and /opt)"
+    fi
+    if ! have /workspace/models/text_encoders/t5xxl_fp16.safetensors && \
+       ! have /workspace/models/clip/t5xxl_fp16.safetensors && \
+       ! have /opt/ComfyUI/models/text_encoders/t5xxl_fp16.safetensors && \
+       ! have /opt/ComfyUI/models/clip/t5xxl_fp16.safetensors; then
+        log_error "Missing CLIP t5xxl (checked /workspace and /opt)"
+    fi
+
+    # 모델 인덱스 리프레시 (ComfyUI는 디렉토리 스캔 캐시를 가질 수 있음)
+    curl -sf -X POST http://127.0.0.1:8188/refresh_models >/dev/null 2>&1 || true
 }
 
 # ====================================================================

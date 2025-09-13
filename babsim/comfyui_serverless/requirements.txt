@@ -20,6 +20,7 @@ safetensors==0.4.5
 
 # ===== 3D 처리 =====
 trimesh==4.5.0
+pymeshlab==2023.12.post3
 
 # ===== 유틸리티 =====
 tqdm==4.66.5

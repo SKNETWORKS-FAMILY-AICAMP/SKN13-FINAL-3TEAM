@@ -9,16 +9,14 @@
     }
   },
   "4": {
-    "inputs": {
-      "clip_name": "t5xxl_fp16.safetensors",
-      "type": "ltxv",
-      "device": "default"
-    },
-    "class_type": "CLIPLoader",
-    "_meta": {
-      "title": "CLIP 로드"
-    }
-  },
+  "class_type": "CLIPLoader",
+  "_meta": { "title": "CLIP Loader (LTXV/T5 weights)" },
+  "inputs": {
+    "clip_name": "t5xxl_fp16.safetensors",
+    "type": "ltxv",
+    "device": "default"
+  }
+},
   "5": {
     "inputs": {
       "ckpt_name": "ltxv-2b-0.9.8-distilled.safetensors"
@@ -28,24 +26,19 @@
       "title": "체크포인트 로드"
     }
   },
-  "6": {
-    "inputs": {
-      "text": "(low quality, worst quality, normal quality, jpeg artifacts, blurry, noisy, grainy:1.2),\n(deformed, distorted, disfigured, mutated, mangled:1.3), extra limbs, fused fingers, too many fingers,\n(malformed car, warped body, unrealistic proportions), (extra wheels, missing wheels, fused wheels:1.2),\n(static image, frozen, still, not moving), (sliding, floating, flying, unrealistic physics), (jitter, stutter, shaking, unstable camera),\n(3d render, cgi, video game, cartoon, anime, drawing, painting, illustration),\n(watermark, text, signature, username, logo, overlay, UI),\n(car wheels that don't roll, a stopped wheel, wheel stopping, not rolling wheel, excessive deformation of the input image, wheels rolling backwards),\n(sliding, skidding, static wheels, frozen wheels, deformed, disfigured, blurry, watermark)\n(Transformation of the input image), (One frame of video is unnatural), (1 frame of the video and the input image are not connected)",
-      "clip": [
-        "4",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Negative Prompt)"
-    }
-  },
+  "6":  {
+  "class_type": "CLIPTextEncode",
+  "_meta": { "title": "CLIP Text Encode (Negative Prompt)" },
+  "inputs": {
+    "text": "lowres, blurry, soft, mushy, watercolor, jpeg artifacts, noise, banding, posterization, cartoon, anime, game render, plastic look, oversharpen halos, ringing, flicker, jitter, wobble, rolling-shutter, stutter, ghosting, trailing, sliding tires, floating, unrealistic physics, warped body, deformed wheels, extra or missing wheels, fused parts, duplicated parts, stretched textures, bad proportions, skewed perspective, tilted horizon, text, watermark, signature, UI overlays, overexposure, clipped highlights, crushed blacks, harsh vignette, strong color cast",
+    "clip": ["4", 0]
+  }
+},
   "7": {
     "inputs": {
       "add_noise": true,
       "noise_seed": 564107125261888,
-      "cfg": 2.6,
+      "cfg": 3.0,
       "model": [
         "5",
         0
@@ -94,11 +87,11 @@
   },
   "9": {
     "inputs": {
-      "width": 768,
-      "height": 448,
-      "length": 97,
+      "width": 1280,
+      "height": 720,
+      "length": 240,
       "batch_size": 1,
-      "strength": 0.4,
+      "strength": 0.28,
       "positive": [
         "14",
         0
@@ -123,7 +116,7 @@
   },
   "10": {
     "inputs": {
-      "frame_rate": 30,
+      "frame_rate": 24,
       "positive": [
         "9",
         0
@@ -140,11 +133,11 @@
   },
   "11": {
     "inputs": {
-      "steps": 30,
-      "max_shift": 2.05,
-      "base_shift": 0.96,
+      "steps": 48,
+      "max_shift": 1.45,
+      "base_shift": 0.7,
       "stretch": false,
-      "terminal": 0.11000000000000001,
+      "terminal": 0.09,
       "latent": [
         "9",
         2
@@ -158,11 +151,11 @@
   "12": {
     "inputs": {
       "frame_rate": 24,
-      "loop_count": 2,
+      "loop_count": 1,
       "filename_prefix": "AnimateDiff",
       "format": "video/h265-mp4",
       "pix_fmt": "yuv420p10le",
-      "crf": 24,
+      "crf": 16,
       "save_metadata": true,
       "pingpong": false,
       "save_output": true,
@@ -186,16 +179,11 @@
     }
   },
   "14": {
-    "inputs": {
-      "text": "(masterpiece, best quality, 4k, photorealistic), cinematic, hyperrealism, soft natural daylight,\nwheels spinning rapidly, motion blur on the tires and the road\nA Hyundai-designed car, with the exact same color and design as the one in the input image, driving smoothly down a highway.\nRegardless of the input car image, we create driving videos of cars that are \"Hyundai-like\" by reflecting the characteristics and design elements of Hyundai cars that are familiar to many.\nThe entire vehicle must be captured in the video.\nIf the distance to the vehicle image is too close, create the video with a viewpoint at an appropriate distance.\nPerfect concatenation of one frame of the video and the input image.\nWhen generating a video from an input image, the first frame is always uninterrupted and the video is smooth from beginning to end.\nBe sure to add in the video to create the physical phenomenon and appearance of the wheels rolling while actually driving.\n\nThe video starts from the angle of the input image, but is generated to show driving on the highway without going at an angle and following actual traffic laws.\nThe generated videos are always created to show the vehicle driving along the road's driving lines.\nEven the interior of the car (mainly the car seats) is made as detailed as the real thing.\nThe vehicle's appearance is made to show the entire body at a 4/3 angle from the front.\nThe highest priority is to ensure the generated car is an exact, identical, and precise match to the original design in the input image, preserving its form without any alterations.\n(Physically-accurate forward rotation:1.2), with details like spokes and logos moving realistically within a natural motion blur while perfectly preserving their original intricate shape.\nThe car must driving forward.\nThe wheels roll realistically while maintaining their original shape and detail.\nA smooth 3rd person tracking shot follows the car at a moderate distance, keeping the entire vehicle in frame.\nMaintain the color and shape of the original input image from beginning to end of the video.",
-      "clip": [
-        "4",
-        0
-      ]
-    },
     "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Positive Prompt)"
+    "_meta": { "title": "CLIP Text Encode (Positive Prompt)" },
+    "inputs": {
+      "text": "(masterpiece:1.1), (photorealistic:1.2), ultra-detailed textures, physically-based lighting, soft natural daylight, HDR tonality, global illumination, accurate reflections and shadows, temporal consistency, motion coherence, no flicker, no wobble, stable perspective, crisp fine details, micro-contrast preserved, faithful to the input image, preserve original shape and color (no design change:1.1), realistic camera tracking, smooth parallax, road-lane adherence, believable physics, (physically-accurate forward wheel rotation:1.25), natural motion blur on tires and road, logos/emblems sharp, clean background, 4k clarity, natural bokeh, balanced highlights and shadows, realistic glass, rubber, metallic speculars, subject centered, full vehicle in frame, slight 3/4 front-view bias, steady horizon, clean composition",
+      "clip": ["4", 0]
     }
   }
 }

@@ -21,7 +21,7 @@
   },
   "17": {
     "inputs": {
-      "filename_prefix": "3D/Hy3D",
+      "filename_prefix": "models/Hy3D",
       "file_format": "glb",
       "save_file": true,
       "trimesh": [
@@ -45,9 +45,9 @@
   },
   "35": {
     "inputs": {
-      "steps": 50,
-      "width": 384,
-      "height": 384,
+      "steps": 60,
+      "width": 512,
+      "height": 512,
       "cfg_image": 1,
       "seed": 0,
       "delight_pipe": [
@@ -55,7 +55,7 @@
         0
       ],
       "image": [
-        "64",
+        "52",
         0
       ],
       "scheduler": [
@@ -82,46 +82,18 @@
   },
   "52": {
     "inputs": {
-      "width": 518,
-      "height": 518,
-      "interpolation": "lanczos",
-      "method": "pad",
-      "condition": "always",
-      "multiple_of": 2,
+      "width": 512,
+      "height": 512,
+      "crop": "disabled",
+      "upscale_method": "lanczos",
       "image": [
         "13",
         0
       ]
     },
-    "class_type": "ImageResize+",
+    "class_type": "ImageScale",
     "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "55": {
-    "inputs": {
-      "mode": "base",
-      "use_jit": true
-    },
-    "class_type": "TransparentBGSession+",
-    "_meta": {
-      "title": "🔧 InSPyReNet TransparentBG"
-    }
-  },
-  "56": {
-    "inputs": {
-      "rembg_session": [
-        "55",
-        0
-      ],
-      "image": [
-        "52",
-        0
-      ]
-    },
-    "class_type": "ImageRemoveBackground+",
-    "_meta": {
-      "title": "🔧 Image Remove Background"
+      "title": "🔧 Image Scale(core)"
     }
   },
   "59": {
@@ -129,7 +101,7 @@
       "remove_floaters": true,
       "remove_degenerate_faces": true,
       "reduce_faces": true,
-      "max_facenum": 50000,
+      "max_facenum": 100000,
       "smooth_normals": false,
       "trimesh": [
         "140",
@@ -154,33 +126,10 @@
       "title": "Hy3D Camera Config"
     }
   },
-  "64": {
-    "inputs": {
-      "x": 0,
-      "y": 0,
-      "resize_source": false,
-      "destination": [
-        "133",
-        0
-      ],
-      "source": [
-        "52",
-        0
-      ],
-      "mask": [
-        "56",
-        1
-      ]
-    },
-    "class_type": "ImageCompositeMasked",
-    "_meta": {
-      "title": "마스크된 이미지 합성"
-    }
-  },
   "79": {
     "inputs": {
-      "render_size": 1024,
-      "texture_size": 2048,
+      "render_size": 2048,
+      "texture_size": 4096,
       "normal_space": "world",
       "trimesh": [
         "83",
@@ -219,9 +168,9 @@
   },
   "88": {
     "inputs": {
-      "view_size": 384,
-      "steps": 25,
-      "seed": 1024,
+      "view_size": 512,
+      "steps": 40,
+      "seed": 12345,
       "denoise_strength": 1,
       "pipeline": [
         "85",
@@ -303,7 +252,7 @@
   },
   "99": {
     "inputs": {
-      "filename_prefix": "3D/Hy3D_textured",
+      "filename_prefix": "models/Hy3D_textured",
       "file_format": "glb",
       "save_file": true,
       "trimesh": [
@@ -317,23 +266,15 @@
     }
   },
   "104": {
-    "inputs": {
-      "inpaint_radius": 3,
-      "inpaint_method": "ns",
-      "texture": [
-        "129",
-        0
-      ],
-      "mask": [
-        "129",
-        1
-      ]
-    },
-    "class_type": "CV2InpaintTexture",
-    "_meta": {
-      "title": "CV2 Inpaint Texture"
-    }
+  "inputs": {
+    "inpaint_radius": 3,
+    "inpaint_method": "ns",
+    "texture": ["129", 0],
+    "mask": ["129", 1]
   },
+  "class_type": "CV2InpaintTexture",
+  "_meta": { "title": "CV2 Inpaint Texture" }
+},
   "111": {
     "inputs": {
       "images": [
@@ -362,18 +303,16 @@
     "inputs": {
       "width": 2048,
       "height": 2048,
-      "interpolation": "lanczos",
-      "method": "stretch",
-      "condition": "always",
-      "multiple_of": 0,
+      "upscale_method": "lanczos",
+      "crop": "disabled",
       "image": [
         "88",
         0
       ]
     },
-    "class_type": "ImageResize+",
+    "class_type": "ImageScale",
     "_meta": {
-      "title": "🔧 Image Resize"
+      "title": "🔧 Image Scale(core)"
     }
   },
   "125": {
@@ -455,18 +394,6 @@
       "title": "마스크를 이미지로 변환"
     }
   },
-  "138": {
-    "inputs": {
-      "mask": [
-        "56",
-        1
-      ]
-    },
-    "class_type": "MaskPreview+",
-    "_meta": {
-      "title": "🔧 Mask Preview"
-    }
-  },
   "140": {
     "inputs": {
       "box_v": 1.01,
@@ -492,9 +419,9 @@
   },
   "141": {
     "inputs": {
-      "guidance_scale": 5.5,
-      "steps": 50,
-      "seed": 123,
+      "guidance_scale": 6.5,
+      "steps": 70,
+      "seed": 12345,
       "scheduler": "FlowMatchEulerDiscreteScheduler",
       "force_offload": true,
       "pipeline": [
@@ -506,8 +433,8 @@
         0
       ],
       "mask": [
-        "56",
-        1
+        "132",
+        0
       ]
     },
     "class_type": "Hy3DGenerateMesh",

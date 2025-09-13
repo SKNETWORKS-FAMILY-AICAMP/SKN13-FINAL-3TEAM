@@ -12,6 +12,9 @@ import runpod
 import boto3
 from pydantic import BaseModel
 
+import re
+from botocore.exceptions import ClientError
+
 # 설정
 COMFY_URL = "http://127.0.0.1:8188"
 OUTPUT_DIR = Path("/workspace/outputs")
@@ -34,9 +37,47 @@ s3_client = boto3.client(
 
 print(f"✓ S3 configured: {s3_client is not None}")
 
+def _s3_key_exists(bucket: str, key: str) -> bool:
+    """S3 오브젝트 존재 여부"""
+    if not s3_client:
+        return False
+    try:
+        s3_client.head_object(Bucket=bucket, Key=key)
+        return True
+    except ClientError as e:
+        # 404는 '없음'
+        if e.response.get("ResponseMetadata", {}).get("HTTPStatusCode") == 404:
+            return False
+        print(f"head_object error (treat as not exists): {e}")
+        return False
+
+def _next_available_name(folder: str, filename: str) -> str:
+    """
+    'AnimateDiff_00001.mp4'처럼 끝에 번호가 붙는 이름을 유지하며
+    S3 폴더 내 다음 가용 번호를 찾아 반환.
+    번호가 없으면 _00001부터 시작.
+    """
+    p = Path(filename)
+    stem, suffix = p.stem, p.suffix  # ('AnimateDiff_00001', '.mp4')
+
+    m = re.search(r"^(.*?)(?:_)?(\d+)$", stem)
+    if m:
+        base = m.group(1) or ""
+        num = int(m.group(2))
+    else:
+        base = stem
+        num = 0
+
+    while True:
+        num += 1
+        cand_name = f"{base}_{num:05d}{suffix}"
+        cand_key = f"{folder}/{cand_name}"
+        if not _s3_key_exists(AWS_BUCKET, cand_key):
+            return cand_name
+
 # 입력 스키마 (테스트 payload와 일치)
 class VideoInput(BaseModel):
-    prompt: str
+    prompt: Optional[str] = None
     image_path: str
     width: int = 768
     height: int = 448
@@ -49,7 +90,7 @@ class VideoInput(BaseModel):
 
 class ThreeDInput(BaseModel):
     image_path: str
-    prompt: str = ""  # 3D 생성용 프롬프트 추가
+    prompt: Optional[str] = None  # 3D 생성용 프롬프트 추가
     tex_res: int = 1024
     steps: int = 30
     seed: int = 12345
@@ -101,23 +142,151 @@ def load_workflow(workflow_name: str) -> Dict:
     with open(workflow_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def ensure_models_ready(max_wait: int = 300) -> bool:
+    """ComfyUI 서버/노드 준비 + 필수 모델 파일 존재 확인"""
+    start = time.time()
 
-def get_output_files() -> List[Path]:
-    """출력 파일 목록 가져오기"""
-    output_files = []
-    
+    # 1) 서버 살아있는지 먼저 확인
+    print("🔍 Checking ComfyUI server readiness...")
+    for i in range(60):
+        try:
+            r = requests.get(f"{COMFY_URL}/system_stats", timeout=3)
+            if r.status_code == 200:
+                print("✓ ComfyUI server is responding")
+                break
+        except Exception:
+            pass
+        time.sleep(1)
+    else:
+        print("❌ ComfyUI did not respond within 60s")
+        return False
+
+    # 2) 반복적으로 노드/모델 확인
+    wanted_candidates = [
+         ["/workspace/models/checkpoints/ltxv-2b-0.9.8-distilled.safetensors",
+         "/opt/ComfyUI/models/checkpoints/ltxv-2b-0.9.8-distilled.safetensors"],
+         ["/workspace/models/diffusion_models/hunyuan3d-dit-v2_fp16.safetensors",
+        "/opt/ComfyUI/models/diffusion_models/hunyuan3d-dit-v2_fp16.safetensors"],
+        ["/workspace/models/text_encoders/t5xxl_fp16.safetensors",
+        "/opt/ComfyUI/models/text_encoders/t5xxl_fp16.safetensors"],
+     ]
+
+    def files_ok() -> bool:
+        try:
+            for choices in wanted_candidates:
+                if not any(Path(p).exists() and Path(p).stat().st_size > 0 for p in choices):
+                    print(f"✗ Missing or empty model file (any of): {choices}")
+                    return False
+            return True
+        except Exception as e:
+            print(f"⚠️ File check failed: {e}")
+            return False
+
+    while time.time() - start < max_wait:
+        try:
+            oi = requests.get(f"{COMFY_URL}/object_info", timeout=5).json()
+            node_keys = [k.lower() for k in oi.keys()]
+            has_ltx = any(k.startswith("ltx") or k.startswith("ltxv") for k in node_keys)
+            has_hy3d = any(("hunyuan3d" in k) or ("hy3d" in k) for k in node_keys)
+
+            if has_ltx and has_hy3d and files_ok():
+                print("✓ Custom nodes present and required model files exist")
+                return True
+
+            # 디버깅 도움 로그 (처음 몇 번만)
+            elapsed = int(time.time() - start)
+            print(f"⏳ Not ready yet... ({elapsed}s) nodes={len(node_keys)} "
+                  f"ltx={has_ltx} hy3d={has_hy3d}")
+            if elapsed in (5, 15, 30, 60):
+                print("   sample node keys:", node_keys[:20])
+
+            # 모델 목록 리프레시 시도
+            try:
+                requests.post(f"{COMFY_URL}/refresh_models", timeout=3)
+            except Exception:
+                pass
+
+        except Exception as e:
+            print(f"⚠️ Failed to query object_info: {e}")
+
+        time.sleep(3)
+
+    print(f"❌ Models not indexed within {max_wait}s")
+    return False
+
+
+def get_output_files(since: Optional[float] = None) -> List[Path]:
+    """출력 파일 목록 가져오기(inputs 폴더 제외)"""
+    candidates: List[Path] = []
     for ext in ['*.png', '*.jpg', '*.jpeg', '*.mp4', '*.mov', '*.glb', '*.obj']:
-        output_files.extend(OUTPUT_DIR.glob(f"**/{ext}"))
-    
-    # 최신 파일들만 반환 (최근 5분 이내)
-    recent_files = []
-    current_time = time.time()
-    
-    for file_path in output_files:
-        if current_time - file_path.stat().st_mtime < 300:  # 5분
-            recent_files.append(file_path)
-    
-    return sorted(recent_files, key=lambda x: x.stat().st_mtime, reverse=True)
+        for p in OUTPUT_DIR.glob(f"**/{ext}"):
+            # 입력 이미지가 저장되는 inputs 디렉토리는 업로드 대상에서 제외
+            if "inputs" in p.parts:
+                continue
+            candidates.append(p)
+    # 최근 5분 이내 파일만
+    now = time.time()
+    if since is not None:
+        recent = [p for p in candidates if p.stat().st_mtime >= since - 5]
+    else:
+        recent = [p for p in candidates if now - p.stat().st_mtime < 1200]
+    return sorted(recent, key=lambda x: x.stat().st_mtime, reverse=True)
+
+def _should_upload(path: Path, task_type: str) -> bool:
+    """
+    업로드 허용 규칙:
+      - video: mp4/mov만 (png/jpg 전부 제외 → 첫 프레임 PNG 자동 제외)
+      - 3d   : glb/obj만
+      - 공통 : inputs 디렉토리는 이미 상단에서 제외
+    """
+    ext = path.suffix.lower()
+    if task_type == "video":
+        return ext in (".mp4", ".mov")
+    if task_type == "3d":
+        return ext in (".glb", ".obj")
+    return True
+
+def get_outputs_from_history(prompt_id: str) -> List[Path]:
+    """
+    ComfyUI /history/{prompt_id}에서 노드별 산출물 목록을 직접 추출해서
+    로컬 절대 경로 리스트로 돌려준다.
+    """
+    outs: List[Path] = []
+    try:
+        r = requests.get(f"{COMFY_URL}/history/{prompt_id}", timeout=10)
+        r.raise_for_status()
+        h = r.json()
+        entry = h.get(prompt_id, {})
+        outputs = entry.get("outputs", {})  # node_id -> {images: [...], ...}
+
+        for _nid, node_out in outputs.items():
+            # Comfy가 주는 표준 키들을 전부 훑는다.
+            for key in ("images", "gifs", "videos", "files", "meshes"):
+                for item in node_out.get(key, []) or []:
+                    # item 예시: {"filename":"AnimateDiff_00001.mp4","subfolder":"", "type":"output", ...}
+                    fname = item.get("filename")
+                    subfolder = (item.get("subfolder") or "").strip("/")
+                    if not fname:
+                        continue
+                    p = (OUTPUT_DIR / subfolder / fname) if subfolder else (OUTPUT_DIR / fname)
+                    outs.append(p)
+    except Exception as e:
+        print(f"⚠️ history parse failed: {e}")
+
+    # 중복 제거 + 존재하는 파일만 필터
+    dedup = []
+    seen = set()
+    for p in outs:
+        try:
+            if p.exists() and p.is_file():
+                s = str(p)
+                if s not in seen:
+                    seen.add(s)
+                    dedup.append(p)
+        except Exception:
+            pass
+    return dedup
+
 
 def upload_to_s3(file_path: Path) -> Optional[str]:
     """S3에 파일 업로드하고 URL 반환"""
@@ -129,17 +298,24 @@ def upload_to_s3(file_path: Path) -> Optional[str]:
         # 파일 확장자에 따른 폴더 분류 (babsim-media 고정 경로)
         ext = file_path.suffix.lower()
         if ext in ['.png']:
-            s3_folder = "babsim-media/images"
-        elif ext in ['.mp4', '.mov']:
-            s3_folder = "babsim-media/videos"
-        elif ext in ['.glb', '.obj']:
-            s3_folder = "babsim-media/models"
+            s3_folder = "images"
+        elif ext in ['.mp4']:
+            s3_folder = "videos"
+        elif ext in ['.glb']:
+            s3_folder = "models"
         else:
-            s3_folder = "babsim-media/images"  # 기본값을 images로 설정
+            s3_folder = "misc"  # 기본값을 images로 설정
         
+        filename = file_path.name
         # S3 키 생성
-        job_id = str(uuid.uuid4())[:8]
-        s3_key = f"{s3_folder}/{job_id}/{file_path.name}"
+        s3_key = f"{s3_folder}/{file_path.name}"
+
+        # ▶ 영상만: 같은 키가 이미 있으면 다음 가용 번호로 변경
+        if s3_folder == "videos" and _s3_key_exists(AWS_BUCKET, s3_key):
+            new_name = _next_available_name(s3_folder, filename)
+            print(f"⚠️ S3 key exists, renaming '{filename}' -> '{new_name}'")
+            filename = new_name
+            s3_key = f"{s3_folder}/{filename}"
         
         # 업로드
         s3_client.upload_file(str(file_path), AWS_BUCKET, s3_key)
@@ -153,7 +329,7 @@ def upload_to_s3(file_path: Path) -> Optional[str]:
         print(f"S3 upload error: {e}")
         return None
 
-def modify_workflow(workflow_json: Dict, user_image_path: str, user_prompt: str) -> Dict:
+def modify_workflow(workflow_json: Dict, user_image_path: str, user_prompt: Optional[str] = None) -> Dict:
     """워크플로우의 input image와 prompt를 사용자 입력으로 교체"""
     
     # 1. LoadImage 노드 찾아서 이미지 교체
@@ -163,11 +339,15 @@ def modify_workflow(workflow_json: Dict, user_image_path: str, user_prompt: str)
             print(f"🖼️ Updated LoadImage node {node_id}: {user_image_path}")
     
     # 2. CLIPTextEncode 노드 찾아서 프롬프트 교체 (positive만)
-    for node_id, node in workflow_json.items():
-        if (node.get("class_type") == "CLIPTextEncode" and 
-            "positive" in node.get("_meta", {}).get("title", "").lower()):
-            node["inputs"]["text"] = user_prompt
-            print(f"📝 Updated CLIPTextEncode node {node_id}: {user_prompt[:50]}...")
+    # 2. 텍스트 인코더 노드 찾아서 프롬프트 교체 (positive만, T5/CLIP 모두 지원)
+    if user_prompt:
+        for node_id, node in workflow_json.items():
+            ct = (node.get("class_type") or "").lower()
+            title = (node.get("_meta", {}).get("title") or "").lower()
+            if "textencode" in ct and "positive" in title:
+                if "text" in node.get("inputs", {}):
+                    node["inputs"]["text"] = user_prompt
+                    print(f"📝 Updated {node.get('class_type')} node {node_id}: {user_prompt[:50]}...")
     
     return workflow_json
 
@@ -246,7 +426,12 @@ def process_task(job_input: JobInput) -> Dict[str, Any]:
         user_prompt = job_input.video.prompt if task_type == "video" else job_input.three_d.prompt if task_type == "3d" else ""
         workflow = modify_workflow(workflow, input_data['image_path'], user_prompt)
         
+        # 모델 인덱싱 확인 후 워크플로우 제출
+        if not ensure_models_ready(max_wait=300):
+            raise RuntimeError("Models not indexed yet; retry later")
+        
         # 워크플로우 실행
+        started_at = time.time()
         print(f"▶️ Submitting workflow...")
         prompt_id = submit_workflow(workflow)
         print(f"⏳ Workflow submitted: {prompt_id}")
@@ -256,16 +441,38 @@ def process_task(job_input: JobInput) -> Dict[str, Any]:
         
         print(f"✅ Workflow completed!")
         
-        # 결과 파일 수집
-        output_files = get_output_files()
+        # 결과 파일(1) — 히스토리에서 직접 읽기
+        files_from_history = get_outputs_from_history(prompt_id)
+        if files_from_history:
+            print(f"📁 {len(files_from_history)} files from history")
+            output_files = files_from_history
+        else:
+            # 결과 파일(2) — 폴더 스캔 (백업 경로)
+            output_files = get_output_files(since=started_at)
+
         if not output_files:
+            # 디버깅을 위해 최근 생성 파일 일부를 덤프
+            try:
+                print("🔎 DEBUG: recent files in output dir")
+                for p in sorted(OUTPUT_DIR.rglob("*"), key=lambda x: x.stat().st_mtime, reverse=True)[:20]:
+                    try:
+                        print(" -", p, int(time.time() - p.stat().st_mtime), "s ago")
+                    except Exception:
+                        pass
+            except Exception as _:
+                pass
             raise RuntimeError("No output files generated")
-        
-        print(f"📁 Found {len(output_files)} output files")
-        
+
+        print(f"📁 Found {len(output_files)} output files (pre-filter)")
+
+        filtered_files = [p for p in output_files if _should_upload(p, task_type)]
+        print(f"📁 {len(filtered_files)} files after upload filter for task={task_type}")
+        if not filtered_files:
+            raise RuntimeError("No uploadable artifacts found (after filtering)")
+
         # S3 업로드
-        uploaded_urls = []
-        for file_path in output_files[:3]:  # 최대 3개 파일
+        uploaded_urls: List[str] = []
+        for file_path in output_files[:3]:
             print(f"📤 Uploading {file_path.name}...")
             url = upload_to_s3(file_path)
             if url:
@@ -275,7 +482,7 @@ def process_task(job_input: JobInput) -> Dict[str, Any]:
                 "success": True,
                 "task_type": task_type,
                 "outputs": uploaded_urls,
-                "file_count": len(output_files),
+                "file_count": len(filtered_files),
                 "workflow": workflow_name
         }
         
