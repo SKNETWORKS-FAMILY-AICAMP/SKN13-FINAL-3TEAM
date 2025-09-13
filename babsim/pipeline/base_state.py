@@ -14,11 +14,13 @@ class PipelineState(TypedDict, total=False):
     chat_history: List[Dict[str, str]]
     messages_summarized: bool
     image_query: str
+    image_mode: str
     is_form_complete: bool
     completion_status: Dict[str, Any]
     checklist_data: Dict[str, Any]
     pipeline_step: str
-    current_field: Optional[str]
+    current_field: Optional[str]    # 질문중인 필드, 11개
+    current_field_conversation: Optional[str]
     waiting_node: Optional[str]
     modification_request: Optional[str]
     generated_image: Optional[str]

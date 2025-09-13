@@ -69,7 +69,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen" style={{backgroundColor: '#353745'}}>
+    <div className="min-h-screen bg-black">
       <Header />
       
       {/* Main Content */}
@@ -160,7 +160,7 @@ function Login() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? '로그인 중...' : 'Sign In'}
                   </button>

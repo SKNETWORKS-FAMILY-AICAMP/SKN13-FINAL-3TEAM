@@ -43,10 +43,66 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
     completionStatus: response.headers.get('X-Completion-Status') || '{}',
     checklistData: response.headers.get('X-Checklist-Data') || '{}',
     userId: response.headers.get('X-User-ID') || 'default_user',
-    userMessage: response.headers.get('X-User-Message') || '사용자 메시지'
+    userMessage: response.headers.get('X-User-Message') || '사용자 메시지',
+    isLoading: response.headers.get('X-Is-Loading') === 'true',
+    autoRetry: response.headers.get('X-Auto-Retry') === 'true',
+    generationType: response.headers.get('X-Generation-Type') || 'text'
   };
   
   console.log('🔍 스트리밍 응답 메타데이터:', metadata);
+  
+  // interrupt 상태 (is_loading: true)인 경우 즉시 응답 반환
+  if (metadata.isLoading) {
+    console.log('[chatService.js] 🔄 interrupt 상태 감지 - 즉시 응답 반환');
+    return {
+      success: true,
+      response: '',
+      generatedResults: [],
+      isJson: false,
+      completionStatus: (() => {
+        try {
+          if (typeof metadata.completionStatus === 'string') {
+            return metadata.completionStatus ? JSON.parse(metadata.completionStatus) : {};
+          } else {
+            return metadata.completionStatus || {};
+          }
+        } catch (e) {
+          console.error('❌ completionStatus 처리 실패:', e);
+          return {};
+        }
+      })(),
+      checklistData: (() => {
+        try {
+          if (typeof metadata.checklistData === 'object' && metadata.checklistData !== null) {
+            return metadata.checklistData;
+          }
+          if (typeof metadata.checklistData === 'string') {
+            if (!metadata.checklistData.trim()) return {};
+            if (metadata.checklistData.includes("'") && metadata.checklistData.includes("{")) {
+              const jsObject = metadata.checklistData
+                .replace(/'/g, '"')
+                .replace(/(\w+):/g, '"$1":');
+              return JSON.parse(jsObject);
+            } else {
+              return JSON.parse(metadata.checklistData);
+            }
+          }
+          return {};
+        } catch (e) {
+          console.error('❌ checklistData 처리 실패:', e);
+          return {};
+        }
+      })(),
+      intent: metadata.intent,
+      isFormComplete: metadata.isFormComplete,
+      imageQuery: metadata.imageQuery,
+      sessionId: metadata.sessionId,
+      promptId: metadata.promptId,
+      is_loading: metadata.isLoading,
+      auto_retry: metadata.autoRetry,
+      generation_type: metadata.generationType
+    };
+  }
   
   // 초기 스트리밍 메시지 생성
   if (setMessages) {
@@ -187,7 +243,7 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
         
         // 문자열인 경우
         if (typeof metadata.checklistData === 'string') {
-          // 빈 문자열인 경우
+          // 빈 문자열인 경우ㅇ
           if (!metadata.checklistData.trim()) {
             return {};
           }
@@ -216,7 +272,10 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
     isFormComplete: metadata.isFormComplete,
     imageQuery: metadata.imageQuery,
     sessionId: metadata.sessionId,
-    promptId: metadata.promptId
+    promptId: metadata.promptId,
+    is_loading: metadata.isLoading,
+    auto_retry: metadata.autoRetry,
+    generation_type: metadata.generationType
   };
 };
 
@@ -507,7 +566,9 @@ export const sendChatMessage = async (sessionId, message, userId, onStreamingUpd
           intent: data.intent || '',
           isFormComplete: data.is_form_complete || false,
           imageQuery: data.image_query || '',
-          isJson: true
+          isJson: true,
+          auto_retry: data.auto_retry || false,  // auto_retry 플래그 추가
+          generation_type: data.generation_type || ''  // generation_type 추가
         };
       }
     } else {

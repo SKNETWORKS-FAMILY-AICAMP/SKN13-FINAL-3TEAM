@@ -8,10 +8,10 @@ import json
 import requests
 import boto3
 import io
+import time
 import re
 import hashlib
 import base64
-import time
 from typing import Dict, Any, Optional
 from django.conf import settings
 from langgraph.graph import StateGraph, END
@@ -133,49 +133,81 @@ class ImageGenerator:
                 "Content-Type": "application/json"
             }
             
-            # 이미지 생성 요청 페이로드 - prompt_2, negative_prompt
+            # 이미지 생성 요청 페이로드 - Cloudflare 타임아웃 고려 최적화
             payload = {
                 "prompt": image_query,
+                "num_inference_steps": 10,  # 추론 단계 수 더 줄임 (20→10)
+                "guidance_scale": 7.0,      # 가이던스 스케일 조정
+                "width": 512,               # 이미지 크기 줄임 (1024→512)
+                "height": 512,              # 이미지 크기 줄임 (1024→512)
+                "num_outputs": 1,           # 출력 이미지 수
+                "scheduler": "DPMSolverMultistepScheduler"  # 스케줄러
             }
             
             print(f"🚀 RunPod API 호출: {self.flux_url}")
             
-            # API 호출 (타임아웃을 줄이고 재시도)
+            # API 호출 (타임아웃을 늘리고 재시도 간격 조정)
             max_retries = 3
             for attempt in range(max_retries):
                 try:
                     print(f"🔄 RunPod API 호출 시도 {attempt + 1}/{max_retries}")
+                    print(f"⏰ 호출 시작 시간: {time.strftime('%H:%M:%S')}")
                     response = requests.post(
                         self.flux_url,
                         headers=headers,
                         data=json.dumps(payload),
-                        timeout=600,  # 10분으로 줄임
+                        timeout=1200,  # 20분으로 늘림
                     )
+                    print(f"⏰ 응답 받은 시간: {time.strftime('%H:%M:%S')}")
                     
                     response.raise_for_status()
+                    print(f"✅ RunPod API 호출 성공 (시도 {attempt + 1})")
                     break  # 성공하면 루프 탈출
                     
                 except requests.exceptions.Timeout:
-                    print(f"⏰ 시도 {attempt + 1}: 타임아웃 발생")
+                    print(f"⏰ 시도 {attempt + 1}: 타임아웃 발생 (20분)")
                     if attempt == max_retries - 1:
-                        print("❌ 모든 재시도 실패")
+                        print("❌ 모든 재시도 실패 - 타임아웃")
                         return None
-                    time.sleep(5)  # 5초 대기 후 재시도
+                    print(f"⏳ {30 * (attempt + 1)}초 대기 후 재시도...")
+                    time.sleep(30 * (attempt + 1))  # 점진적으로 대기 시간 증가
+                    
+                except requests.exceptions.ConnectionError as e:
+                    print(f"🔌 시도 {attempt + 1}: 연결 오류 - {time.strftime('%H:%M:%S')} - {e}")
+                    if attempt == max_retries - 1:
+                        print("❌ 모든 재시도 실패 - 연결 오류")
+                        return None
+                    print(f"⏳ {30 * (attempt + 1)}초 대기 후 재시도...")
+                    time.sleep(30 * (attempt + 1))
                     
                 except requests.exceptions.HTTPError as e:
+                    print(f"🌐 시도 {attempt + 1}: HTTP 오류 {e.response.status_code} - {time.strftime('%H:%M:%S')}")
                     if e.response.status_code == 524:
-                        print(f"⏰ 시도 {attempt + 1}: 524 Server Error (타임아웃)")
+                        print(f"⏰ 524 Server Error (타임아웃)")
                         if attempt == max_retries - 1:
-                            print("❌ 모든 재시도 실패")
+                            print("❌ 모든 재시도 실패 - 524 에러")
                             return None
-                        time.sleep(10)  # 10초 대기 후 재시도
+                        print(f"⏳ {60 * (attempt + 1)}초 대기 후 재시도...")
+                        time.sleep(60 * (attempt + 1))  # 524 에러는 더 오래 대기
                     else:
                         print(f"❌ HTTP 오류: {e}")
                         return None
                         
+                except requests.exceptions.RequestException as e:
+                    print(f"📡 시도 {attempt + 1}: 요청 오류 - {time.strftime('%H:%M:%S')} - {e}")
+                    if attempt == max_retries - 1:
+                        print("❌ 모든 재시도 실패 - 요청 오류")
+                        return None
+                    print(f"⏳ {30 * (attempt + 1)}초 대기 후 재시도...")
+                    time.sleep(30 * (attempt + 1))
+                        
                 except Exception as e:
-                    print(f"❌ API 호출 오류: {e}")
-                    return None
+                    print(f"❌ 시도 {attempt + 1}: 기타 오류 - {time.strftime('%H:%M:%S')} - {e}")
+                    if attempt == max_retries - 1:
+                        print("❌ 모든 재시도 실패 - 기타 오류")
+                        return None
+                    print(f"⏳ {30 * (attempt + 1)}초 대기 후 재시도...")
+                    time.sleep(30 * (attempt + 1))
             
             # 응답 상태 코드와 헤더 확인
             print(f"🔍 응답 상태 코드: {response.status_code}")

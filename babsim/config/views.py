@@ -23,10 +23,10 @@ def chatbot_api(request, session_id):
         completion_status = data.get('completionStatus', {})
         
         # 디버깅: 받은 데이터 확인
-        print(f"🔍 config/views.py 디버깅:")
-        print(f"  - 받은 user_id: {user_id}")
-        print(f"  - user_id 타입: {type(user_id)}")
-        print(f"  - 전체 data: {data}")
+        # print(f"🔍 config/views.py 디버깅:")
+        # print(f"  - 받은 user_id: {user_id}")
+        # print(f"  - user_id 타입: {type(user_id)}")
+        # print(f"  - 전체 data: {data}")
         
         # Pipeline 서비스를 사용하여 응답 생성 (체크리스트 데이터 포함)
         print(f"🔍 [CONFIG] process_query 호출 시작 - user_message: '{user_message[:50]}...'")
@@ -58,9 +58,17 @@ def chatbot_api(request, session_id):
             streaming_response['X-Completion-Status'] = str(result.get('completion_status', {}))
             streaming_response['X-Checklist-Data'] = str(result.get('checklist_data', {}))
             
+        # 디버깅 로그 추가
+            print(f"[config/views.py] [DEBUG] completion_status: {result.get('completion_status', {})}")
+            print(f"[config/views.py] [DEBUG] checklist_data: {result.get('checklist_data', {})}")
+            
             return streaming_response
         
         # 일반 응답인 경우 JsonResponse로 반환
+        # 디버깅 로그 추가
+        # print(f"[config/views.py] [DEBUG] completion_status: {result.get('completion_status')}")
+        # print(f"[config/views.py] [DEBUG] checklist_data: {result.get('checklist_data')}")
+        
         return JsonResponse({
             'reply': result['response'],
             'intent': result.get('initial_intent', ''),
@@ -71,6 +79,8 @@ def chatbot_api(request, session_id):
             'generated_results': result.get('generated_results', []),
             'completion_status': result.get('completion_status', {}),
             'checklist_data': result.get('checklist_data', {}),
+            'auto_retry': result.get('auto_retry', False),  # auto_retry 플래그 추가
+            'generation_type': result.get('generation_type', ''),  # generation_type 추가
         })
 
     except Exception as e:

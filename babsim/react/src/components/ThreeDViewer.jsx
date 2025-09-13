@@ -25,16 +25,16 @@ const ThreeDViewer = ({ carName }) => {
       mountRef.current.appendChild(renderer.domElement);
 
       // Lighting - 입체감을 줄이기 위해 조명 조정
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // 전역 조명 강화로 그림자 감소
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // 전역 조명 강화로 그림자 감소
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4); // 방향성 조명 강도 감소
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // 방향성 조명 강도 감소
       directionalLight.position.set(10, 10, 5);
       directionalLight.castShadow = false; // 그림자 비활성화
       scene.add(directionalLight);
 
       // 추가 부드러운 조명
-      const fillLight = new THREE.DirectionalLight(0xffffff, 0.3); // 채우기 조명 추가
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.6); // 채우기 조명 추가
       fillLight.position.set(-10, 5, -10);
       scene.add(fillLight);
 

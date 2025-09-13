@@ -310,9 +310,9 @@ class BabsimPipelineService:
         process_id = str(uuid.uuid4())[:8]  # 고유 ID 생성
         
         try:
-            logger.info(f"🚀 [PID:{process_id}] 파이프라인 쿼리 처리 시작: {user_query}")
-            logger.info(f"🚀 [PID:{process_id}] 체크리스트 데이터: {checklist_data}")
-            logger.info(f"🚀 [PID:{process_id}] 완성도 상태: {completion_status}")
+            # logger.info(f"🚀 [PID:{process_id}] 파이프라인 쿼리 처리 시작: {user_query}")
+            # logger.info(f"🚀 [PID:{process_id}] 체크리스트 데이터: {checklist_data}")
+            # logger.info(f"🚀 [PID:{process_id}] 완성도 상태: {completion_status}")
             print(f"🚀 [PID:{process_id}] process_query 시작 - user_query: '{user_query[:50]}...'")
             
             # 사용자 조회 또는 생성
@@ -376,11 +376,13 @@ class BabsimPipelineService:
        
             if is_resume:
              # 직전 세션 상태(또는 이번 요청으로 만든 initial_state)로부터 대기 키 추정
-                print(f"🔍 파이프라인 재실행: {current_state}")
+                print(f"🔍 파이프라인 재실행: ")
                 print(f"🔍 user_query 전달: '{user_query}'")
                 # waiting_key = self._guess_waiting_key(initial_state)
                 # print(f"🔍 waiting_key: {waiting_key}")
                 # Command(resume=...)을 사용할 때는 현재 상태에 데이터를 추가
+                print(f"🔍 checklist_data 값 확인: {checklist_data}")
+                print(f"🔍 completion_status 값 확인: {completion_status}")
                 resume_data = {
                     "user_query": user_query,
                     "user_id": user_id,
@@ -388,16 +390,15 @@ class BabsimPipelineService:
                     "is_streaming": False,  # 스트리밍 상태 초기화
                     "waiting_node": current_state.next[0],
                     "response": current_state.values.get("response"),
-                    "checklist_data": checklist_data or {},
-                    "completion_status": completion_status or {},
+                    "current_field_conversation": current_state.values.get("current_field_conversation", ""),
                 }
-                print(f"🔍 resume_data: {resume_data}")
-                print(f"🔍 user_id 타입: {type(user_id)} = {user_id}")
-                print(f"🔍 user_query 타입: {type(user_query)} = {user_query}")
+                # print(f"🔍 resume_data: {resume_data}")
+                # print(f"🔍 user_id 타입: {type(user_id)} = {user_id}")
+                # print(f"🔍 user_query 타입: {type(user_query)} = {user_query}")
                 # Command 객체 생성 시 올바른 구조 사용
                 text_pipeline.update_state(config, resume_data)
                 command = Command(resume=current_state)
-                print(f"🔍 command: {command}")
+                # print(f"🔍 command: {command}")
                 # print(f"🔍 command.resume: {command.resume}")
                 pipeline_result = text_pipeline.invoke(None, config=config, command=command)
             else:
@@ -432,8 +433,15 @@ class BabsimPipelineService:
             image_generation_intent = pipeline_result.get('image_generation_intent', '')
             is_form_complete = pipeline_result.get('is_form_complete', False)
             image_query = pipeline_result.get('image_query', '')
-            updated_completion_status = pipeline_result.get('completion_status', interrupt_data.get('completion_status', {}))
-            updated_checklist_data = pipeline_result.get('checklist_data', interrupt_data.get('checklist_data', {}))
+            updated_completion_status = interrupt_data.get('completion_status', pipeline_result.get('completion_status', {}))
+            updated_checklist_data = interrupt_data.get('checklist_data', pipeline_result.get('checklist_data', {}))
+            
+            # 디버깅 로그 추가
+            # print(f"[services.py] [DEBUG] image_query: {image_query}")
+            # print(f"[services.py] [DEBUG] updated_completion_status: {updated_completion_status}")
+            print(f"[services.py] [DEBUG] updated_checklist_data: {updated_checklist_data}")
+            # print(f"[services.py] [DEBUG] pipeline_result keys: {list(pipeline_result.keys())}")
+            # print(f"[services.py] [DEBUG] interrupt_data keys: {list(interrupt_data.keys())}")
             updated_history = pipeline_result.get('chat_history', chat_history)
 
             
@@ -451,6 +459,8 @@ class BabsimPipelineService:
             
             # 임시 로딩창
             if is_loading:
+                # interrupt_data에서 generation_type 가져오기
+                generation_type = interrupt_data.get('generation_type', 'text')
                 if generation_type == 'image':
                     generated_results.append({
                         "result_type": "image",
@@ -466,6 +476,34 @@ class BabsimPipelineService:
                         "result_type": "4d",
                         "result_path": "",
                     })
+                elif generation_type == "text":
+                    generated_results.append({
+                        "result_type": "text",
+                        "result_path": "",
+                    })
+                
+                # 로딩 메시지 반환 후 자동으로 파이프라인 재실행
+                result = {
+                    "response": "",
+                    "generated_results": generated_results,
+                    "initial_intent": initial_intent,
+                    "image_generation_intent": image_generation_intent,
+                    "user_query": user_query,
+                    "user_message": user_query,
+                    "is_form_complete": is_form_complete,
+                    "completion_status": updated_completion_status,
+                    "checklist_data": updated_checklist_data,
+                    "session_id": session_id,
+                    "prompt_id": str(prompt_log.prompt_id),
+                    "user_id": user_id,
+                    "is_streaming": False,
+                    "is_loading": True,
+                    "generation_type": generation_type,
+                    "auto_retry": True  # 자동 재시도 플래그
+                }
+                
+                print(f"🔄 로딩 메시지 반환 후 자동 재시도 예정: {generation_type}")
+                return result
             # generation_type에 따른 결과 저장
             if generation_type == 'image' and s3_url:
                 generated_results.append({
@@ -523,6 +561,8 @@ class BabsimPipelineService:
                 "user_id": user_id,
                 "is_streaming": is_streaming
             }
+
+            # print(f"[services.py] [DEBUG] 반환되는 result : {result}")
             
             # 스트리밍 응답인 경우 streaming_response 키 추가
             if is_streaming:

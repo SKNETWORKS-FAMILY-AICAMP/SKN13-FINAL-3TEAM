@@ -144,14 +144,19 @@ def route_top(state: PipelineState) -> str:
     if it == "image_generation":
         print(f"[라우팅] 이미지 생성 경로로 라우팅")
         return "image_generation"
-    if it == "image_modification":
+    elif it == "image_modification":
         print(f"[라우팅] 이미지 수정 경로로 라우팅")
         return "image_modification"
-    if it == "rag":
+    elif it == "rag":
         print(f"[라우팅] RAG 질문 경로로 라우팅")
         return "rag"
-    print(f"[라우팅] 일반 대화 경로로 라우팅")
-    return "general_conversation"
+    else:
+        # Interrupt 걸리기 전, 첫 방문 시
+        if state["waiting_node"] != "route_top":
+            interrupt({"is_loading": True, "generation_type": "text"})
+        else:
+            print(f"[라우팅] 일반 대화 경로로 라우팅")
+            return "general_conversation"
 
 
 # -----------------------------
@@ -162,18 +167,25 @@ def handle_general_conversation(state: PipelineState) -> Dict[str, Any]:
     user_query = state.get("user_query", "")
     _append_history(state, "user", user_query)
     
-    # vLLM 스트리밍 응답 사용
-    streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+    # vLLM 텍스트 응답 사용
+    response = kanana_llm_model.generate_vllm_response_text(
         user_query, 
-        max_length=512
+        max_length=1024
     )
     
-    print(f"[처리] 일반 대화 스트리밍 응답 생성 완료")
-    # StreamingHttpResponse를 전역 변수에 저장하고 ID만 상태에 저장
-    import uuid
-    streaming_id = str(uuid.uuid4())
-    _streaming_responses[streaming_id] = streaming_response
-    return {"streaming_id": streaming_id, "response": "[스트리밍 응답]", "is_streaming": True}
+    print(f"[처리] 일반 대화 텍스트 응답 생성 완료")
+    
+    # 기존 스트리밍 코드 (주석처리)
+    # streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+    #     user_query, 
+    #     max_length=512
+    # )
+    # import uuid
+    # streaming_id = str(uuid.uuid4())
+    # _streaming_responses[streaming_id] = streaming_response
+    # return {"streaming_id": streaming_id, "response": "[스트리밍 응답]", "is_streaming": True}
+    
+    return {"response": response}
 
 
 # -----------------------------
@@ -184,21 +196,24 @@ def handle_general_conversation(state: PipelineState) -> Dict[str, Any]:
 def rewrite_query(state: PipelineState) -> PipelineState:
     """사용자 쿼리를 HyDE 방식으로 재작성"""
     print(f"[분기] rewrite_query 노드 접근")
-    pipeline_step = state.get("pipeline_step", "")
     user_query = state.get("user_query", "")
     
     # 간단한 쿼리 확장 (실제 QueryRewriter가 있다면 사용)
     # rq, _ = query_rewriter.hyde_expand_and_rewrite(user_query)
     # 현재는 기본 쿼리 사용
     rq = user_query
-    
-    print(f"[처리] 쿼리 재작성 완료: '{user_query[:30]}...'")
-    return {
-        **state, 
-        "user_query": rq or user_query, 
-        "rewritten": True,
-        "pipeline_step": "rewrite_query",
-    }
+
+    # 첫 방문 시, Interrupt 걸리기 이전
+    if state["waiting_node"] != "rewrite_query":
+        interrupt({"is_loading": True, "generation_type": "text"})
+    else:    
+        print(f"[처리] 쿼리 재작성 완료: '{user_query[:30]}...'")
+        return {
+            **state, 
+            "user_query": rq or user_query, 
+            "rewritten": True,
+            "pipeline_step": "rewrite_query",
+        }
 
 # 2) RAG 응답 생성
 def generate_rag_response(state: PipelineState) -> PipelineState:
@@ -228,27 +243,41 @@ def generate_rag_response(state: PipelineState) -> PipelineState:
     context_prefix = "다음은 관련 참고 컨텍스트입니다:\n" + "\n---\n".join(context_snippets[:3]) if context_snippets else ""
     merged_query = (context_prefix + "\n\n질문: " + user_query).strip()
     
-    # RAG 응답 생성 - vLLM 스트리밍 응답 사용
-    streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+    # RAG 응답 생성 - vLLM 텍스트 응답 사용
+    response = kanana_llm_model.generate_vllm_response_text(
         merged_query, 
-        max_length=512
+        max_length=1024
     )
     
     chat_history = chat_manager.add_message(chat_history, "user", user_query)
+    chat_history = chat_manager.add_message(chat_history, "assistant", response)
     
-    print(f"[처리] RAG 스트리밍 응답 생성 완료")
-    # StreamingHttpResponse를 전역 변수에 저장하고 ID만 상태에 저장
-    import uuid
-    streaming_id = str(uuid.uuid4())
-    _streaming_responses[streaming_id] = streaming_response
+    print(f"[처리] RAG 텍스트 응답 생성 완료")
+    
+    # 기존 스트리밍 코드 (주석처리)
+    # streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+    #     merged_query, 
+    #     max_length=512
+    # )
+    # import uuid
+    # streaming_id = str(uuid.uuid4())
+    # _streaming_responses[streaming_id] = streaming_response
+    # return {
+    #     **state, 
+    #     "streaming_id": streaming_id,
+    #     "response": "[스트리밍 응답]", 
+    #     "chat_history": chat_history, 
+    #     "messages_summarized": False,
+    #     "pipeline_step": "generate_rag_response",
+    #     "is_streaming": True
+    # }
+    
     return {
         **state, 
-        "streaming_id": streaming_id,
-        "response": "[스트리밍 응답]", 
+        "response": response, 
         "chat_history": chat_history, 
         "messages_summarized": False,
-        "pipeline_step": "generate_rag_response",
-        "is_streaming": True
+        "pipeline_step": "generate_rag_response"
     }
 
 # 3) 답변 평가
@@ -284,8 +313,12 @@ def retry_or_accept(state: PipelineState) -> PipelineState:
     THRESH = 0.55
     
     if rel < THRESH or ade < THRESH:
-        print(f"[처리] 품질 부족 - LLM fallback으로 라우팅 (관련성={rel}, 적절성={ade})")
-        return {**state, "route": "llm_fallback"}
+        # 첫 방문 시, Interrupt 걸리기 이전
+        if state["waiting_node"] != "build_query_from_history":
+            interrupt({"is_loading": True, "generation_type": "text"})
+        else:
+            print(f"[처리] 품질 부족 - LLM fallback으로 라우팅 (관련성={rel}, 적절성={ade})")
+            return {**state, "route": "llm_fallback"}
     print(f"[처리] 품질 양호 - 최종화로 라우팅 (관련성={rel}, 적절성={ade})")
     return {**state, "route": "ok"}
 
@@ -297,25 +330,38 @@ def handle_llm_fallback(state: PipelineState) -> PipelineState:
         user_query = state.get("user_query", "")
         chat_history = state.get("chat_history", [])
         
-        # vLLM 스트리밍 응답 사용
-        streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+        # vLLM 텍스트 응답 사용
+        response = kanana_llm_model.generate_vllm_response_text(
             user_query, 
-            max_length=512
+            max_length=1024
         )
         chat_history = chat_manager.add_message(chat_history, "user", user_query)
+        chat_history = chat_manager.add_message(chat_history, "assistant", response)
         
-        print(f"[처리] LLM fallback 스트리밍 응답 생성 완료")
-        # StreamingHttpResponse를 전역 변수에 저장하고 ID만 상태에 저장
-        import uuid
-        streaming_id = str(uuid.uuid4())
-        _streaming_responses[streaming_id] = streaming_response
+        print(f"[처리] LLM fallback 텍스트 응답 생성 완료")
+        
+        # 기존 스트리밍 코드 (주석처리)
+        # streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+        #     user_query, 
+        #     max_length=512
+        # )
+        # import uuid
+        # streaming_id = str(uuid.uuid4())
+        # _streaming_responses[streaming_id] = streaming_response
+        # return {
+        #     **state, 
+        #     "streaming_id": streaming_id,
+        #     "response": "[스트리밍 응답]", 
+        #     "chat_history": chat_history, 
+        #     "messages_summarized": False,
+        #     "is_streaming": True
+        # }
+        
         return {
             **state, 
-            "streaming_id": streaming_id,
-            "response": "[스트리밍 응답]", 
+            "response": response, 
             "chat_history": chat_history, 
-            "messages_summarized": False,
-            "is_streaming": True
+            "messages_summarized": False
         }
     except Exception as e:
         print(f"[처리] LLM Fallback 응답 생성 실패: {e}")
@@ -377,15 +423,16 @@ def apply_image_mode(state: PipelineState) -> Dict[str, Any]:
     mode = _classifier.classify_image_generation_intent(user_input)
     
     # 분류 결과를 상태에 저장
-    state["image_mode"] = mode
     _append_history(state, "user", user_input)
     
     print(f"[처리] 이미지 생성 방식 분류 완료: '{user_input[:30]}...' -> '{mode}'")
     return {"image_mode": mode}
 
 def route_image_mode(state: PipelineState) -> str:
+    print(f"[라우팅] route_image_mode - 전체 상태: {state}")
     mode = state.get("image_mode", "guided")
     print(f"[라우팅] route_image_mode - 선택된 방식: '{mode}'")
+    
     if mode == "guided":
         print(f"[라우팅] 체크리스트 기반 가이드 경로로 라우팅")
     else:
@@ -440,13 +487,20 @@ def guided_next_category(state: PipelineState) -> PipelineState:
     print(f"[분기] guided_next_category 노드 접근")
     form_data = dict(state.get("checklist_data") or {})
     user_query = (state.get("user_query") or "").strip()
-    print(f"[DEBUG] {state}")
 
     # 필수 필드부터 확인
     missing_req = checklist_generator.missing_required_fields(form_data)    
+    print(f"[DEBUG] missing_req: {missing_req}")
 
     # 선택 필드 확인
     missing_opt = checklist_generator.missing_optional_fields(form_data)
+    print(f"[DEBUG] missing_opt: {missing_opt}")
+
+    # 첫 번째 누락된 필드를 current_field로 설정
+    missing = missing_req if missing_req else missing_opt
+    current_field = missing[0] if missing else ""
+    print(f"[DEBUG] guided_next_category 에서 설정한 current_field : {current_field}")
+    print(f"[DEBUG] form_data: {form_data}")
 
     # 노드 첫 방문이라면
     if state["waiting_node"] != "guided_next_category":
@@ -456,14 +510,14 @@ def guided_next_category(state: PipelineState) -> PipelineState:
             return {"response": "체크리스트를 건너뛰고 이미지 생성을 진행합니다. 🎨", "pipeline_step": "build_query_from_history"}
         
         if missing_req:
-            # 아직 필수 필드가 남아있음
-            current_field = missing_req[0]
             
             # 체크리스트 시작 안내 (첫 번째 질문인 경우)
+            field_description = checklist_generator.field_descriptions.get(current_field, "")
+            
             if len(form_data) == 0 or all(v == "" for v in form_data.values()):
-                intro_message = f"이제 체크리스트를 하나씩 채워보겠습니다!\n\n첫 번째 카테고리: {current_field}\n\n{current_field}에 대해 자유롭게 질문하세요!\n현대자동차 디자인 전문가 AI가 답변해드립니다.\n\n질문이 끝나시면 '질문 완료'라고 입력해주세요.\n\n명령어:\n- 다음 질문: '질문 완료', '완료', '다음', 'next'\n- 이미지 생성: '건너뛰기', 'skip'"
+                intro_message = f"이제 체크리스트를 하나씩 채워보겠습니다!\n\n첫 번째 카테고리: {current_field}\n\n{field_description}\n\n{current_field}에 대해 자유롭게 질문하세요!\n현대자동차 디자인 전문가 AI가 답변해드립니다.\n\n질문이 끝나시면 '질문 완료'라고 입력해주세요.\n\n명령어:\n- 다음 질문: '질문 완료', '완료', '다음', 'next'\n- 이미지 생성: '건너뛰기', 'skip'"
             else:
-                intro_message = f"다음 카테고리: {current_field}\n\n{current_field}에 대해 자유롭게 질문하세요!\n현대자동차 디자인 전문가 AI가 답변해드립니다.\n\n질문이 끝나시면 '질문 완료'라고 입력해주세요.\n\n명령어:\n- 다음 질문: '질문 완료', '완료', '다음', 'next'\n- 이미지 생성: '건너뛰기', 'skip'"
+                intro_message = f"다음 카테고리: {current_field}\n\n{field_description}\n\n{current_field}에 대해 자유롭게 질문하세요!\n현대자동차 디자인 전문가 AI가 답변해드립니다.\n\n질문이 끝나시면 '질문 완료'라고 입력해주세요.\n\n명령어:\n- 다음 질문: '질문 완료', '완료', '다음', 'next'\n- 이미지 생성: '건너뛰기', 'skip'"
             
             print(f"[처리] 다음 필수 필드 설정: '{current_field}'")
             
@@ -471,14 +525,12 @@ def guided_next_category(state: PipelineState) -> PipelineState:
             completion_status = checklist_generator.get_completion_status(form_data)
             print(f"[처리] 체크리스트 완성도: {completion_status.get('completion_percentage', 0)}%")
             
-            # interrupt로 사용자 입력을 받음
-            interrupt({"query": intro_message})
+            # interrupt로 사용자 입력을 받음 / 다음 카테고리 넘어갈 때 이전 체크리스트 프론트 반영
+            interrupt({"query": intro_message, "checklist_data": form_data, "completion_status": completion_status})
             
         else:
             
             if missing_opt:
-                # 선택 필드가 남아있음 - 사용자에게 선택권 제공
-                current_field = missing_opt[0]
                 
                 optional_message = f"필수 질문이 모두 완료되었습니다! 🎉\n\n선택 질문도 채우시겠습니까?\n\n필수 정보로 충분하다면, '건너뛰기'를 입력해주세요.\n\n다음 선택 카테고리: {current_field}\n\n{current_field}에 대해 자유롭게 질문하세요!\n현대자동차 디자인 전문가 AI가 답변해드립니다.\n\n명령어:\n- 다음 질문: '질문 완료', '완료', '다음', 'next'\n- 이미지 생성: '건너뛰기', 'skip'"
                 
@@ -492,36 +544,62 @@ def guided_next_category(state: PipelineState) -> PipelineState:
                 print(f"[처리] 모든 질문 완료 - 이미지 생성으로 진행")
                 return {"response": "체크리스트가 모두 완료되었습니다! 🎉 이제 이미지 생성을 시작하겠습니다.", "pipeline_step": "build_query_from_history"}
         
-    # Interrupt 이후 돌아온 것이라면 "guided_llm_chat" 으로
+    # Interrupt 이후 돌아온 것이라면 "guided_llm_chat" 으로 / 이 경로가 챗봇 경로
     else:
-        if missing_req:
-            current_field = missing_req[0]
-        elif missing_opt:
-            current_field = missing_opt[0]
+        # current_field_conversation 초기화
+        state["current_field_conversation"] = ""
+        
+        # 카테고리 자체 건너뛰기 - 요약없이 바로 다음 카테고리로
+        if user_query.lower() in ["질문 완료", "완료", "다음", "next"]:
+            # 현재 current_field에 대해 form_data를 "-"로 설정
+            if current_field:
+                form_data = state.get("checklist_data", {})
+                form_data[current_field] = "-"
+                print(f"[처리] 카테고리 건너뛰기: '{current_field}' = '-', form_data {form_data}")
+
+                # 체크리스트 완성도 업데이트
+                completion_status = checklist_generator.get_completion_status(form_data)
+
+                return {
+                    "pipeline_step": "guided_next_category",
+                    "waiting_node": "",  # waiting_node 초기화 -> 다음 카테고리 처음부터 질문 시작 
+                    "user_query": "",    # user_query 초기화 
+                    "checklist_data": form_data,  # 업데이트된 체크리스트 데이터 반환
+                    "completion_status": completion_status
+                }
+
+        if user_query.lower() in ["건너뛰기", "skip", "건너 뛰기"]:
+            print(f"[처리] 건너뛰기 - 이미지 생성으로 진행")
+            return {"response": "건너뛰어보겠습니다! 🎉 이제 이미지 생성을 시작하겠습니다.", "pipeline_step": "build_query_from_history"}
+
+
+        # 첫 방문 시, Interrupt 걸리기 이전
+        if state["waiting_node"] != "build_query_from_history":
+            interrupt({"is_loading": True, "generation_type": "text"})
         else:
-            current_field = ""
-        return safe_merge_user_query(
-                user_query,
-                pipeline_step="guided_llm_chat", 
-                current_field=current_field,
-                waiting_node="guided_llm_chat", # 다시 들어왔을때 위 내용을 돌기 위해 
-            )
+            return safe_merge_user_query(
+                    user_query,
+                    pipeline_step="guided_llm_chat", 
+                    current_field=current_field,
+                    waiting_node="guided_llm_chat", # 다시 들어왔을때 위 내용을 돌기 위해 
+                )
 
 def guided_llm_chat(state: PipelineState) -> PipelineState:
     """LLM과의 자유로운 대화 처리"""
     print(f"[분기] guided_llm_chat 노드 접근")
     user_query = (state.get("user_query") or "").strip()
     current_field = state.get("current_field", "")
+    current_field_conversation = state.get("current_field_conversation", "")
     
-    # print(f"[DEBUG] guided_llm_chat - current_field: '{current_field}', user_input: '{user_input}'")
-    # print(f"[DEBUG] guided_llm_chat - 전체 state keys: {list(state.keys())}")
-    # print(f"[DEBUG] guided_llm_chat - 전체 state: {state}")
-    
-    # "질문 완료" 확인 -> 다음 카테고리의 llm 대화로 이동
+    # print(f"[text_pipeline_full_v2.py] [DEBUG] guided_llm_chat - current_field: '{current_field}', user_input: '{user_input}'")
+    # print(f"[text_pipeline_full_v2.py] [DEBUG] guided_llm_chat - 전체 state keys: {list(state.keys())}")
+    # print(f"[text_pipeline_full_v2.py] [DEBUG] guided_llm_chat - 전체 state: {state}")
+    print(f"[text_pipeline_full_v2.py] [DEBUG] 누적된 대화: {current_field_conversation}")
+    # "질문 완료" 확인 -> 카테고리 요약으로
     if user_query.lower() in ["질문 완료", "완료", "다음", "next"]:
         # LLM 대화 종료, 체크리스트 답변 요청으로 이동
         _append_history(state, "user", user_query)
-        print(f"[처리] 질문 완료 - 체크리스트 답변 요청으로 이동")
+        print(f"[처리] 질문 완료 - 다음 체크리스트 항목으로 이동")
         return {"pipeline_step": "guided_ask_answer", "current_field": current_field}
         
     if user_query.lower() in ["건너뛰기", "skip", "다음", "next"]:
@@ -530,22 +608,35 @@ def guided_llm_chat(state: PipelineState) -> PipelineState:
     else:
         # 사용자가 LLM에게 질문한 경우
         print(f"[처리] LLM 질문 처리: '{user_query[:30]}...' (필드: '{current_field}')")
-        # Kanana LLM에게 질문 - 스트리밍 응답 사용
-        streaming_response = kanana_llm_model.generate_vllm_response_streaming(
+        
+        # Kanana LLM에게 질문 - 텍스트 응답 사용
+        response = kanana_llm_model.generate_vllm_response_text(
             user_query, 
-            max_length=300
+            max_length=1024
         )
         
-        # 대화 기록 (스트리밍 응답이므로 임시로 사용자 입력만 기록)
+        # 대화 기록
         _append_history(state, "user", user_query)
+        _append_history(state, "assistant", response)
 
-        # StreamingHttpResponse를 전역 변수에 저장하고 ID만 상태에 저장
-        streaming_id = str(uuid4())
-        is_streaming = True
-        _streaming_responses[streaming_id] = streaming_response
+        # current_field_conversation에 user_query 누적
+        current_field_conversation = state.get("current_field_conversation", "") + f"\n사용자: {user_query}\nAI: {response}"
 
-        # 스트리밍 응답을 별도로 처리 - 위에서 안걸리면 무한 루프 
-        interrupt({"query": "[스트리밍 응답]", "streaming_id": streaming_id, "is_streaming": is_streaming})
+        return {"response": response, "current_field_conversation": current_field_conversation, "waiting_node": "guided_llm_chat"}
+        
+def guided_llm_chat_save(state: PipelineState) -> PipelineState:
+    """current_field_conversation 저장을 위한 노드"""
+    response = state.get("response", "")
+    current_field_conversation = state.get("current_field_conversation", "")
+    current_field = state.get("current_field", "")
+
+    user_query = state.get("user_query")
+
+    # Interrupt 이전
+    if state["waiting_node"] != "guided_llm_chat_save":
+        interrupt({"query": response, "current_field_conversation": current_field_conversation, "current_field": current_field})
+    else:
+        return {"user_query": user_query}
 
 def guided_ask_answer(state: PipelineState) -> PipelineState:
     """체크리스트 답변 요청 - 사용자가 최종 요약"""
@@ -574,25 +665,59 @@ def guided_ask_answer(state: PipelineState) -> PipelineState:
                 print(f"[처리] 체크리스트 답변 요청: '{current_field}'")
                 interrupt({"query": answer_request})
     else:
+        # current_field_conversation에 user_query 누적
+        current_field_conversation = state.get("current_field_conversation", "") + f"\n사용자: {user_query}"
+        
         print(f"[처리] 다음 단계로 진행")
-        return safe_merge_user_query(user_query, response="다음 단계로 진행합니다.", pipeline_step="guided_ask_answer", current_field=current_field)
+        return safe_merge_user_query(user_query, response="다음 단계로 진행합니다.", pipeline_step="guided_ask_answer", current_field=current_field, current_field_conversation=current_field_conversation)
 
 def guided_record(state: PipelineState) -> Dict[str, Any]:
     """체크리스트 답변 저장 후 다음 카테고리로 이동"""
     print(f"[분기] guided_record 노드 접근")
     field = state.get("current_field")
-    user_input = (state.get("user_query") or "").strip()
+    user_query = (state.get("user_query") or "").strip()
     form = dict(state.get("checklist_data") or {})
     pipeline_step = state.get("pipeline_step", "")
     
     if pipeline_step == "guided_ask_answer":
         # 체크리스트 답변을 받는 단계
         if field:
-            # 체크리스트 답변 저장
-            form[field] = user_input
-            _append_history(state, "user", f"{field}: {user_input}")
+            # current_field_conversation을 사용하여 자동 추출 시도
+            current_field_conversation = state.get("current_field_conversation", "")
+            auto_filled_data = checklist_generator.auto_fill_from_description(current_field_conversation, field)
+            print(f"[처리] 자동 추출된 데이터: {auto_filled_data}")
             
-            print(f"[처리] 체크리스트 답변 저장: '{field}' = '{user_input[:30]}...'")
+            # 현재 필드와 일치하는 데이터가 있으면 사용
+            if field in auto_filled_data and auto_filled_data[field]:
+                # 새로운 구조: {field: {sub_field1: value1, sub_field2: value2}}
+                field_data = auto_filled_data[field]
+                if isinstance(field_data, dict):
+                    # 하위 필드들을 form에 병합
+                    for sub_field, value in field_data.items():
+                        if value and str(value).strip():
+                            form[sub_field] = value
+                            print(f"[처리] 자동 추출로 하위 필드 저장: '{sub_field}' = '{value[:30]}...'")
+                else:
+                    # 단일 값인 경우 (viewpoint, surfacing, aero 등)
+                    form[field] = field_data
+                    print(f"[처리] 자동 추출로 체크리스트 답변 저장: '{field}' = '{field_data[:30]}...'")
+            else:
+                # 자동 추출 실패 시 원래 사용자 입력 사용
+                form[field] = user_query
+                print(f"[처리] 수동 입력으로 체크리스트 답변 저장: '{field}' = '{user_query[:30]}...'")
+            
+            # 하위 필드들이 있는 경우 모든 하위 필드를 기록
+            if field in auto_filled_data and auto_filled_data[field] and isinstance(auto_filled_data[field], dict):
+                sub_fields = []
+                for sub_field, value in auto_filled_data[field].items():
+                    if value and str(value).strip():
+                        sub_fields.append(f"{sub_field}: {value}")
+                if sub_fields:
+                    _append_history(state, "user", f"{field}: {', '.join(sub_fields)}")
+                else:
+                    _append_history(state, "user", f"{field}: {user_query}")
+            else:
+                _append_history(state, "user", f"{field}: {form[field]}")
             
             # 체크리스트 완성도 업데이트
             completion_status = checklist_generator.get_completion_status(form)
@@ -632,7 +757,7 @@ def build_query_from_history(state: PipelineState) -> Dict[str, Any]:
         image_query = _querygen.generate_image_query(state)
         
         print(f"[처리] 이미지 쿼리 생성 완료: '{image_query[:50]}...'")
-        return {**state, "image_query": image_query}
+        return {**state, "image_query": image_query, "waiting_node": ""}
 
 # Direct
 def direct_prompt(state: PipelineState) -> Dict[str, Any]:
@@ -641,12 +766,10 @@ def direct_prompt(state: PipelineState) -> Dict[str, Any]:
         "원하는 자동차 디자인을 자유롭게 상세히 적어주세요.\n"
         "예) '중형 SUV, 3/4 front, 긴 휠베이스, 짧은 오버행, 깨끗한 바디, parametric grille, pixel DRL, 대형 알로이 휠, 파노라믹 글라스 루프, 매트 실버'"
     )
-    state["response"] = p
     _append_history(state, "assistant", p)
     # 다음에 direct_freeform에서 interrupt 발생
-    state["waiting_node"] = "direct_freeform"
     print(f"[처리] 직접 생성 안내 메시지 전송")
-    return {}
+    return {"response": p}
 
 def direct_freeform(state: PipelineState) -> PipelineState:
     """자유형식 입력을 요청"""
@@ -692,7 +815,7 @@ def run_image_generation(state: PipelineState) -> Dict[str, Any]:
     updated = chat_manager.add_message(state.get("chat_history", []), "user", state["user_query"])
     updated = chat_manager.add_message(updated, "assistant", response)
     
-    print(f"[처리] 이미지 생성 완료: '{response[:50]}...' (S3: {s3_url[:30] if s3_url else 'None'}...)")
+    print(f"[처리] 이미지 생성 완료: '{response[:50]}...' (S3: {s3_url if s3_url else 'None'}...)")
     return {**state, "chat_history": updated, "response": response, "s3_url": s3_url, "generation_type": "image"}
 
 def ask_modify(state: PipelineState) -> PipelineState:
@@ -734,7 +857,7 @@ def ask_modify(state: PipelineState) -> PipelineState:
             else:
                 # 수정을 원하지 않음
                 print(f"[처리] 수정 요청 없음 - 대화 종료")
-                return {"response": "감사합니다. 여기까지 짹짹이였습니다 짹 ><", "pipeline_step": "finish"}
+                return {"response": "감사합니다. 여기까지 짹짹이였습니다 짹 >< 🐤", "pipeline_step": "finish"}
     else:
         # 사용자 입력이 없으면 질문
         question = "이미지를 수정하시겠습니까? 수정 사항을 말씀해주시거나, '아니오'라고 답해주세요.\n혹은 생성된 이미지를 이용해 3D 나 4D 에서의 확장된 경험을 맛보실 수도 있습니다."
@@ -744,7 +867,7 @@ def ask_modify(state: PipelineState) -> PipelineState:
 # 이미지 수정
 def modify_image(state: PipelineState) -> PipelineState:
     """
-    ImageModifier 인스턴스를 사용하여 이미지 수정
+    ImageModifier 인스턴스를 사용하여 이미지 수정 - 노드 X 함수 O
     """
     print(f"[분기] modify_image 노드 접근")
     
@@ -1037,45 +1160,58 @@ def route_3d_4d_result_choice(state: PipelineState) -> str:
 # 5) Image modification branch
 # -----------------------------
 def mod_intro(state: PipelineState) -> Dict[str, Any]:
+    "url 받기 / 생성된 s3_url 사용만 구현 - 기존 이미지 중 선택 미구현"
     print(f"[분기] mod_intro 노드 접근")
     text = (
         "이미지 수정 모드입니다.\n"
-        "1) 수정할 자동차 이미지의 URL을 붙여넣어 주세요 (또는 업로드 후 접근 가능한 링크를 제공해 주세요).\n"
-        "2) 어떤 부분을 어떻게 수정할지 간단히 설명해 주세요 (예: 색상 변경, DRL 스타일 변경, 휠 디자인 교체 등)."
+        "수정할 자동차 이미지의 URL을 붙여넣어 주세요 (또는 업로드 후 접근 가능한 링크를 제공해 주세요).\n"
+        "혹은 이전에 생성된 이미지를 사용하기 위해서는 '계속' 이라고 입력해주세요."
     )
-    state["response"] = text
     _append_history(state, "assistant", text)
     print(f"[처리] 이미지 수정 모드 안내 메시지 전송")
-    return {}
+    return {"response": text, "generation_type": ""}    # generation_type 초기화 -> 결과 계속 안뜨게
 
 def mod_image_url(state: PipelineState) -> PipelineState:
     """수정할 이미지 URL을 요청"""
     print(f"[분기] mod_image_url 노드 접근")
     question = state.get("response") or "수정할 이미지 URL을 입력하세요."
-    user_query=interrupt({"query": question})
-    print(f"[처리] 이미지 URL 입력 요청 메시지 전송")
-    return safe_merge_user_query(user_query, response=question)
+    if state["waiting_node"] != "mod_image_url":
+        interrupt({"query": question})
+        print(f"[처리] 이미지 URL 입력 요청 메시지 전송")
+    else:
+        return safe_merge_user_query(state.get("user_query"), response=question)
 
 def store_mod_image(state: PipelineState) -> Dict[str, Any]:
     print(f"[분기] store_mod_image 노드 접근")
     # user_query에서 받은 사용자 입력을 사용
-    url = (state.get("user_query") or "").strip()
-    if url:
+    user_query = (state.get("user_query") or "").strip()
+    if user_query == "계속":
+        if not state.get("s3_url"):
+            return {"error": "기존에 생성된 이미지가 존재하지 않습니다."}
+        else:
+            url = state.get("s3_url")
+    elif user_query: # url 형식
         # image_modifier.modify_image expects 'input_image' in state (commonly)
-        state["input_image"] = url
+        url = user_query
         _append_history(state, "user", f"[이미지 URL] {url}")
         print(f"[처리] 이미지 URL 저장 완료: '{url[:50]}...'")
     else:
         print(f"[처리] 이미지 URL 없음")
-    return {}
+        return {"error": "올바르지 않은 URL 입니다."}
+    return {"s3_url": url}
 
 def mod_instruction(state: PipelineState) -> PipelineState:
     """수정 지시사항을 요청"""
     print(f"[분기] mod_instruction 노드 접근")
-    question = "어떤 부분을 어떻게 수정할까요? 예: '픽셀 DRL로 변경하고, 바디 컬러는 매트 실버'"
-    user_query=interrupt({"query": question})
-    print(f"[처리] 수정 지시사항 입력 요청 메시지 전송")
-    return safe_merge_user_query(user_query, response=question)
+    question = (
+        "이미지 수정을 시작하겠습니다 !\n"
+        "어떤 부분을 어떻게 수정할지 간단히 설명해 주세요 (예: 색상 변경, DRL 스타일 변경, 휠 디자인 교체 등)."
+    )
+    if state["waiting_node"] != "mod_instruction":
+        interrupt({"query": question})
+        print(f"[처리] 수정 지시사항 입력 요청 메시지 전송")
+    else:
+        return safe_merge_user_query(state.get("user_query"), response=question)
 
 def store_mod_instruction(state: PipelineState) -> Dict[str, Any]:
     print(f"[분기] store_mod_instruction 노드 접근")
@@ -1094,23 +1230,25 @@ def store_mod_instruction(state: PipelineState) -> Dict[str, Any]:
 
 def run_image_modification(state: PipelineState) -> Dict[str, Any]:
     print(f"[분기] run_image_modification 노드 접근")
-    if not state.get("input_image"):
-        print(f"[처리] 오류: input_image가 비어 있습니다.")
+    if not state.get("s3_url"):
+        print(f"[처리] 오류: s3_url 비어 있습니다.")
         return {"error": "input_image가 비어 있습니다."}
     if not state.get("image_query"):
         print(f"[처리] 오류: image_query가 비어 있습니다.")
         return {"error": "image_query가 비어 있습니다."}
     
-    print(f"[처리] 이미지 수정 실행 중...")
-    out = modify_image(dict(state))
-    for k in ["s3_url", "generated_image", "image_generation_status", "response", "error"]:
-        if k in out: state[k] = out[k]
-    if not state.get("response"):
-        msg = state.get("s3_url") or state.get("generated_image") or "이미지 수정 완료"
-        state["response"] = f"이미지 수정이 완료되었습니다! 🛠️\n\n결과: {msg}"
-    
-    print(f"[처리] 이미지 수정 완료")
-    return {}
+    if state["waiting_node"] != "run_image_modification":
+        interrupt({"is_loading": True, "generation_type": "image"})
+    else:
+        print(f"[처리] 이미지 수정 실행 중...")
+        out = modify_image(dict(state))
+        for k in ["s3_url", "generated_image", "image_generation_status", "response", "error"]:
+            if k in out: state[k] = out[k]
+        if not state.get("response"):
+            msg = state.get("s3_url") or state.get("generated_image") or "이미지 수정 완료"
+            response = f"이미지 수정이 완료되었습니다! 🛠️\n\n결과: {msg}"
+        print(f"[처리] 이미지 수정 완료")
+        return {"response": response}
 
 
 # -----------------------------
@@ -1150,6 +1288,7 @@ def create_text_pipeline():
     g.add_node("apply_image_mode", apply_image_mode)
     g.add_node("guided_prepare_question", guided_prepare_question)
     g.add_node("guided_llm_chat", guided_llm_chat)               # HITL C.1 (LLM 대화)
+    g.add_node("guided_llm_chat_save", guided_llm_chat_save)
     g.add_node("guided_record", guided_record)
     g.add_node("guided_ask_answer", guided_ask_answer)            # HITL C.5 (ask for actual answer)
     g.add_node("guided_next_category", guided_next_category)     # 다음 카테고리로 이동
@@ -1222,32 +1361,35 @@ def create_text_pipeline():
             "direct": "direct_prompt",
         },
     )
-    g.add_edge("guided_prepare_question", "guided_next_category")  # 바로 다음 카테고리로 이동
+    g.add_edge("guided_prepare_question", "guided_next_category")  # 다음 카테고리로 이동
     g.add_conditional_edges(
         "guided_next_category",
-        lambda s: "build_query" if s.get("pipeline_step") == "build_query_from_history" else "llm_chat",
+        lambda s: "build_query" if s.get("pipeline_step") == "build_query_from_history" else "llm_chat" if s.get("pipeline_step") == "guided_llm_chat" else "next_category",
         {
             "llm_chat": "guided_llm_chat",  # LLM 대화 시작
             "build_query": "build_query_from_history",  # 쿼리 생성으로 이동
+            "next_category": "guided_next_category" # 다음 카테고리로 바로 이동
         },
     )
     g.add_conditional_edges(
         "guided_llm_chat",
-        lambda s: "ask_answer" if s.get("pipeline_step") == "guided_ask_answer" else ("build_query" if s.get("pipeline_step") == "build_query_from_history" else "llm_chat"),
+        lambda s: "next_category" if s.get("pipeline_step") == "guided_ask_answer" else ("build_query" if s.get("pipeline_step") == "build_query_from_history" else "llm_chat"),
         {
-            "llm_chat": "guided_llm_chat",  # 계속 LLM 대화
-            "ask_answer": "guided_ask_answer",  # 체크리스트 답변 요청
+            "llm_chat": "guided_llm_chat_save",  # 계속 LLM 대화
+            "next_category": "guided_ask_answer",  # 체크리스트 답변 요청
             "build_query": "build_query_from_history",  # 쿼리 생성으로 이동
         },
     )
-    g.add_conditional_edges(
-        "guided_ask_answer",
-        lambda s: "record" if s.get("user_query") and s.get("user_query").strip() else "ask",
-        {
-            "ask": "guided_ask_answer",  # 계속 답변 요청
-            "record": "guided_record",   # 답변 저장 후 기록
-        },
-    )
+    g.add_edge("guided_llm_chat_save", "guided_llm_chat")
+    # g.add_conditional_edges(
+    #     "guided_ask_answer",
+    #     lambda s: "record" if s.get("user_query") and s.get("user_query").strip() else "ask",
+    #     {
+    #         "ask": "guided_ask_answer",  # 계속 답변 요청
+    #         "record": "guided_record",   # 답변 저장 후 기록
+    #     },
+    # )
+    g.add_edge("guided_ask_answer", "guided_record")
     g.add_conditional_edges(
         "guided_record",
         lambda s: "next_category" if s.get("pipeline_step") == "guided_next_category" else ("done" if guided_continue_or_done(s) == "done" else "continue"),

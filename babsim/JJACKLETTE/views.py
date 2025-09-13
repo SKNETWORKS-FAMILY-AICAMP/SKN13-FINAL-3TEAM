@@ -175,9 +175,9 @@ class StandardResultSetPagination(PageNumberPagination):
 
         try:
             # 파이프라인 서비스를 사용하여 완전한 AI 응답 생성
-            logger.info(f"파이프라인 처리 시작: {user_prompt}")
-            logger.info(f"체크리스트 데이터: {checklist_data}")
-            logger.info(f"완성도 상태: {completion_status}")
+            # logger.info(f"파이프라인 처리 시작: {user_prompt}")
+            # logger.info(f"체크리스트 데이터: {checklist_data}")
+            # logger.info(f"완성도 상태: {completion_status}")
             
             # 파이프라인 서비스 호출 (체크리스트 데이터 포함)
             pipeline_result = babsim_pipeline_service.process_query(
@@ -218,7 +218,8 @@ class StandardResultSetPagination(PageNumberPagination):
                 "success": True, 
                 "ai_response": text_answer, 
                 "generated_results": generated_results,
-                "completion_status": pipeline_completion_status
+                "completion_status": pipeline_completion_status,
+                "auto_retry": pipeline_completion_status.get('auto_retry', False) if pipeline_completion_status else False
             }
             
             # 체크리스트 데이터가 있으면 응답에 포함

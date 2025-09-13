@@ -61,9 +61,12 @@ class ImageModifier:
         try:
             # 이미지 쿼리와 기존 이미지 가져오기
             image_query = state.get("image_query", "")
-            s3_url = state.get("s3_url", "https://babsim-media.s3.ap-southeast-2.amazonaws.com/images/1757566389_hyundai_car_image_generation.png"
+            s3_url = state.get("s3_url", ""
         )
-            
+            if not s3_url:
+                state["error"] = "수정할 이미지가 없습니다. 먼저 이미지를 생성해주세요."
+                return state
+                
             if not image_query:
                 state["error"] = "이미지 수정 쿼리가 없습니다."
                 return state
