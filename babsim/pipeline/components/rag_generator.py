@@ -41,7 +41,7 @@ class RAGGenerator:
             prompt = self._build_prompt(user_query, context, chat_history)
             
             # LLM을 사용하여 답변 생성
-            response = kanana_llm_model.generate_response(prompt, max_length=1024)
+            response = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=1024)
             
             # Multi-turn 대화를 위한 후속 질문 추가
             follow_up_question = self._generate_follow_up_question(user_query, response)
@@ -227,7 +227,7 @@ class RAGGenerator:
 """
         
         try:
-            follow_up = kanana_llm_model.generate_response(follow_up_prompt, max_length=100)
+            follow_up = kanana_llm_model.generate_vllm_response_streaming(follow_up_prompt, max_length=100)
             return f"추가 질문이 있으시면 언제든 말씀해 주세요. 예를 들어: {follow_up.strip()}"
         except:
             return "추가 질문이 있으시면 언제든 말씀해 주세요."
@@ -243,7 +243,7 @@ class RAGGenerator:
                 prompt = f"{self.system_prompt}\n\n사용자 질문: {user_query}\n답변:"
             
             # Kanana LLM 직접 응답
-            response = kanana_llm_model.generate_response(prompt, max_length=1024)
+            response = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=1024)
             
             # 후속 질문 추가
             follow_up_question = self._generate_follow_up_question(user_query, response)

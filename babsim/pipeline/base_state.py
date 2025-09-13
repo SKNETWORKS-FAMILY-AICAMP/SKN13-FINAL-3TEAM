@@ -23,8 +23,21 @@ class PipelineState(TypedDict, total=False):
     modification_request: Optional[str]
     generated_image: Optional[str]
     image_generation_status: Optional[str]
-    image_type: Optional[str]
+    generation_type: Optional[str]  # 프롬프트 - 이미지, 3D, 4D 구분용 (기존 image_type)
     error: Optional[str]
     answer_type: Optional[str]
-    s3_url: Optional[str]
+    s3_url: Optional[str]  # 이미지 URL만
+    s3_url_3d: Optional[str]  # 3D 모델 URL
+    s3_url_4d: Optional[str]  # 4D 모델 URL
     session_id: Optional[uuid4]
+    user_id: Optional[str]  # 사용자 ID
+    available_images: Optional[List[Dict[str, Any]]]  # 선택 가능한 이미지 목록
+    selected_image_info: Optional[Dict[str, Any]]  # 선택된 이미지 정보
+    # RAG 처리 관련 필드들
+    rewritten: Optional[bool]
+    eval: Optional[Dict[str, Any]]
+    route: Optional[str]
+    # 스트리밍 관련 필드
+    is_streaming: Optional[bool]
+    streaming_id: Optional[str]  # StreamingHttpResponse ID
+    is_loading: Optional[bool]

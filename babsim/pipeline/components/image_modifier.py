@@ -169,7 +169,7 @@ class ImageModifier:
 """
             
             # vLLM을 사용하여 설명 생성
-            description = kanana_llm_model.generate_response(prompt, max_length=200)
+            description = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=200)
             
             # 기본 설명이 생성되지 않은 경우 폴백
             if not description or len(description.strip()) < 10:

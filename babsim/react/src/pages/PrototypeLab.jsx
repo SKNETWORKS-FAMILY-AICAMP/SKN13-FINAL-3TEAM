@@ -7,7 +7,8 @@ import {
   getChatSessions, 
   createChatSession, 
   getPromptLogs,
-  sendChatMessage 
+  sendChatMessage,
+  deleteChatSession
 } from '../services/chatService';
 import backgroundImage from '../assets/PrototypeLab_background.png';
 
@@ -40,7 +41,13 @@ function PrototypeLab() {
     }
   }, [isAuthenticated, chatSessions.length]);
 
-  
+  // currentSession에 메시지가 없을 때 자동으로 파이프라인 호출
+  useEffect(() => {
+    if (isAuthenticated && currentSession && messages.length === 0) {
+      // 빈 user_query로 파이프라인 호출 (WELCOME_TEXT 표시용)
+      handleInitialPipelineCall();
+    }
+  }, [isAuthenticated, currentSession, messages.length]);
 
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [scrollY, setScrollY] = useState(0);
@@ -71,6 +78,7 @@ function PrototypeLab() {
     glasshouse: "",
     aero: "",
     color_finish: "",
+    wheel: "",
   });
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -139,6 +147,91 @@ function PrototypeLab() {
       total: totalFields,
       percentage: Math.round((completedFields / totalFields) * 100)
     };
+  };
+
+  // 필수 체크리스트 필드 확인 (viewpoint, body_type, color_finish)
+  const isChecklistComplete = (() => {
+    const requiredFields = ['viewpoint', 'body_type', 'color_finish'];
+    return requiredFields.every(field => 
+      checklistData[field] && checklistData[field].trim() !== ""
+    );
+  })();
+
+  // 체크리스트 전송 핸들러
+  const handleChecklistSubmit = async () => {
+    if (!isChecklistComplete) {
+      console.log('❌ 필수 체크리스트 필드가 모두 채워지지 않았습니다.');
+      return;
+    }
+
+    // 로딩 메시지 먼저 표시 (스코프 밖에서 선언)
+    const loadingMessage = {
+      id: `loading-${Date.now()}`,
+      type: 'result',
+      resultType: 'image',
+      content: '',
+      filePath: '',
+      timestamp: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, loadingMessage]);
+
+    try {
+      console.log('🚀 체크리스트 기반 이미지 생성 시작:', checklistData);
+
+      // API 호출
+      const response = await fetch('/api/chat/checklist/generate-image/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({
+          checklist_data: checklistData,
+          session_id: currentSession?.session_id,
+          user_id: isAuthenticated ? user?.user_id : 'anonymous_user'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ 체크리스트 이미지 생성 응답:', data);
+
+      // 로딩 메시지 제거
+      setMessages(prev => prev.filter(msg => msg.id !== loadingMessage.id));
+
+      // 생성된 이미지 결과 추가
+      if (data.generated_results && data.generated_results.length > 0) {
+        data.generated_results.forEach(result => {
+          const resultMessage = {
+            id: `result-${Date.now()}-${Math.random()}`,
+            type: 'result',
+            resultType: result.result_type,
+            content: result.result || '',
+            filePath: result.result_path || '',
+            timestamp: new Date().toISOString()
+          };
+          setMessages(prev => [...prev, resultMessage]);
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ 체크리스트 이미지 생성 실패:', error);
+      
+      // 로딩 메시지 제거
+      setMessages(prev => prev.filter(msg => msg.id !== loadingMessage.id));
+      
+      // 에러 메시지 추가
+      const errorMessage = {
+        id: `error-${Date.now()}`,
+        type: 'error',
+        content: `이미지 생성 실패: ${error.message}`,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   const loadChatSessions = async () => {
@@ -324,45 +417,14 @@ function PrototypeLab() {
     try {
       // 디버깅: 사용자 정보 확인
       console.log('🔍 사용자 정보 디버깅:');
-      console.log('  - user 객체:', user);
-      console.log('  - user?.id:', user?.id);
-      console.log('  - user?.user_id:', user?.user_id);
-      console.log('  - isAuthenticated:', isAuthenticated);
+      // console.log('  - user 객체:', user);
+      console.log('  - user?.user_id:', user?.user_id); // user.id 는 없음
+      // console.log('  - isAuthenticated:', isAuthenticated);
       
       // 체크리스트 데이터와 함께 메시지 전송
       const completionStatus = getChecklistCompletion();
-      const actualUserId = user?.user_id || user?.id || '550e8400-e29b-41d4-a716-446655440000';
-      console.log('  - 실제 사용할 user_id:', actualUserId);
-      
-      const response = await sendChatMessage(currentSession.session_id, inputMessage, actualUserId, null, null, null, checklistData, completionStatus);
-      
-      if (response.success) {
-        const aiMessage = { 
-          id: `ai-${Date.now()}`, 
-          type: 'ai', 
-          content: response.response || response.reply || response.content || '', 
-          timestamp: new Date().toISOString() 
-        };
-        setMessages(prev => [...prev, aiMessage]);
-        
-        // 백엔드에서 받은 체크리스트 데이터로 프론트엔드 체크리스트 업데이트
-        if (response.completionStatus && response.completionStatus.checklist_data) {
-          const backendChecklistData = response.completionStatus.checklist_data;
-          setChecklistData(prev => ({
-            ...prev,
-            ...backendChecklistData
-          }));
-        }
-        
-        // 체크리스트 완성도는 체크리스트 박스에서 표시하므로 별도 메시지 제거
-        
-        if (response.generatedResults) {
-          response.generatedResults.forEach(result => {
-            const resultMessage = { id: `result-${Date.now()}-${result.result_id}`, type: 'result', resultType: result.result_type, content: result.result, filePath: result.result_path, timestamp: new Date().toISOString() };
-            setMessages(prev => [...prev, resultMessage]);
-          });
-        }
-      }
+      console.log('  - completionStatus:', completionStatus);
+      // 스트리밍 방식으로 변경되어 기존 동기식 코드는 제거됨
       
       // 스트리밍 응답 처리 부분
       // user_id만 사용
@@ -375,16 +437,16 @@ function PrototypeLab() {
       
       // 실시간 스트리밍 업데이트 콜백
       const onStreamingUpdate = (partialResponse) => {
-        console.log('🔄 onStreamingUpdate 호출됨!');
-        console.log('🔄 partialResponse:', partialResponse);
-        console.log('🔄 partialResponse 타입:', typeof partialResponse);
+        // console.log('🔄 onStreamingUpdate 호출됨!');
+        // console.log('🔄 partialResponse:', partialResponse);
+        // console.log('🔄 partialResponse 타입:', typeof partialResponse);
         
-        console.log('🔄 스트리밍 청크 수신:', { // 이상없음. 계속 청크마다 누적하는 중.
-          streamingMessageId,
-          partialResponse: partialResponse.substring(0, 100) + (partialResponse.length > 100 ? '...' : ''),
-          responseLength: partialResponse.length,
-          timestamp: new Date().toISOString()
-        });
+        // console.log('🔄 스트리밍 청크 수신:', { // 이상없음. 계속 청크마다 누적하는 중.
+        //   streamingMessageId,
+        //   partialResponse: partialResponse.substring(0, 100) + (partialResponse.length > 100 ? '...' : ''),
+        //   responseLength: partialResponse.length,
+        //   timestamp: new Date().toISOString()
+        // });
         
         flushSync(() => {
           // 여기서는 이미 존재하는 스트리밍 메시지 업데이트만
@@ -393,58 +455,62 @@ function PrototypeLab() {
                 ? { ...msg, content: partialResponse }
                 : msg
             ));
-        
-            // // 스트리밍 메시지가 있으면 업데이트
-            // const timestamp = new Date().toLocaleTimeString('ko-KR', { 
-            //   hour12: false, 
-            //   hour: '2-digit', 
-            //   minute: '2-digit', 
-            //   second: '2-digit',
-            //   fractionalSecondDigits: 3
-            // });
-            // console.log(`[${timestamp}] 🔄 메시지 업데이트됨:`, {
-            //   messageId: streamingMessageId,
-            //   newContent: partialResponse.substring(0, 50) + '...',
-            //   isStreaming: true
-            // });
-            
-            // return updatedMessages;
-          // );
         });
         
         // 강제 리렌더링 트리거
         setForceRender(prev => prev + 1);
       };
       
-        // 스트리밍 시작 (await 제거!)
-        sendChatMessage(currentSession.session_id, inputMessage, userId, onStreamingUpdate, setMessages, streamingMessageId, checklistData, completionStatus)
-        .then(response => {
-          console.log('✅ 스트리밍 완료 - 최종 응답:', {
-            streamingMessageId,
-            finalResponse: response.response?.substring(0, 100) + (response.response?.length > 100 ? '...' : ''),
-            responseLength: response.response?.length,
-            timestamp: new Date().toISOString()
-          });
-          
-          // 스트리밍 완료 - isStreaming을 false로 변경
+      // 스트리밍 시작 (await 제거!)
+      sendChatMessage(currentSession.session_id, inputMessage, userId, onStreamingUpdate, setMessages, streamingMessageId, checklistData, completionStatus)
+      .then(response => {
+        console.log('✅ 스트리밍 완료 - 최종 응답:', {
+          streamingMessageId,
+          finalResponse: response.response?.substring(0, 100) + (response.response?.length > 100 ? '...' : ''),
+          responseLength: response.response?.length,
+          timestamp: new Date().toISOString()
+        });
+
+        if (response.isJson) {
+          const jsonMessage = { id: `json-${Date.now()}`, type: 'ai', content: response.response, timestamp: new Date().toISOString(), isStreaming: false };
+          setMessages(prev => [...prev, jsonMessage]);
+        } else {// 스트리밍 완료 - isStreaming을 false로 변경
           setMessages(prev => prev.map(msg => 
             msg.id === streamingMessageId 
               ? { ...msg, isStreaming: false }
               : msg
           ));
-          
-          if (response.generatedResults) {
-            response.generatedResults.forEach(result => {
-              const resultMessage = { id: `result-${Date.now()}-${result.result_id}`, type: 'result', resultType: result.result_type, content: result.result, filePath: result.result_path, timestamp: new Date().toISOString() };
-              setMessages(prev => [...prev, resultMessage]);
-            });
-          }
-        })
-        .catch(error => {
-          console.error('❌ API 호출 실패:', error);
-          const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: `API 호출 실패: ${error.message || '알 수 없는 오류'}`, timestamp: new Date().toISOString() };
-          setMessages(prev => [...prev, errorMessage]);
-        });
+        }            
+        
+        // 백엔드에서 받은 체크리스트 데이터로 프론트엔드 체크리스트 업데이트
+        if (response.completionStatus && response.completionStatus.checklist_data) {
+          const backendChecklistData = response.completionStatus.checklist_data;
+          setChecklistData(prev => ({
+            ...prev,
+            ...backendChecklistData
+          }));
+        }
+        
+        // 생성된 결과들 처리
+        if (response.generatedResults) {
+          response.generatedResults.forEach(result => {
+            const resultMessage = { 
+              id: `result-${Date.now()}-${result.result_id || Math.random()}`, 
+              type: 'result', 
+              resultType: result.result_type, 
+              content: result.result || '', 
+              filePath: result.result_path || '', 
+              timestamp: new Date().toISOString() 
+            };
+            setMessages(prev => [...prev, resultMessage]);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('❌ API 호출 실패:', error);
+        const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: `API 호출 실패: ${error.message || '알 수 없는 오류'}`, timestamp: new Date().toISOString() };
+        setMessages(prev => [...prev, errorMessage]);
+      });
     } catch (error) {
       console.error('메시지 전송 실패:', error);
       const errorMessage = { id: `error-${Date.now()}`, type: 'error', content: '메시지 전송에 실패했습니다. 다시 시도해주세요.', timestamp: new Date().toISOString() };
@@ -455,20 +521,81 @@ function PrototypeLab() {
     }
   };
   
+  const handleInitialPipelineCall = async () => {
+    try {
+      const userId = isAuthenticated ? user?.user_id : 'anonymous_user';
+      
+      // 빈 user_query로 파이프라인 호출
+      const response = await sendChatMessage(
+        currentSession.session_id, 
+        "", // 빈 user_query
+        userId, 
+        null, 
+        null, 
+        null
+      );
+      
+      // 응답을 message 객체로 변환하여 추가
+      if (response && response.response) {
+        const welcomeMessage = {
+          id: `welcome-${Date.now()}`,
+          type: 'ai',
+          content: response.response,
+          timestamp: new Date().toISOString()
+        };
+        
+        setMessages(prev => [...prev, welcomeMessage]);
+      }
+    } catch (error) {
+      console.error('초기 파이프라인 호출 실패:', error);
+    }
+  };
+
+  // 세션 삭제 함수
+  const handleDeleteSession = async (sessionId, e) => {
+    e.stopPropagation(); // 부모 div의 onClick 이벤트 방지
+    
+    if (window.confirm('이 대화를 삭제하시겠습니까?')) {
+      try {
+        await deleteChatSession(sessionId);
+        
+        // 세션 목록에서 제거
+        setChatSessions(prev => prev.filter(session => session.session_id !== sessionId));
+        
+        // 현재 선택된 세션이 삭제된 세션이면 초기화
+        if (currentSession?.session_id === sessionId) {
+          setCurrentSession(null);
+          setMessages([]);
+        }
+        
+        console.log('세션 삭제 완료:', sessionId);
+      } catch (error) {
+        console.error('세션 삭제 실패:', error);
+        alert('세션 삭제에 실패했습니다.');
+      }
+    }
+  };
+
   const renderMessage = (message) => {
-    console.log('🎨 renderMessage 실행:', {
-      messageId: message.id,
-      messageType: message.type,
-      content: message.content,
-      isStreaming: message.isStreaming, 
-      timestamp: new Date().toISOString()
-    });
+    // console.log('🎨 renderMessage 실행:', {
+    //   messageId: message.id,
+    //   messageType: message.type,
+    //   content: message.content,
+    //   isStreaming: message.isStreaming, 
+    //   timestamp: new Date().toISOString()
+    // });
     
     // 메시지 타입이 없거나 'ai'가 아닌 경우 'ai'로 처리
     const messageType = message.type || 'ai';
     
     switch (messageType) {
       case 'user':
+        // user_query가 비어있으면 렌더링하지 않음
+        if (!message.content || message.content.trim() === '') {
+          console.log('🔍 user_query가 비어있어서 렌더링하지 않음');
+          return null;
+        }
+        
         return (
           <div key={message.id} className="flex justify-end mb-6">
             <div className="bg-blue-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-blue-500/30">
@@ -491,15 +618,60 @@ function PrototypeLab() {
               </div>
               <p className="text-xs text-gray-300 mt-3 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
-                {message.isStreaming && (
-                  <span className="ml-2 text-blue-400">스트리밍 중...</span>
-                )}
               </p>
             </div>
           </div>
         );
       
       case 'result':
+        // result_path가 빈 문자열인 경우 로딩박스 표시
+        if (!message.filePath || message.filePath.trim() === '') {
+          return (
+            <div key={message.id} className="flex justify-start mb-6">
+              <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-4 max-w-xs lg:max-w-md shadow-lg border border-gray-600/30">
+                <div className="flex items-center space-x-2 mb-3">
+                  <span className="text-lg">
+                    {message.resultType === 'image' ? '🖼️' : 
+                     message.resultType === '3d' ? '🎲' : 
+                     message.resultType === '4d' ? '🎬' : '📄'}
+                  </span>
+                  <span className="text-sm font-medium">
+                    {message.resultType === 'image' ? '이미지 생성 중' :
+                     message.resultType === '3d' ? '3D 모델 생성 중' :
+                     message.resultType === '4d' ? '4D 시뮬레이션 생성 중' : '처리 중'}
+                  </span>
+                </div>
+                
+                {/* 로딩 애니메이션 */}
+                <div className="flex items-center justify-center py-8">
+                  <div className="relative">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-2xl">
+                        {message.resultType === 'image' ? '🖼️' : 
+                         message.resultType === '3d' ? '🎲' : 
+                         message.resultType === '4d' ? '🎬' : '📄'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-sm text-gray-300 mb-2">
+                    {message.resultType === 'image' ? 'AI가 이미지를 생성하고 있습니다...' :
+                     message.resultType === '3d' ? '3D 모델을 렌더링하고 있습니다...' :
+                     message.resultType === '4d' ? '4D 시뮬레이션을 준비하고 있습니다...' : '처리 중입니다...'}
+                  </p>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        // result_path가 있는 경우 기존 렌더링
         return (
           <div key={message.id} className="flex justify-start mb-6">
             <div className="bg-gray-800/90 backdrop-blur-md text-white rounded-2xl px-6 py-4 max-w-xs lg:max-w-md shadow-lg border border-gray-600/30">
@@ -695,13 +867,22 @@ function PrototypeLab() {
                   <div
                     key={session.session_id}
                     onClick={() => setCurrentSession(session)}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                    className={`p-3 rounded-lg cursor-pointer transition-colors group relative ${
                       currentSession?.session_id === session.session_id
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-800/50 hover:bg-gray-800/70 text-gray-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    {/* 삭제 버튼 */}
+                    <button
+                      onClick={(e) => handleDeleteSession(session.session_id, e)}
+                      className="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500/80 hover:bg-red-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                      title="대화 삭제"
+                    >
+                      ×
+                    </button>
+                    
+                    <div className="flex items-center justify-between mb-2 pr-6">
                       <p className="text-sm font-medium truncate">
                         {session.title || `대화 ${session.session_id.slice(-4)}`}
                       </p>
@@ -1274,6 +1455,16 @@ function PrototypeLab() {
                         />
                       </div>
                       <div className="flex items-center justify-between">
+                        <label className="text-sm text-gray-300 whitespace-nowrap">휠 디자인:</label>
+                        <input 
+                          type="text" 
+                          placeholder="multi-spoke, Y-spoke, turbine" 
+                          value={checklistData.wheel}
+                          onChange={(e) => updateChecklistData('wheel', e.target.value)}
+                          className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
                         <label className="text-sm text-gray-300 whitespace-nowrap">루프 대비 색상:</label>
                         <input type="text" placeholder="black, silver" className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" />
                       </div>
@@ -1295,6 +1486,26 @@ function PrototypeLab() {
                   ></textarea>
                 </div>
               </div>
+            </div>
+            
+            {/* 체크리스트 전송 버튼 */}
+            <div className="p-6 border-t border-gray-700">
+              <button
+                onClick={handleChecklistSubmit}
+                disabled={!isChecklistComplete}
+                className={`w-full py-3 px-6 rounded-xl font-medium transition-all duration-300 ${
+                  isChecklistComplete
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isChecklistComplete ? '🚀 이미지 생성하기' : '📝 필수 항목을 모두 채워주세요'}
+              </button>
+              {!isChecklistComplete && (
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  필수 항목: {getChecklistCompletion().completed}/{getChecklistCompletion().total} 완료
+                </p>
+              )}
             </div>
           </div>
         </div>

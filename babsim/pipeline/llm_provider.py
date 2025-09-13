@@ -26,171 +26,151 @@ class _KananaChat:
     def generate_response(self, prompt: str, max_length: int = 512, temperature: float = 0.7) -> str:
         # 기존 로컬 추론 대신, vLLM 서버를 호출하는 함수를 사용
         return generate_vllm_response(prompt, max_length=max_length, temperature=temperature)
-
-kanana_llm_model = _KananaChat()
-
-def generate_vllm_response_text(prompt: str, max_length: int = 512) -> str:
-    """
-    RunPod의 vLLM API 서버를 호출하여 모델의 응답을 문자열로 생성합니다.
-    (파이프라인 중간 과정용)
-    """
-    # URL에 v1/chat/completions/ 자동 추가
-    base_url = settings.VLLM_API_URL.rstrip('/')
-    api_url = f"{base_url}/v1/chat/completions"
-    model_name = settings.VLLM_MODEL_NAME
     
-    # 디버깅: 실제 URL 확인
-    print(f"🔍 vLLM API URL: {api_url}")
-    print(f"🔍 Model Name: {model_name}")
-
-    headers = {"Content-Type": "application/json"}
-    
-    # OpenAI 호환 API 형식에 맞게 데이터 구성
-    data = {
-        "model": model_name,
-        "messages": [
-            {"role": "system", "content": "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."},
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": max_length,
-        "temperature": temperature,
-    }
-
-    try:
-        response = requests.post(api_url, headers=headers, data=json.dumps(data), timeout=180)
-        response.raise_for_status()
-        
-        # 디버깅: 응답 정보 확인
-        print(f"🔍 Text 응답 상태 코드: {response.status_code}")
-        print(f"🔍 Text 응답 Content-Type: {response.headers.get('content-type', '')}")
-        print(f"🔍 Text 응답 내용 (처음 500자): {response.text[:500]}...")
-        
-        # 응답에서 텍스트 추출
-        try:
-            result = response.json()
-            print(f"🔍 JSON 파싱 성공: {result}")
-            
-            if 'choices' in result and len(result['choices']) > 0:
-                content = result['choices'][0]['message']['content'].strip()
-                print(f"🔍 추출된 내용: {content}")
-                return content
-            else:
-                print("🔍 choices가 없거나 비어있음")
-                return "응답을 생성할 수 없습니다."
-        except Exception as e:
-            print(f"🔍 JSON 파싱 오류: {e}")
-            print(f"🔍 응답 내용: {response.text}")
-            return "응답을 파싱하는 데 실패했습니다."
-    
-    except requests.exceptions.RequestException as e:
-        print(f"vLLM API 호출 오류: {e}")
-        return "모델 응답을 가져오는 데 실패했습니다."
-
-    except (KeyError, IndexError) as e:
-        print(f"vLLM API 응답 처리 오류: {e}")
-        return "모델 응답을 처리하는 데 실패했습니다."
-
-def generate_vllm_response_streaming(prompt: str, max_length: int = 512) -> StreamingHttpResponse:
-    """
-    RunPod의 vLLM API 서버를 호출하여 모델의 응답을 스트리밍으로 생성합니다.
-    (최종 사용자 응답용) - 완전 동기 방식
-    """
-    def event_stream():
-        # 완전 동기 방식으로 스트리밍 구현
-        import requests
-        import json
-        import time
-        
-        # URL 설정
+    def generate_vllm_response_text(self, prompt: str, max_length: int = 512, temperature: float = 0.9) -> str:
+        """
+        RunPod의 vLLM API 서버를 호출하여 모델의 응답을 문자열로 생성합니다.
+        (파이프라인 중간 과정용)
+        """
+        # URL에 v1/chat/completions/ 자동 추가
         base_url = settings.VLLM_API_URL.rstrip('/')
         api_url = f"{base_url}/v1/chat/completions"
         model_name = settings.VLLM_MODEL_NAME
         
+        # 디버깅: 실제 URL 확인
         print(f"🔍 vLLM API URL: {api_url}")
         print(f"🔍 Model Name: {model_name}")
-        
+
         headers = {"Content-Type": "application/json"}
         
-        # 스트리밍 요청 데이터
-        payload = {
+        # OpenAI 호환 API 형식에 맞게 데이터 구성
+        data = {
             "model": model_name,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [
+                {"role": "system", "content": "당신은 현대자동차/자동차 지식에 특화된 한국어 어시스턴트입니다. 반드시 한국어로 답하세요."},
+                {"role": "user", "content": prompt}
+            ],
             "max_tokens": max_length,
-            "stream": True,
-            "temperature": 0.7
+            "temperature": temperature,
         }
-        
-        try:
-            print("🔍 스트리밍 요청 시작...")
-            
-            # requests로 스트리밍 요청
-            response = requests.post(
-                api_url,
-                json=payload,
-                headers=headers,
-                stream=True,
-                timeout=60
-            )
-            
-            if response.status_code != 200:
-                print(f"vLLM API 오류: {response.status_code}")
-                # 폴백으로 일반 응답을 스트리밍 시뮬레이션
-                yield from _fallback_streaming_simulation(prompt, max_length)
-                return
-            
-            print(f"🔍 스트리밍 응답 Content-Type: {response.headers.get('content-type', 'N/A')}")
-            
-            # 스트리밍 응답 처리
-            buffer = ""
-            chunk_count = 0
-            
-            for chunk in response.iter_content(chunk_size=1024, decode_unicode=True):
-                if chunk:
-                    buffer += chunk
-                    chunk_count += 1
-                    
-                    # 줄 단위로 처리
-                    while '\n' in buffer:
-                        line, buffer = buffer.split('\n', 1)
-                        line = line.strip()
-                        
-                        if line.startswith('data: '):
-                            data_content = line[6:].strip()
-                            
-                            # [DONE] 신호 처리
-                            if data_content == '[DONE]':
-                                print("🔍 스트리밍 완료: [DONE]")
-                                return
-                            
-                            try:
-                                # JSON 파싱 시도
-                                json_data = json.loads(data_content)
-                                if 'choices' in json_data and len(json_data['choices']) > 0:
-                                    delta = json_data['choices'][0].get('delta', {})
-                                    if 'content' in delta:
-                                        content = delta['content']
-                                        print(f"🔍 청크 {chunk_count}: '{content}'")
-                                        # 브라우저 버퍼링 우회용 패딩
-                                        content = content.ljust(1024, " ")
-                                        yield f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
-                            
-                            except json.JSONDecodeError as e:
-                                print(f"JSON 파싱 오류: {e}")
-                                print(f"원본 라인: {line}")
-                                continue
-            
-            print(f"🔍 총 {chunk_count}개 청크 처리 완료")
-            
-        except Exception as e:
-            print(f"스트리밍 API 호출 오류: {e}")
-            # 폴백으로 일반 응답을 스트리밍 시뮬레이션
-            yield from _fallback_streaming_simulation(prompt, max_length)
 
-    print("SSSSSSSSSStreamingHttpResponse 반환됨 !!!")
-    result = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
-    result["Cache-Control"] = "no-cache"
-    result["X-Accel-Buffering"] = "no"
-    return result
+        try:
+            response = requests.post(api_url, headers=headers, data=json.dumps(data), timeout=180)
+            response.raise_for_status()
+            
+            # 디버깅: 응답 정보 확인
+            print(f"🔍 Text 응답 상태 코드: {response.status_code}")
+            print(f"🔍 Text 응답 Content-Type: {response.headers.get('content-type', '')}")
+            print(f"🔍 Text 응답 내용 (처음 500자): {response.text[:500]}...")
+            
+            # 응답에서 텍스트 추출
+            try:
+                result = response.json()
+                print(f"🔍 JSON 파싱 성공: {result}")
+                
+                if 'choices' in result and len(result['choices']) > 0:
+                    content = result['choices'][0]['message']['content'].strip()
+                    print(f"🔍 추출된 내용: {content}")
+                    return content
+                else:
+                    print("🔍 choices가 없거나 비어있음")
+                    return "응답을 생성할 수 없습니다."
+            except Exception as e:
+                print(f"🔍 JSON 파싱 오류: {e}")
+                return "응답을 파싱할 수 없습니다."
+                
+        except requests.exceptions.RequestException as e:
+            print(f"🔍 vLLM API 요청 실패: {e}")
+            return "모델 응답을 처리하는 데 실패했습니다."
+
+    def generate_vllm_response_streaming(self, prompt: str, max_length: int = 512) -> StreamingHttpResponse:
+        """
+        RunPod의 vLLM API 서버를 호출하여 모델의 응답을 스트리밍으로 생성합니다.
+        (최종 사용자 응답용) - 완전 동기 방식
+        """
+        def event_stream():
+            # 완전 동기 방식으로 스트리밍 구현
+            import requests
+            import json
+            import time
+            
+            # URL 설정
+            base_url = settings.VLLM_API_URL.rstrip('/')
+            api_url = f"{base_url}/v1/chat/completions"
+            model_name = settings.VLLM_MODEL_NAME
+            
+            print(f"🔍 vLLM API URL: {api_url}")
+            print(f"🔍 Model Name: {model_name}")
+            
+            headers = {"Content-Type": "application/json"}
+            
+            # 스트리밍 요청 데이터
+            payload = {
+                "model": model_name,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_length,
+                "stream": True,
+                "temperature": 0.7
+            }
+            
+            try:
+                print(f"🔍 vLLM 스트리밍 요청 시작: {prompt[:50]}...")
+                
+                # 스트리밍 요청
+                response = requests.post(api_url, headers=headers, json=payload, stream=True, timeout=30)
+                
+                if response.status_code == 200:
+                    print(f"🔍 vLLM 스트리밍 응답 상태 코드: {response.status_code}")
+                    print(f"🔍 vLLM 스트리밍 응답 Content-Type: {response.headers.get('content-type', '')}")
+                    
+                    for line in response.iter_lines():
+                        if line:
+                            line = line.decode('utf-8')
+                            if line.startswith('data: '):
+                                data = line[6:]  # 'data: ' 제거
+                                
+                                if data.strip() == '[DONE]':
+                                    print("🔍 vLLM 스트리밍 완료")
+                                    break
+                                
+                                try:
+                                    chunk = json.loads(data)
+                                    if 'choices' in chunk and len(chunk['choices']) > 0:
+                                        delta = chunk['choices'][0].get('delta', {})
+                                        content = delta.get('content', '')
+                                        
+                                        if content:
+                                            print(f"🔍 vLLM 스트리밍 청크: {content[:50]}...")
+                                            yield f"data: {json.dumps({'content': content}, ensure_ascii=False)}\n\n"
+                                            
+                                except json.JSONDecodeError as e:
+                                    print(f"🔍 vLLM 스트리밍 JSON 파싱 오류: {e}")
+                                    continue
+                else:
+                    print(f"🔍 vLLM 스트리밍 응답 오류: {response.status_code}")
+                    error_msg = f"모델 응답을 받을 수 없습니다. (상태 코드: {response.status_code})"
+                    yield f"data: {json.dumps({'content': error_msg}, ensure_ascii=False)}\n\n"
+                    
+            except requests.exceptions.RequestException as e:
+                print(f"🔍 vLLM 스트리밍 요청 오류: {e}")
+                error_msg = "모델 서버에 연결할 수 없습니다."
+                yield f"data: {json.dumps({'content': error_msg}, ensure_ascii=False)}\n\n"
+            except Exception as e:
+                print(f"🔍 vLLM 스트리밍 처리 오류: {e}")
+                error_msg = "모델 응답을 처리하는 데 실패했습니다."
+                yield f"data: {json.dumps({'content': error_msg}, ensure_ascii=False)}\n\n"
+        
+        return StreamingHttpResponse(
+            event_stream(),
+            content_type='text/event-stream',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no'  # Nginx 버퍼링 비활성화
+            }
+        )
+
+kanana_llm_model = _KananaChat()
 
 from django.http import StreamingHttpResponse
 import time
@@ -346,7 +326,7 @@ async def _fallback_streaming_response(prompt: str, max_length: int):
     print("🔍 폴백 모드: 일반 응답을 스트리밍으로 시뮬레이션")
     
     # 일반 텍스트 응답 생성
-    response_text = generate_vllm_response_text(prompt, max_length)
+    response_text = kanana_llm_model.generate_vllm_response_text(prompt, max_length)
     print(f"🔍 폴백 모드 응답 텍스트: {response_text[:100]}...")
     
     # 텍스트를 단어 단위로 나누어 스트리밍 시뮬레이션 (test_streaming.py 방식)
@@ -368,11 +348,11 @@ async def _fallback_streaming_response(prompt: str, max_length: int):
     yield f"data: {json.dumps({'choices': [{'delta': {'content': ''}, 'finish_reason': 'stop'}]})}\n\n"
 
 # 기존 함수명 유지 (하위 호환성)
-def generate_vllm_response(prompt: str, max_length: int = 512) -> str:
+def generate_vllm_response(prompt: str, max_length: int = 512, temperature: float = 0.9) -> str:
     """기존 함수명 유지 - 텍스트 응답 반환"""
-    return generate_vllm_response_text(prompt, max_length)
+    return kanana_llm_model.generate_vllm_response_text(prompt, max_length, temperature)
 
 
 # 전역 모델 인스턴스
 kanana_llm_model = _KananaChat()
-kanana_llm_model.generate_response("현대차에 대해 설명해줘")
+# kanana_llm_model.generate_response("현대차에 대해 설명해줘")

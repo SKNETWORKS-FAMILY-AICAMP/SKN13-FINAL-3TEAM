@@ -32,9 +32,6 @@ from django.utils import timezone
 from dotenv import load_dotenv
 from .models import *
 from .serializers import *
-from qdrant_client import QdrantClient
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from pipeline.llm_provider import generate_vllm_response
 from pipeline.services import babsim_pipeline_service
 from .services import get_chatbot_response # Added for vLLM integration
 
@@ -170,9 +167,9 @@ class StandardResultSetPagination(PageNumberPagination):
         checklist_data = request.data.get("checklistData", {})
         completion_status = request.data.get("completionStatus", {})
 
-        if not user_prompt or not session_id:
+        if not session_id:
             return Response(
-                {"error": "세션 ID와 메시지를 모두 입력해주세요."},
+                {"error": "세션 ID를 입력해주세요."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -285,16 +282,19 @@ class ChatSessionListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, session_title=self.request.data.get('session_title', 'New Chat'))
     
-class ChatSessionEndView(generics.UpdateAPIView):
+class ChatSessionDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ChatSessionSerializer
     lookup_field = 'session_id'
-    def get_queryset(self): return self.request.user.chat_sessions.all()
-    def update(self, request, *args, **kwargs):
+    
+    def get_queryset(self):
+        return self.request.user.chat_sessions.all()
+    
+    def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.ended_at = datetime.now()
-        instance.save()
-        return Response({"message": "세션이 종료되었습니다.", "session": self.get_serializer(instance).data})
+        session_id = instance.session_id
+        instance.delete()
+        return Response({"message": "세션이 삭제되었습니다.", "session_id": str(session_id)}, status=status.HTTP_200_OK)
 
 class PromptLogListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -562,6 +562,7 @@ class CommentLikeToggleView(APIView):
 
 class ChatHistoryUpdateView(APIView):
     """채팅 기록 업데이트 API"""
+    permission_classes = [IsAuthenticated]
     
     def post(self, request, session_id):
         try:
@@ -570,7 +571,14 @@ class ChatHistoryUpdateView(APIView):
             user_message = data.get('user_message')
             assistant_response = data.get('assistant_response')
             
+            print(f"🔍 ChatHistoryUpdateView 요청 데이터:")
+            print(f"  - session_id: {session_id}")
+            print(f"  - user_id: {user_id}")
+            print(f"  - user_message 길이: {len(user_message) if user_message else 0}")
+            print(f"  - assistant_response 길이: {len(assistant_response) if assistant_response else 0}")
+            
             if not all([user_id, user_message, assistant_response]):
+                print(f"❌ 필수 필드 누락: user_id={user_id}, user_message={user_message}, assistant_response={assistant_response}")
                 return Response(
                     {'error': '필수 필드가 누락되었습니다.'}, 
                     status=status.HTTP_400_BAD_REQUEST
@@ -578,21 +586,31 @@ class ChatHistoryUpdateView(APIView):
             
             # 세션 확인
             try:
+                print(f"🔍 세션 조회 시도: session_id={session_id}, user_id={user_id}")
                 session = ChatSession.objects.get(session_id=session_id, user_id=user_id)
+                print(f"✅ 세션 조회 성공: {session}")
             except ChatSession.DoesNotExist:
+                print(f"❌ 세션을 찾을 수 없음: session_id={session_id}, user_id={user_id}")
                 return Response(
                     {'error': '세션을 찾을 수 없습니다.'}, 
                     status=status.HTTP_404_NOT_FOUND
                 )
             
             # 프롬프트 로그 생성
-            prompt_log = PromptLog.objects.create(
-                session=session,
-                user_prompt=user_message,
-                ai_response=assistant_response,
-                response_time=0  # 스트리밍이므로 0으로 설정
-            )
+            try:
+                print(f"🔍 프롬프트 로그 생성 시도: session={session}, user_message='{user_message[:50]}...', assistant_response='{assistant_response[:50]}...'")
+                prompt_log = PromptLog.objects.create(
+                    session=session,
+                    user_prompt=user_message,
+                    ai_response=assistant_response,
+                    response_time=0  # 스트리밍이므로 0으로 설정
+                )
+                print(f"✅ 프롬프트 로그 생성 성공: prompt_id={prompt_log.prompt_id}")
+            except Exception as e:
+                print(f"❌ 프롬프트 로그 생성 실패: {e}")
+                raise e
             
+            print(f"🔍 응답 반환 준비")
             return Response({
                 'success': True,
                 'prompt_id': prompt_log.prompt_id,
@@ -600,8 +618,75 @@ class ChatHistoryUpdateView(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
+            print(f"❌ ChatHistoryUpdateView 예외 발생: {e}")
+            print(f"❌ 예외 타입: {type(e)}")
+            import traceback
+            print(f"❌ 스택 트레이스: {traceback.format_exc()}")
             logger.error(f"Chat history update error: {e}")
             return Response(
-                {'error': '채팅 기록 업데이트 중 오류가 발생했습니다.'}, 
+                {'error': f'채팅 기록 업데이트 중 오류가 발생했습니다: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ChecklistImageGenerationView(APIView):
+    """체크리스트 기반 이미지 생성 API"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            print(f"🔍 [라우팅] 체크리스트 이미지 생성 요청 받음")
+            
+            # 요청 데이터 추출
+            checklist_data = request.data.get('checklist_data', {})
+            session_id = request.data.get('session_id')
+            user_id = request.data.get('user_id', 'anonymous_user')
+            
+            print(f"🔍 체크리스트 데이터: {checklist_data}")
+            print(f"🔍 세션 ID: {session_id}")
+            print(f"🔍 사용자 ID: {user_id}")
+            
+            # 필수 필드 검증
+            required_fields = ['viewpoint', 'body_type', 'color_finish']
+            missing_fields = [field for field in required_fields if not checklist_data.get(field)]
+            
+            if missing_fields:
+                return Response(
+                    {'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 파이프라인 서비스를 통한 이미지 생성
+            from pipeline.services import BabsimPipelineService
+            pipeline_service = BabsimPipelineService()
+            
+            # 체크리스트 데이터를 이미지 쿼리로 변환
+            image_query = pipeline_service.generate_image_query_from_checklist(checklist_data)
+            print(f"🔍 생성된 이미지 쿼리: {image_query}")
+            
+            # 이미지 생성 실행
+            result = pipeline_service.generate_image_from_checklist(
+                checklist_data=checklist_data,
+                image_query=image_query,
+                session_id=session_id,
+                user_id=user_id
+            )
+            
+            print(f"✅ 체크리스트 이미지 생성 완료: {result}")
+            
+            return Response({
+                'success': True,
+                'generated_results': result.get('generated_results', []),
+                'image_query': image_query,
+                'message': '이미지가 성공적으로 생성되었습니다.'
+            })
+            
+        except Exception as e:
+            print(f"❌ ChecklistImageGenerationView 예외 발생: {e}")
+            import traceback
+            print(f"❌ 스택 트레이스: {traceback.format_exc()}")
+            logger.error(f"Checklist image generation error: {e}")
+            return Response(
+                {'error': f'이미지 생성 중 오류가 발생했습니다: {str(e)}'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

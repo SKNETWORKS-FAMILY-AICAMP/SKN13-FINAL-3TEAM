@@ -15,7 +15,7 @@ from .components.generator_4d import generate_4d_model
 from .components.query_rewriter import query_rewriter
 from .components.answer_evaluator import answer_evaluator
 from .components.checklist_generator import checklist_generator
-from .llm_provider import generate_vllm_response_text, generate_vllm_response_streaming, test_stream
+from .llm_provider import kanana_llm_model, generate_vllm_response_streaming, test_stream
 
 # 1) 의도 분류
 def classify_intent(state: PipelineState) -> PipelineState:

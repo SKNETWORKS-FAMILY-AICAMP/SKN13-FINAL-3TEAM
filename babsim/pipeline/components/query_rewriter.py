@@ -24,7 +24,7 @@ class QueryRewriter:
 키워드: 키워드1, 키워드2, ...
 검색쿼리: ...
 """
-        out = kanana_llm_model.generate_response(prompt, max_length=360).strip()
+        out = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=360).strip()
         pseudo = _pick(out, r"가상답변\s*:\s*(.+)")
         keys   = _pick(out, r"키워드\s*:\s*(.+)")
         q      = _pick(out, r"검색쿼리\s*:\s*(.+)") or re.sub(r"\s+", " ", keys.replace(",", " "))

@@ -6,147 +6,187 @@ RunPod을 통해 4D 모델 생성하고 S3에 저장
 import os
 import json
 import requests
+import json
+from typing import Dict, Any, Optional
 import boto3
-import io
-from typing import Dict, Any
-from django.conf import settings
-from langgraph.graph import StateGraph, END
-from ..base_state import PipelineState
+from botocore.exceptions import ClientError
+import uuid
+import os
 
 
-def generate_4d_model(state: PipelineState) -> PipelineState:
-    """
-    RunPod을 통해 4D 모델 생성하고 S3에 업로드
-    """
-    try:
-        # 4D 쿼리 가져오기 (image_query 필드 재사용)
-        d4_query = state.get("image_query", "")
-        if not d4_query:
-            state["error"] = "4D 생성 쿼리가 없습니다."
-            return state
-        
-        print(f"🎯 4D 모델 생성 시작: {d4_query}")
-        
-        # RunPod 4D 생성 API 호출
-        generated_4d = call_runpod_4d_api(d4_query)
-        
-        if generated_4d:
-            # S3에 4D 모델 업로드
-            s3_url = upload_4d_to_s3(generated_4d, d4_query)
-            
-            if s3_url:
-                # 답변 타입과 S3 URL만 저장
-                state["answer_type"] = "4D"
-                state["s3_url"] = s3_url
-                print(f"✅ 4D 모델 생성 및 S3 업로드 완료: {s3_url}")
-            else:
-                state["error"] = "S3 업로드 실패"
-        else:
-            state["error"] = "4D 모델 생성 실패"
-            
-    except Exception as e:
-        print(f"❌ 4D 모델 생성 중 오류: {str(e)}")
-        state["error"] = f"4D 모델 생성 오류: {str(e)}"
+class Generator4D:
+    """4D 생성기 클래스 - RunPod Serverless를 사용하여 4D 모델 생성"""
     
-    return state
-
-
-def call_runpod_4d_api(d4_query: str) -> bytes:
-    """
-    RunPod 4D 모델 생성 API 호출
-    """
-    try:
-        # RunPod 엔드포인트 설정
-        runpod_endpoint = os.getenv('4D_API_URL')
-        runpod_api_key = os.getenv('RUNPOD_API_KEY')
+    def __init__(self):
+        self.serverless_url = os.getenv("4D_ENDPOINT_ID", "https://api.runpod.ai/v2/your-4d-endpoint")
+        self.api_key = os.getenv("RUNPOD_API_KEY", "your-api-key")
+        self.s3_client = boto3.client('s3')
+        self.bucket_name = os.getenv('S3_BUCKET_NAME', 'babsim-bucket')
         
-        if not runpod_endpoint or not runpod_api_key:
-            print("❌ 4D RunPod 설정이 없습니다.")
-            return None
+    def generate_4d_model(self, image_url: str, prompt: str = "") -> Dict[str, Any]:
+        """
+        4D 모델 생성
+        
+        Args:
+            image_url: 입력 이미지 URL
+            prompt: 추가 프롬프트 (선택사항)
+            
+        Returns:
+            Dict containing s3_url_4d, generation_type, status, error
+        """
+        try:
+            print(f"[4D 생성기] 4D 모델 생성 시작 - 이미지: {image_url}")
+            
+            # RunPod Serverless API 호출
+            payload = {
+                "input": {
+                    "image_url": image_url,
+                    "prompt": prompt or "Generate a high-quality 4D animated model of this car",
+                    "quality": "high",
+                    "format": "glb",
+                    "animation_duration": 10,  # 10초 애니메이션
+                    "animation_type": "rotation"  # 회전 애니메이션
+                }
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            # RunPod API 호출
+            response = requests.post(
+                f"{self.serverless_url}/run",
+                headers=headers,
+                json=payload,
+                timeout=300  # 5분 타임아웃
+            )
+            
+            if response.status_code != 200:
+                return {
+                    "error": f"RunPod API 호출 실패: {response.status_code} - {response.text}",
+                    "generation_type": "4d",
+                    "s3_url_4d": None
+                }
+            
+            result = response.json()
+            
+            # 작업 ID 추출
+            job_id = result.get("id")
+            if not job_id:
+                return {
+                    "error": "RunPod에서 작업 ID를 받지 못했습니다.",
+                    "generation_type": "4d", 
+                    "s3_url_4d": None
+                }
+            
+            print(f"[4D 생성기] 작업 ID: {job_id}")
+            
+            # 작업 완료 대기 및 결과 조회
+            final_result = self._wait_for_completion(job_id)
+            
+            if "error" in final_result:
+                return final_result
+            
+            # 4D 모델 파일을 S3에 업로드
+            s3_url = self._upload_to_s3(final_result["output"], "4d_model.glb")
+            
+            if not s3_url:
+                return {
+                    "error": "4D 모델을 S3에 업로드하는데 실패했습니다.",
+                    "generation_type": "4d",
+                    "s3_url_4d": None
+                }
+            
+            print(f"[4D 생성기] 4D 모델 생성 완료: {s3_url}")
+            
+            return {
+                "s3_url_4d": s3_url,
+                "generation_type": "4d",
+                "status": "success",
+                "error": None
+            }
+            
+        except Exception as e:
+            print(f"[4D 생성기] 오류 발생: {str(e)}")
+            return {
+                "error": f"4D 모델 생성 중 오류: {str(e)}",
+                "generation_type": "4d",
+                "s3_url_4d": None
+            }
+    
+    def _wait_for_completion(self, job_id: str, max_wait_time: int = 600) -> Dict[str, Any]:
+        """작업 완료까지 대기"""
+        import time
         
         headers = {
-            "Authorization": f"Bearer {runpod_api_key}",
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
         
-        # 4D 모델 생성 요청 페이로드
-        payload = {
-            "input": {
-                "prompt": d4_query,
-                "format": "glb",  # 4D 모델 형식
-                "quality": "high",
-                "num_inference_steps": 100,  # 4D는 더 복잡하므로 더 많은 스텝
-                "temporal_resolution": 30  # 4D 특성: 시간 해상도
-            }
-        }
+        start_time = time.time()
         
-        print(f"🚀 4D RunPod API 호출: {runpod_endpoint}")
+        while time.time() - start_time < max_wait_time:
+            try:
+                response = requests.get(
+                    f"{self.serverless_url}/status/{job_id}",
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code != 200:
+                    return {"error": f"상태 조회 실패: {response.status_code}"}
+                
+                result = response.json()
+                status = result.get("status")
+                
+                if status == "COMPLETED":
+                    return result
+                elif status == "FAILED":
+                    return {"error": f"작업 실패: {result.get('error', 'Unknown error')}"}
+                elif status in ["IN_QUEUE", "IN_PROGRESS"]:
+                    print(f"[4D 생성기] 작업 진행 중... (상태: {status})")
+                    time.sleep(10)  # 10초 대기
+                else:
+                    return {"error": f"알 수 없는 상태: {status}"}
+                    
+            except Exception as e:
+                return {"error": f"상태 조회 중 오류: {str(e)}"}
         
-        # API 호출
-        response = requests.post(
-            runpod_endpoint,
-            headers=headers,
-            json=payload,
-            timeout=180  # 4D 생성은 가장 오래 걸림
-        )
-        
-        response.raise_for_status()
-        result = response.json()
-        
-        # 응답에서 4D 모델 데이터 추출
-        if result.get("status") == "COMPLETED":
-            model_data = result.get("output", {}).get("model", [])
-            if model_data:
-                import base64
-                model_bytes = base64.b64decode(model_data[0])
-                return model_bytes
-        
-        print(f"❌ 4D RunPod 응답 오류: {result}")
-        return None
-        
-    except requests.exceptions.RequestException as e:
-        print(f"❌ 4D RunPod API 요청 오류: {e}")
-        return None
-    except Exception as e:
-        print(f"❌ 4D RunPod API 호출 중 오류: {e}")
-        return None
+        return {"error": "작업 완료 시간 초과"}
+    
+    def _upload_to_s3(self, file_data: Any, filename: str) -> Optional[str]:
+        """4D 모델 파일을 S3에 업로드"""
+        try:
+            # 고유한 파일명 생성
+            unique_filename = f"4d_models/{uuid.uuid4()}_{filename}"
+            
+            # 파일 데이터가 URL인 경우 다운로드
+            if isinstance(file_data, str) and file_data.startswith("http"):
+                response = requests.get(file_data)
+                file_content = response.content
+            else:
+                # 바이너리 데이터인 경우
+                file_content = file_data
+            
+            # S3에 업로드
+            self.s3_client.put_object(
+                Bucket=self.bucket_name,
+                Key=unique_filename,
+                Body=file_content,
+                ContentType="model/gltf-binary"
+            )
+            
+            # S3 URL 생성
+            s3_url = f"https://{self.bucket_name}.s3.amazonaws.com/{unique_filename}"
+            print(f"[4D 생성기] S3 업로드 완료: {s3_url}")
+            
+            return s3_url
+            
+        except Exception as e:
+            print(f"[4D 생성기] S3 업로드 실패: {str(e)}")
+            return None
 
 
-def upload_4d_to_s3(model_bytes: bytes, d4_query: str) -> str:
-    """
-    생성된 4D 모델을 S3에 업로드
-    """
-    try:
-        # S3 클라이언트 생성
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME
-        )
-        
-        # 파일명 생성 (쿼리 기반)
-        import re
-        import hashlib
-        safe_query = re.sub(r'[^a-zA-Z0-9_-]', '_', d4_query)[:50]
-        query_hash = hashlib.md5(d4_query.encode()).hexdigest()[:8]
-        filename = f"{safe_query}_{query_hash}.glb"
-        s3_key = f"4d/{filename}"
-        
-        # S3에 업로드
-        s3_client.upload_fileobj(
-            io.BytesIO(model_bytes),
-            settings.AWS_STORAGE_BUCKET_NAME,
-            s3_key,
-            ExtraArgs={'ContentType': 'model/gltf-binary'}
-        )
-        
-        # S3 URL 생성
-        s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
-        
-        print(f"📤 4D S3 업로드 완료: {s3_url}")
-        return s3_url
-        
-    except Exception as e:
-        print(f"❌ 4D S3 업로드 오류: {e}")
-        return None
+# 전역 인스턴스 생성
+generator_4d = Generator4D()

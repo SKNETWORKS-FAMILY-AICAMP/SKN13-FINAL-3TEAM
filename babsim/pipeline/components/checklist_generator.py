@@ -125,7 +125,7 @@ class ChecklistGenerator:
         progress = f"({completed}/{total})"
         
         if is_required:
-            return f"📋 **필수 정보** {progress}\n\n'{description}'을 선택해주세요!\n\n💡 예시: {examples}\n\n이 정보는 이미지 생성에 꼭 필요합니다."
+            return f"📋 현재 채워진 **필수 정보** {progress}\n\n'{description}'을 선택해주세요!\n\n💡 예시: {examples}\n\n이 정보는 이미지 생성에 꼭 필요합니다."
         else:
             return f"📋 **추가 정보** {progress}\n\n'{description}'에 대해 알려주세요.\n\n💡 예시: {examples}\n\n(선택사항이므로 건너뛰셔도 됩니다)"
 
@@ -181,7 +181,7 @@ class ChecklistGenerator:
 {{"viewpoint": "", "body_type": "", "size_class": "", "color_finish": "", "proportions": "", "surface": "", "front_elements": "", "side_elements": "", "lighting": "", "glasshouse": "", "aero": "", "wheel": ""}}"""
 
         try:
-            response = kanana_llm_model.generate_response(prompt, max_length=200, temperature=0.2)
+            response = kanana_llm_model.generate_vllm_response_text(prompt, max_length=200, temperature=0.1)
             print(f"Kanana LLM 응답: {response}")
             
             # JSON 부분만 추출 (중첩된 중괄호도 처리)
@@ -307,7 +307,7 @@ class ChecklistGenerator:
 
 자연스럽고 친근한 후속 질문을 생성해주세요(한문장):
 """
-            follow_up = kanana_llm_model.generate_response(prompt, max_length=150, temperature=0.7)
+            follow_up = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=150)
             
             # LLM 응답이 부자연스러울 경우 폴백 질문 사용
             if not follow_up or len(follow_up) < 10:

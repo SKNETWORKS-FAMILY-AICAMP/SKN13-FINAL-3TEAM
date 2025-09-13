@@ -37,14 +37,16 @@ urlpatterns = [
     # --- 2. 챗봇 세션 (Chat Session) ---
     # 채팅 세션 목록 조회/생성
     path('chat/sessions/', views.ChatSessionListCreateView.as_view(), name='chat-session-list-create'),
-    # 채팅 세션 종료
-    path('chat/sessions/<uuid:session_id>/end/', views.ChatSessionEndView.as_view(), name='chat-session-end'),
+    # 채팅 세션 삭제
+    path('chat/sessions/<uuid:session_id>/delete/', views.ChatSessionDeleteView.as_view(), name='chat-session-delete'),
     # 프롬프트 로그 조회
     path('chat/sessions/<uuid:session_id>/prompts/', views.PromptLogListView.as_view(), name='prompt-log-list'),
     # 채팅 메시지 전송 (스트리밍)
     path('chat/sessions/<uuid:session_id>/message/', chatbot_api, name='chat-message'),
     # 채팅 기록 업데이트
     path('chat/sessions/<uuid:session_id>/update-history/', views.ChatHistoryUpdateView.as_view(), name='chat-history-update'),
+    # 체크리스트 기반 이미지 생성
+    path('chat/checklist/generate-image/', views.ChecklistImageGenerationView.as_view(), name='checklist-generate-image'),
     # path('chat/prompts/<uuid:prompt_id>/results/', views.GeneratedResultListCreateView.as_view(), name='generated-result-list-create'),
     
     # --- 3. 에셋 라이브러리 ---

@@ -11,6 +11,7 @@ import io
 import re
 import hashlib
 import base64
+import time
 from typing import Dict, Any, Optional
 from django.conf import settings
 from langgraph.graph import StateGraph, END
@@ -56,32 +57,67 @@ class ImageGenerator:
             print(f"❌ S3 클라이언트 초기화 오류: {e}")
             self.s3_client = None
     
-    def generate_image(self, state: PipelineState) -> PipelineState:
+    def generate_image(self, state_or_prompt, session_id: str = None, user_id: str = 'anonymous_user'):
         """
         RunPod을 통해 이미지 생성 모델에 연결하여 이미지 생성하고 S3에 업로드
+        state 또는 prompt를 받아서 처리
         """
         try:
-            # 이미지 쿼리 가져오기
-            image_query = state.get("image_query", "")
-            if not image_query:
-                state["error"] = "이미지 쿼리가 없습니다."
-                return state
-            
-            print(f"🖼️ 이미지 생성 시작: {image_query}")
-            
-            # RunPod 이미지 생성 API 호출
-            s3_url = self._call_runpod_image_api(image_query)
+            # state인지 prompt인지 확인
+            if isinstance(state_or_prompt, dict) and 'image_query' in state_or_prompt:
+                # 기존 방식: state를 받는 경우
+                state = state_or_prompt
+                image_query = state.get("image_query", "")
+                if not image_query:
+                    state["error"] = "이미지 쿼리가 없습니다."
+                    return state
+                
+                print(f"🖼️ 이미지 생성 시작: {image_query}")
+                
+                # RunPod 이미지 생성 API 호출
+                s3_url = self._call_runpod_image_api(image_query)
 
-            # 이미지 쿼리에 대한 상세 설명 생성
-            detailed_description = self._generate_image_description(image_query)
-            print(f"📝 이미지 설명 생성 완료")
-            return detailed_description, s3_url
+                # 이미지 쿼리에 대한 상세 설명 생성
+                detailed_description = self._generate_image_description(image_query)
+                print(f"📝 이미지 설명 생성 완료")
+                return detailed_description, s3_url
+                
+            else:
+                # 새로운 방식: prompt를 직접 받는 경우 (체크리스트용)
+                prompt = str(state_or_prompt)
+                print(f"🖼️ 직접 이미지 생성 시작: {prompt[:50]}...")
+                
+                # 기존 방식 사용: _call_runpod_image_api 호출 (S3 URL 반환)
+                s3_url = self._call_runpod_image_api(prompt)
+                
+                if s3_url:
+                    # 이미지 설명 생성
+                    description = self._generate_image_description(prompt)
+                    
+                    return {
+                        's3_url': s3_url,
+                        'description': description,
+                        'success': True
+                    }
+                else:
+                    return {
+                        'error': '이미지 생성 실패',
+                        'success': False
+                    }
                 
         except Exception as e:
             print(f"❌ 이미지 생성 중 오류: {str(e)}")
-            state["error"] = f"이미지 생성 오류: {str(e)}"
-
-        return state
+            if isinstance(state_or_prompt, dict) and 'image_query' in state_or_prompt:
+                # 기존 방식의 경우
+                state = state_or_prompt
+                state["error"] = f"이미지 생성 오류: {str(e)}"
+                return state
+            else:
+                # 새로운 방식의 경우
+                return {
+                    'error': f"이미지 생성 중 오류가 발생했습니다: {str(e)}",
+                    'success': False
+                }
     
     def _call_runpod_image_api(self, image_query: str) -> Optional[bytes]:
         """
@@ -104,15 +140,42 @@ class ImageGenerator:
             
             print(f"🚀 RunPod API 호출: {self.flux_url}")
             
-            # API 호출
-            response = requests.post(
-                self.flux_url,
-                headers=headers,
-                data=json.dumps(payload),
-                timeout=120,
-            )
-            
-            response.raise_for_status()
+            # API 호출 (타임아웃을 줄이고 재시도)
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    print(f"🔄 RunPod API 호출 시도 {attempt + 1}/{max_retries}")
+                    response = requests.post(
+                        self.flux_url,
+                        headers=headers,
+                        data=json.dumps(payload),
+                        timeout=600,  # 10분으로 줄임
+                    )
+                    
+                    response.raise_for_status()
+                    break  # 성공하면 루프 탈출
+                    
+                except requests.exceptions.Timeout:
+                    print(f"⏰ 시도 {attempt + 1}: 타임아웃 발생")
+                    if attempt == max_retries - 1:
+                        print("❌ 모든 재시도 실패")
+                        return None
+                    time.sleep(5)  # 5초 대기 후 재시도
+                    
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 524:
+                        print(f"⏰ 시도 {attempt + 1}: 524 Server Error (타임아웃)")
+                        if attempt == max_retries - 1:
+                            print("❌ 모든 재시도 실패")
+                            return None
+                        time.sleep(10)  # 10초 대기 후 재시도
+                    else:
+                        print(f"❌ HTTP 오류: {e}")
+                        return None
+                        
+                except Exception as e:
+                    print(f"❌ API 호출 오류: {e}")
+                    return None
             
             # 응답 상태 코드와 헤더 확인
             print(f"🔍 응답 상태 코드: {response.status_code}")
@@ -158,7 +221,7 @@ class ImageGenerator:
 """
             
             # vLLM을 사용하여 설명 생성
-            description = kanana_llm_model.generate_response(prompt, max_length=200)
+            description = kanana_llm_model.generate_vllm_response_text(prompt, max_length=200)
             
             # 기본 설명이 생성되지 않은 경우 폴백
             if not description or len(description.strip()) < 10:
@@ -170,7 +233,6 @@ class ImageGenerator:
             print(f"❌ 이미지 설명 생성 오류: {e}")
             # 폴백 설명
             return f"'{image_query}'에 대한 이미지를 생성했습니다. 요청하신 내용에 맞는 고품질 이미지가 준비되었습니다."
-
 
 # ImageGenerator 인스턴스 생성
 image_generator = ImageGenerator()

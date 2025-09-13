@@ -37,12 +37,27 @@ class ImageQueryGenerator:
             prompt = self._create_query_generation_prompt(form_data, chat_history)
             
             # LLM을 사용하여 쿼리 생성
-            query = kanana_llm_model.generate_response(prompt, max_length=512)
+            query = kanana_llm_model.generate_vllm_response_text(prompt, max_length=512)
             
             return query.strip()
         
         except Exception as e:
             print(f"이미지 쿼리 생성 실패: {e}")
+            return "이미지 쿼리 생성에 실패했습니다."
+    
+    def generate_image_query_from_chat(self, chat_history: List[Dict[str, str]], desc: str = "") -> str:
+        """chat_history와 desc를 이용하여 이미지 생성 쿼리 생성 (폼 데이터 없이)"""
+        try:
+            # 이미지 생성 쿼리 생성 프롬프트
+            prompt = self._create_chat_based_query_prompt(chat_history, desc)
+            
+            # LLM을 사용하여 쿼리 생성
+            query = kanana_llm_model.generate_vllm_response_text(prompt, max_length=512)
+            
+            return query.strip()
+        
+        except Exception as e:
+            print(f"채팅 기반 이미지 쿼리 생성 실패: {e}")
             return "이미지 쿼리 생성에 실패했습니다."
     
     def _extract_form_data(self, chat_history: List[Dict[str, str]]) -> Dict[str, str]:
@@ -158,6 +173,68 @@ class ImageQueryGenerator:
                 summary_parts.append(f"{field}: {value}")
         
         return "\n".join(summary_parts) if summary_parts else "폼 데이터가 없습니다."
+    
+    
+    def _create_chat_based_query_prompt(self, chat_history: List[Dict[str, str]], desc: str = "") -> str:
+        """채팅 기반 쿼리 생성 프롬프트 생성"""
+        # 대화 기록 요약
+        conversation_summary = self._summarize_conversation(chat_history)
+        
+        # 설명 추가
+        desc_text = f"\n추가 설명: {desc}" if desc else ""
+        
+        prompt = f"""
+다음 대화 내용을 바탕으로 Stable Diffusion용 자동차 이미지 생성 쿼리를 생성해주세요.
+
+대화 요약:
+{conversation_summary}
+{desc_text}
+
+템플릿:
+{self.car_prompt_template}
+
+위 템플릿을 사용하여 완성된 이미지 생성 쿼리를 생성해주세요.
+대화 내용에서 자동차 디자인 관련 정보를 추출하여 반영하고, 빈 필드는 적절한 기본값으로 채워주세요.
+쿼리는 영어로 작성해주세요. 77 CLIP token 이내로 작성해주세요.
+
+이미지 생성 쿼리:
+"""
+        return prompt
+    
+    def generate_image_query_from_checklist(self, checklist_data: Dict[str, Any]) -> str:
+        """체크리스트 데이터를 기반으로 이미지 생성 쿼리 생성"""
+        try:
+            print(f"🔍 [분기] 체크리스트 기반 이미지 쿼리 생성 시작")
+            
+            # 체크리스트 데이터를 텍스트로 변환
+            query_parts = []
+            
+            # 필수 필드들
+            if checklist_data.get('viewpoint'):
+                query_parts.append(f"Viewpoint: {checklist_data['viewpoint']}")
+            if checklist_data.get('body_type'):
+                query_parts.append(f"Body type: {checklist_data['body_type']}")
+            if checklist_data.get('color_finish'):
+                query_parts.append(f"Color/Finish: {checklist_data['color_finish']}")
+            
+            # 선택 필드들
+            optional_fields = ['size_class', 'proportions', 'surface', 'front_elements', 
+                             'side_elements', 'lighting', 'glasshouse', 'aero', 'wheel']
+            
+            for field in optional_fields:
+                if checklist_data.get(field) and checklist_data[field].strip():
+                    query_parts.append(f"{field.replace('_', ' ').title()}: {checklist_data[field]}")
+            
+            # 쿼리 조합
+            image_query = ", ".join(query_parts)
+            print(f"🔍 생성된 이미지 쿼리: {image_query}")
+            
+            return image_query
+            
+        except Exception as e:
+            print(f"❌ 체크리스트 이미지 쿼리 생성 실패: {e}")
+            return "car design based on checklist"
+
 
 # 전역 이미지 쿼리 생성기 인스턴스
 image_query_generator = ImageQueryGenerator()

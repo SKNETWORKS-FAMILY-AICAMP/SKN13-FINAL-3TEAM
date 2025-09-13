@@ -141,13 +141,15 @@ class IntentClassifier:
     def classify_modification_intent(self, user_input: str) -> str:
         """이미지 수정 의도 분류"""
         prompt = f"""
-사용자의 입력을 분석하여 이미지 수정 의도를 판단해주세요.
+사용자의 입력을 분석하여 사용자의 의도를 판단해주세요.
 
 사용자 입력: "{user_input}"
 
 다음 중 하나로 분류해주세요:
 - modify: 이미지 수정을 원함 (색상 변경, 디자인 요소 추가/제거, 스타일 변경 등)
-- no_modify: 이미지 수정을 원하지 않음 (아니오, 괜찮습니다, 수정 안함 등)
+- 3d_generation: 이미지를 바탕으로 3D 영상을 원함 (3D 이미지, 3D 모델, 3D 생성)
+- 4d_generation: 이미지를 바탕으로 4D 영상을 원함 (4D 이미지, 4D 모델, 4D 생성)
+- finish: 더 이상 대화를 원하지 않음 (고마워, 굳굳, 괜찮습니다 등)
 
 분류 결과만 답변해주세요:
 """
@@ -161,8 +163,13 @@ class IntentClassifier:
         
         if "modify" in response:
             return "modify"
+        elif "3d_generation" in response:
+            return "3d_generation"
+        elif "4d_generation" in response:
+            return "4d_generation"
         else:
-            return "no_modify"
+            return "finish"
+        
     
     
 # 전역 의도 분류기 인스턴스

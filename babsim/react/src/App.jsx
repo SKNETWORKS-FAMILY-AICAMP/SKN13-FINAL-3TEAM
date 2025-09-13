@@ -8,7 +8,6 @@ import Signup from './pages/Signup';
 import AssetLibrary from './pages/AssetLibrary';
 import InsightTrends from './pages/InsightTrends';
 import PrototypeLab from './pages/PrototypeLab';
-import Chatbot from './pages/Chatbot';
 import Profile from './pages/Profile';
 import MyWorkspace from './pages/MyWorkspace';
 import OAuthCallback from './pages/OAuthCallback';
@@ -57,11 +56,6 @@ function App() {
           <Route path="/lab" element={
             <ProtectedRoute>
               <PrototypeLab />
-            </ProtectedRoute>
-          } />
-          <Route path="/chatbot" element={
-            <ProtectedRoute>
-              <Chatbot />
             </ProtectedRoute>
           } />
           <Route path="/profile" element={

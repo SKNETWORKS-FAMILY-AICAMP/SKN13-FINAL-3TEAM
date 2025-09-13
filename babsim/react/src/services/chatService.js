@@ -89,7 +89,9 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
           }
           
           try {
+            console.log('🔍 스트리밍 JSON 파싱 시도:', dataContent);
             const data = JSON.parse(dataContent);
+            console.log('✅ 스트리밍 JSON 파싱 성공:', data);
             if (data.error) {
               throw new Error(data.error);
             }
@@ -103,7 +105,7 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
                 second: '2-digit',
                 fractionalSecondDigits: 3
               });
-              console.log(`[${timestamp}] 스트리밍 청크:`, data.content);
+              // console.log(`[${timestamp}] 스트리밍 청크:`, data.content);
               
               // 실시간 스트리밍 메시지 업데이트를 위한 콜백 호출
               if (onStreamingUpdate) {
@@ -153,13 +155,63 @@ const handleStreamingResponse = async (response, onStreamingUpdate, setMessages,
     console.error('❌ 대화 기록 업데이트 실패:', error);
     // 오류가 발생해도 스트리밍 응답은 정상적으로 반환
   }
+  console.log("metadata.completionStatus", metadata.completionStatus);
+  console.log("metadata.checklistData", metadata.checklistData);
   
   return {
     success: true,
     response: fullResponse,
     generatedResults: [],
-    completionStatus: metadata.completionStatus ? JSON.parse(metadata.completionStatus) : {},
-    checklistData: metadata.checklistData ? JSON.parse(metadata.checklistData) : {},
+    isJson: metadata.isJson || false,
+    completionStatus: (() => {
+      try {
+        console.log('🔍 completionStatus 처리 시도:', metadata.completionStatus, '타입:', typeof metadata.completionStatus);
+        if (typeof metadata.completionStatus === 'string') {
+          return metadata.completionStatus ? JSON.parse(metadata.completionStatus) : {};
+        } else {
+          return metadata.completionStatus || {};
+        }
+      } catch (e) {
+        console.error('❌ completionStatus 처리 실패:', e, '원본:', metadata.completionStatus);
+        return {};
+      }
+    })(),
+    checklistData: (() => {
+      try {
+        console.log('🔍 checklistData 처리 시도:', metadata.checklistData, '타입:', typeof metadata.checklistData);
+        
+        // 이미 객체인 경우
+        if (typeof metadata.checklistData === 'object' && metadata.checklistData !== null) {
+          return metadata.checklistData;
+        }
+        
+        // 문자열인 경우
+        if (typeof metadata.checklistData === 'string') {
+          // 빈 문자열인 경우
+          if (!metadata.checklistData.trim()) {
+            return {};
+          }
+          
+          // Python 딕셔너리 형태인지 확인 (단일 따옴표 사용)
+          if (metadata.checklistData.includes("'") && metadata.checklistData.includes("{")) {
+            // Python 딕셔너리를 JavaScript 객체로 변환
+            const pythonDict = metadata.checklistData;
+            const jsObject = pythonDict
+              .replace(/'/g, '"')  // 단일 따옴표를 이중 따옴표로 변경
+              .replace(/(\w+):/g, '"$1":');  // 키에 따옴표 추가
+            return JSON.parse(jsObject);
+          } else {
+            // 일반 JSON 문자열인 경우
+            return JSON.parse(metadata.checklistData);
+          }
+        }
+        
+        return {};
+      } catch (e) {
+        console.error('❌ checklistData 처리 실패:', e, '원본:', metadata.checklistData);
+        return {};
+      }
+    })(),
     intent: metadata.intent,
     isFormComplete: metadata.isFormComplete,
     imageQuery: metadata.imageQuery,
@@ -251,33 +303,36 @@ export const updateSessionTitle = async (sessionId, title) => {
   }
 };
 
-export const endChatSession = async (sessionId) => {
-  const session = mockChatSessions.find(s => s.session_id === sessionId);
-  if (session) {
-    session.ended_at = new Date().toISOString();
-  }
-
+export const deleteChatSession = async (sessionId) => {
   if (USE_MOCK_DATA) {
-    console.log('🔄 목업 모드: 채팅 세션 종료');
-    const promptCount = mockPromptLogs.filter(log => log.session_id === sessionId).length;
-    return {
-      message: '챗봇 세션이 종료되었습니다.',
-      session: {
-        session_id: sessionId,
-        ended_at: session.ended_at,
-        total_prompts: promptCount,
-        total_duration: '1시간' // 임시 값
+    console.log('🔄 목업 모드: 채팅 세션 삭제');
+    // 목업 데이터에서 세션 제거
+    const sessionIndex = mockChatSessions.findIndex(s => s.session_id === sessionId);
+    if (sessionIndex !== -1) {
+      mockChatSessions.splice(sessionIndex, 1);
+    }
+    // 관련 프롬프트 로그도 제거
+    const promptLogsToRemove = mockPromptLogs.filter(log => log.session_id === sessionId);
+    promptLogsToRemove.forEach(log => {
+      const logIndex = mockPromptLogs.indexOf(log);
+      if (logIndex !== -1) {
+        mockPromptLogs.splice(logIndex, 1);
       }
+    });
+    
+    return {
+      message: '챗봇 세션이 삭제되었습니다.',
+      session_id: sessionId
     };
   }
 
   try {
-    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/end/`, {
-      method: 'PUT'
+    const response = await apiRequest(`${API_BASE_URL}/chat/sessions/${sessionId}/delete/`, {
+      method: 'DELETE'
     });
     return await response.json();
   } catch (error) {
-    console.error('End chat session error:', error);
+    console.error('Delete chat session error:', error);
     throw error;
   }
 };
@@ -402,21 +457,6 @@ export const sendChatMessage = async (sessionId, message, userId, onStreamingUpd
     // 목업 응답 생성
     const mockResponse = generateMockResponse(message);
     
-    // 프롬프트 로그 생성
-    // const promptLog = await createPromptLog(sessionId, message, mockResponse.aiResponse);
-    
-    // 생성 결과가 있으면 저장
-    // if (mockResponse.generatedResults && mockResponse.generatedResults.length > 0) {
-    //   for (const result of mockResponse.generatedResults) {
-    //     await createGeneratedResult(
-    //       promptLog.prompt_id,
-    //       result.result_type,
-    //       result.result_path,
-    //       result.result
-    //     );
-    //   }
-    // }
-    
     return {
       success: true,
       response: mockResponse.aiResponse,
@@ -466,7 +506,8 @@ export const sendChatMessage = async (sessionId, message, userId, onStreamingUpd
           checklistData: data.checklist_data || {},
           intent: data.intent || '',
           isFormComplete: data.is_form_complete || false,
-          imageQuery: data.image_query || ''
+          imageQuery: data.image_query || '',
+          isJson: true
         };
       }
     } else {
@@ -572,9 +613,18 @@ const updateChatHistory = async (sessionId, userId, userMessage, assistantRespon
     console.log('🔍 updateChatHistory 응답 Content-Type:', contentType);
     
     if (contentType && contentType.includes('application/json')) {
-      const result = await response.json();
-      console.log('✅ updateChatHistory JSON 응답:', result);
-      return result;
+      try {
+        const responseText = await response.text();
+        console.log('🔍 updateChatHistory 원본 응답:', responseText);
+        const result = JSON.parse(responseText);
+        console.log('✅ updateChatHistory JSON 응답:', result);
+        return result;
+      } catch (parseError) {
+        console.error('❌ updateChatHistory JSON 파싱 실패:', parseError);
+        const responseText = await response.text();
+        console.error('❌ updateChatHistory 원본 응답:', responseText);
+        return { success: true, message: responseText };
+      }
     } else {
       // JSON이 아닌 경우 텍스트로 처리
       const result = await response.text();
@@ -592,7 +642,7 @@ export default {
   getChatSessions,
   createChatSession,
   updateSessionTitle,
-  endChatSession,
+  deleteChatSession,
   getPromptLogs,
   createPromptLog,
   getGeneratedResults,

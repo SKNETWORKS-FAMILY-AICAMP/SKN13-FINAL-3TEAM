@@ -31,7 +31,7 @@ relevance=0.xx
 adequacy=0.xx
 note=...
 """
-        raw = kanana_llm_model.generate_response(prompt, max_length=200).strip()
+        raw = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=200).strip()
         return {
             "relevance": float(_pick_num(raw, "relevance") or 0.0),
             "adequacy":  float(_pick_num(raw, "adequacy") or 0.0),

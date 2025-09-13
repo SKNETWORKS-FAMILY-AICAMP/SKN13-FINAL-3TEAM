@@ -17,7 +17,7 @@ def chatbot_api(request, session_id):
     try:
         data = json.loads(request.body)
         # print(data)  # 디버깅을 위한 요청 데이터 출력
-        user_message = data.get('message')
+        user_message = data.get('message', '')
         user_id = data.get('user_id', '550e8400-e29b-41d4-a716-446655440000')  # UUID 형식의 기본값 설정
         checklist_data = data.get('checklistData', {})
         completion_status = data.get('completionStatus', {})
@@ -28,10 +28,8 @@ def chatbot_api(request, session_id):
         print(f"  - user_id 타입: {type(user_id)}")
         print(f"  - 전체 data: {data}")
         
-        if not user_message:
-            return JsonResponse({'error': '메시지가 비어있습니다.'}, status=400)
-
         # Pipeline 서비스를 사용하여 응답 생성 (체크리스트 데이터 포함)
+        print(f"🔍 [CONFIG] process_query 호출 시작 - user_message: '{user_message[:50]}...'")
         result = babsim_pipeline_service.process_query(
             user_message,
             user_id=user_id,
@@ -43,11 +41,24 @@ def chatbot_api(request, session_id):
         if 'error' in result:
             return JsonResponse({'error': result['error']}, status=500)
         
-        # 스트리밍 응답인 경우 직접 반환
-        if 'streaming_response' in result:
-            print(f"views.py 가 받은 result : {result}")
+        # 스트리밍 응답인 경우 메타데이터와 함께 반환
+        if result.get('is_streaming', False) and 'streaming_response' in result and result['streaming_response'] is not None:
+            print(f"views.py 스트리밍 응답 반환: {type(result['streaming_response'])}")
             
-            return result["streaming_response"]
+            # 스트리밍 응답에 메타데이터 헤더 추가
+            streaming_response = result["streaming_response"]
+            streaming_response['X-Session-ID'] = result.get('session_id', '')
+            streaming_response['X-Prompt-ID'] = result.get('prompt_id', '')
+            streaming_response['X-Intent'] = result.get('initial_intent', '')
+            streaming_response['X-Is-Form-Complete'] = str(result.get('is_form_complete', False))
+            streaming_response['X-Image-Query'] = result.get('image_query', '')
+            streaming_response['X-Generated-Results'] = str(len(result.get('generated_results', [])))
+            streaming_response['X-User-ID'] = result.get('user_id', 'default_user')
+            streaming_response['X-User-Message'] = result.get('user_message', '사용자 메시지')
+            streaming_response['X-Completion-Status'] = str(result.get('completion_status', {}))
+            streaming_response['X-Checklist-Data'] = str(result.get('checklist_data', {}))
+            
+            return streaming_response
         
         # 일반 응답인 경우 JsonResponse로 반환
         return JsonResponse({
@@ -59,7 +70,7 @@ def chatbot_api(request, session_id):
             'prompt_id': result.get('prompt_id', ''),
             'generated_results': result.get('generated_results', []),
             'completion_status': result.get('completion_status', {}),
-            'checklist_data': result.get('checklist_data', {})
+            'checklist_data': result.get('checklist_data', {}),
         })
 
     except Exception as e:

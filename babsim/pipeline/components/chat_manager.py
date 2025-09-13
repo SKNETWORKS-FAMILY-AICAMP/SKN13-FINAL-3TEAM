@@ -55,7 +55,7 @@ class ChatManager:
 요약:"""
 
             # LLM으로 직접 요약 실행
-            summary_content = kanana_llm_model.generate_response(summarization_prompt, max_length=256)
+            summary_content = kanana_llm_model.generate_vllm_response_streaming(summarization_prompt, max_length=256)
 
             # 요약된 대화 기록으로 교체
             summarized_history = [
@@ -131,7 +131,7 @@ class ChatManager:
                 prompt = f"{general_prompt}\n\n사용자 질문: {user_query}\n답변:"
             
             # Kanana LLM으로 응답 생성
-            response = kanana_llm_model.generate_response(prompt, max_length=512)
+            response = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=512)
             
             return response
             
