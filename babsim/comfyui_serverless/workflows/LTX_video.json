@@ -37,8 +37,8 @@
   "7": {
     "inputs": {
       "add_noise": true,
-      "noise_seed": 564107125261888,
-      "cfg": 3.0,
+      "noise_seed": 0,
+      "cfg": 2.6,
       "model": [
         "5",
         0
@@ -91,7 +91,7 @@
       "height": 720,
       "length": 240,
       "batch_size": 1,
-      "strength": 0.28,
+      "strength": 0.26,
       "positive": [
         "14",
         0
@@ -133,11 +133,11 @@
   },
   "11": {
     "inputs": {
-      "steps": 48,
-      "max_shift": 1.45,
-      "base_shift": 0.7,
+      "steps": 40,
+      "max_shift": 1.25,
+      "base_shift": 0.6,
       "stretch": false,
-      "terminal": 0.09,
+      "terminal": 0.07,
       "latent": [
         "9",
         2
@@ -153,9 +153,9 @@
       "frame_rate": 24,
       "loop_count": 1,
       "filename_prefix": "AnimateDiff",
-      "format": "video/h265-mp4",
-      "pix_fmt": "yuv420p10le",
-      "crf": 16,
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
       "save_metadata": true,
       "pingpong": false,
       "save_output": true,

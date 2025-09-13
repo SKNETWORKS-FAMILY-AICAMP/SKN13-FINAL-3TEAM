@@ -6,6 +6,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional, List
+import secrets
 
 import requests
 import runpod
@@ -133,14 +134,39 @@ def wait_for_completion(prompt_id: str, timeout: int = 600) -> bool:
     return False
 
 def load_workflow(workflow_name: str) -> Dict:
-    """워크플로우 JSON 로드"""
-    workflow_path = WORKFLOWS_DIR / f"{workflow_name}.json"
-    
-    if not workflow_path.exists():
-        raise FileNotFoundError(f"Workflow not found: {workflow_path}")
-    
-    with open(workflow_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    """워크플로우 JSON 로드 (간결+견고)"""
+    # 1) ".json" 붙었으면 제거
+    name = workflow_name[:-5] if workflow_name.lower().endswith(".json") else workflow_name
+
+    # 2) 탐색할 기본 경로들 (기존 WORKFLOWS_DIR 우선)
+    search_dirs = []
+    try:
+        search_dirs.append(WORKFLOWS_DIR if isinstance(WORKFLOWS_DIR, Path) else Path(WORKFLOWS_DIR))
+    except Exception:
+        pass
+    search_dirs += [Path("/opt/baked_workflows"), Path("/workspace/workflows")]
+
+    tried = []
+
+    # 3) 정확 파일명 먼저 시도
+    for base in search_dirs:
+        p = base / f"{name}.json"
+        tried.append(p)
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+    # 4) 대소문자 무시한 보정(동일 stem 탐색)
+    for base in search_dirs:
+        try:
+            for q in base.glob("*.json"):
+                if q.stem.lower() == name.lower():
+                    with open(q, "r", encoding="utf-8") as f:
+                        return json.load(f)
+        except Exception:
+            pass
+
+    raise FileNotFoundError(f"Workflow not found for '{workflow_name}'. tried={[str(p) for p in tried]}")
 
 def ensure_models_ready(max_wait: int = 300) -> bool:
     """ComfyUI 서버/노드 준비 + 필수 모델 파일 존재 확인"""
@@ -311,11 +337,11 @@ def upload_to_s3(file_path: Path) -> Optional[str]:
         s3_key = f"{s3_folder}/{file_path.name}"
 
         # ▶ 영상만: 같은 키가 이미 있으면 다음 가용 번호로 변경
-        if s3_folder == "videos" and _s3_key_exists(AWS_BUCKET, s3_key):
+        if s3_folder in ("videos", "models") and _s3_key_exists(AWS_BUCKET, s3_key):
             new_name = _next_available_name(s3_folder, filename)
-            print(f"⚠️ S3 key exists, renaming '{filename}' -> '{new_name}'")
             filename = new_name
             s3_key = f"{s3_folder}/{filename}"
+
         
         # 업로드
         s3_client.upload_file(str(file_path), AWS_BUCKET, s3_key)
@@ -350,6 +376,29 @@ def modify_workflow(workflow_json: Dict, user_image_path: str, user_prompt: Opti
                     print(f"📝 Updated {node.get('class_type')} node {node_id}: {user_prompt[:50]}...")
     
     return workflow_json
+
+import secrets  # 파일 상단에 추가
+
+def _randomize_video_seeds_if_zero(wf: dict) -> dict:
+    """
+    비디오 워크플로우에서만 seed/noise_seed가 0이면 실행시에 랜덤값으로 바꾼다.
+    (워크플로우 파일은 계속 0으로 유지)
+    """
+    for node in wf.values():
+        ct = (node.get("class_type") or "").lower()
+        if ct in ("samplercustom", "ksampler", "ksampleradvanced"):
+            inputs = node.get("inputs", {})
+            for key in ("noise_seed", "seed"):
+                if key in inputs:
+                    try:
+                        if int(inputs[key]) == 0:
+                            # 1 ~ (2^31-1) 범위 랜덤
+                            inputs[key] = secrets.randbelow(2**31 - 1) or 1
+                    except (TypeError, ValueError):
+                        # 숫자 변환 안 되면 건너뜀
+                        pass
+    return wf
+
 
 def download_input_image(url: str) -> str:
     """입력 이미지를 URL에서 다운로드"""
@@ -424,11 +473,16 @@ def process_task(job_input: JobInput) -> Dict[str, Any]:
         
         # 사용자 입력으로 워크플로우 동적 수정
         user_prompt = job_input.video.prompt if task_type == "video" else job_input.three_d.prompt if task_type == "3d" else ""
+        
         workflow = modify_workflow(workflow, input_data['image_path'], user_prompt)
         
-        # 모델 인덱싱 확인 후 워크플로우 제출
-        if not ensure_models_ready(max_wait=300):
-            raise RuntimeError("Models not indexed yet; retry later")
+        if task_type == "video":
+            workflow = _randomize_video_seeds_if_zero(workflow)
+
+
+        # # 모델 인덱싱 확인 후 워크플로우 제출
+        # if not ensure_models_ready(max_wait=300):
+        #     raise RuntimeError("Models not indexed yet; retry later")
         
         # 워크플로우 실행
         started_at = time.time()
@@ -505,17 +559,92 @@ def process_task(job_input: JobInput) -> Dict[str, Any]:
 
 # RunPod 핸들러
 def handler(job):
-    """RunPod 작업 핸들러"""
-    try:
-        job_input = JobInput(**job["input"])
-        return process_task(job_input)
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+#     """RunPod 작업 핸들러"""
+#     try:
+#         job_input = JobInput(**job["input"])
+#         return process_task(job_input)
+#     except Exception as e:
+#         return {"success": False, "error": str(e)}
 
-if __name__ == "__main__":
-    print("🚀 Starting RunPod handler...")
-    print(f"ComfyUI URL: {COMFY_URL}")
-    print(f"Output dir: {OUTPUT_DIR}")
-    print(f"S3 bucket: {AWS_BUCKET}")
+# if __name__ == "__main__":
+#     print("🚀 Starting RunPod handler...")
+#     print(f"ComfyUI URL: {COMFY_URL}")
+#     print(f"Output dir: {OUTPUT_DIR}")
+#     print(f"S3 bucket: {AWS_BUCKET}")
+
+    """RunPod 작업 핸들러 (상위 3키)"""
+    import time, json, traceback
+    t0 = time.time()
+    print("🛰️ [handler] start")
+
+    try:
+        payload = job.get("input", {})
+        print(f"📥 [handler] raw input keys = {list(payload.keys()) if isinstance(payload, dict) else type(payload)}")
+
+        if not isinstance(payload, dict):
+            msg = "invalid input payload"
+            print(f"❌ [handler] {msg}")
+            return {"success": False, "error": msg}
+
+        # 필수 키 확인
+        task_type = payload.get("task_type")
+        workflow  = payload.get("workflow")
+        print(f"🧭 [handler] task_type={task_type}, workflow={workflow}")
+        if not task_type or not workflow:
+            msg = "missing required fields: task_type, workflow"
+            print(f"❌ [handler] {msg}")
+            return {"success": False, "error": msg}
+
+        # 상위 레벨 sugar 키
+        top_image  = payload.get("image_path")
+        top_prompt = payload.get("prompt", None)  # None이면 워크플로우 기본 프롬프트 사용
+
+        # task_type 정규화 + 상위 키를 각 섹션으로 이관
+        if task_type == "video":
+            payload.setdefault("video", {})
+            if top_image:
+                payload["video"]["image_path"] = top_image
+            if "prompt" in payload or top_prompt is not None:
+                payload["video"]["prompt"] = top_prompt
+
+        elif task_type in ("3d", "three_d"):
+            payload["task_type"] = "3d"  # 표준화
+            payload.setdefault("three_d", {})
+            if top_image:
+                payload["three_d"]["image_path"] = top_image
+            if "prompt" in payload or top_prompt is not None:
+                payload["three_d"]["prompt"] = top_prompt
+
+        else:
+            msg = f"unsupported task_type: {task_type}"
+            print(f"❌ [handler] {msg}")
+            return {"success": False, "error": msg}
+
+        # 상위 sugar 키는 제거 (검증 모델과 충돌 방지)
+        payload.pop("image_path", None)
+        payload.pop("prompt", None)
+
+        print(f"🧩 [handler] normalized payload = {json.dumps(payload, ensure_ascii=False)[:400]}...")
+
+        # pydantic 검증
+        job_input = JobInput(**payload)
+        print("✅ [handler] pydantic validation OK")
+
+        # 실행
+        print("🚀 [handler] dispatch -> process_task")
+        result = process_task(job_input)
+        ok = result.get("success", False)
+        dt = time.time() - t0
+        if ok:
+            print(f"🎉 [handler] done in {dt:.2f}s, outputs={len(result.get('outputs', []) or [])}")
+        else:
+            print(f"💥 [handler] failed in {dt:.2f}s, err={result.get('error')}")
+        return result
+
+    except Exception as e:
+        dt = time.time() - t0
+        print(f"💥 [handler] exception in {dt:.2f}s: {e}")
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
 
 runpod.serverless.start({"handler": handler})
