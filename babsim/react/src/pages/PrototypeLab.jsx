@@ -10,7 +10,7 @@ import {
   sendChatMessage,
   deleteChatSession
 } from '../services/chatService';
-import backgroundImage from '../assets/prototypelab.jpg';
+import backgroundImage from '../assets/PrototypeLab_background.png';
 
 function PrototypeLab() {
   const [chatSessions, setChatSessions] = useState([]);
@@ -73,10 +73,7 @@ function PrototypeLab() {
     viewpoint: "",
     body_type: "",
     body_classification: "",
-    body_classification: "",
     proportions: "",
-    surfacing: "",
-    fascia: "",
     surfacing: "",
     fascia: "",
     lighting: "",
@@ -198,19 +195,6 @@ function PrototypeLab() {
       completed: completedFields,
       total: totalFields,
       percentage: Math.round((completedFields / totalFields) * 100)
-    };
-  };
-
-  // 필수 항목만의 완료 상태 확인
-  const getRequiredChecklistCompletion = () => {
-    const requiredFields = ['viewpoint', 'body_type', 'color_finish'];
-    const completedRequired = requiredFields.filter(field => 
-      checklistData[field] && checklistData[field].trim() !== ""
-    ).length;
-    return {
-      completed: completedRequired,
-      total: requiredFields.length,
-      percentage: Math.round((completedRequired / requiredFields.length) * 100)
     };
   };
 
