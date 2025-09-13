@@ -10,7 +10,7 @@ import {
   sendChatMessage,
   deleteChatSession
 } from '../services/chatService';
-import backgroundImage from '../assets/PrototypeLab_background.png';
+import backgroundImage from '../assets/prototypelab.jpg';
 
 function PrototypeLab() {
   const [chatSessions, setChatSessions] = useState([]);
@@ -19,6 +19,8 @@ function PrototypeLab() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   // ... other state variables ...
 
   const { isAuthenticated, user } = useAuth(); // Context에서 인증 상태 가져오기
@@ -52,6 +54,7 @@ function PrototypeLab() {
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [isChecklistExpanded, setIsChecklistExpanded] = useState(false);
+  const [isChecklistHovered, setIsChecklistHovered] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState({
     viewpoint: false,
     bodyClassification: false,
@@ -69,11 +72,10 @@ function PrototypeLab() {
   const [checklistData, setChecklistData] = useState({
     viewpoint: "",
     body_type: "",
-    size_class: "",
+    body_classification: "",
     proportions: "",
-    surface: "",
-    front_elements: "",
-    side_elements: "",
+    surfacing: "",
+    fascia: "",
     lighting: "",
     glasshouse: "",
     aero: "",
@@ -122,6 +124,25 @@ function PrototypeLab() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // 이미지 업로드 핸들러
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 이미지 제거 핸들러
+  const handleImageRemove = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
   // 체크리스트 데이터 업데이트 함수
   const updateChecklistData = (field, value) => {
     setChecklistData(prev => {
@@ -146,6 +167,19 @@ function PrototypeLab() {
       completed: completedFields,
       total: totalFields,
       percentage: Math.round((completedFields / totalFields) * 100)
+    };
+  };
+
+  // 필수 항목만의 완료 상태 확인
+  const getRequiredChecklistCompletion = () => {
+    const requiredFields = ['viewpoint', 'body_type', 'color_finish'];
+    const completedRequired = requiredFields.filter(field => 
+      checklistData[field] && checklistData[field].trim() !== ""
+    ).length;
+    return {
+      completed: completedRequired,
+      total: requiredFields.length,
+      percentage: Math.round((completedRequired / requiredFields.length) * 100)
     };
   };
 
@@ -403,9 +437,17 @@ function PrototypeLab() {
       }
     }
     
-    const userMessage = { id: `user-${Date.now()}`, type: 'user', content: inputMessage, timestamp: new Date().toISOString() };
+    const userMessage = { 
+      id: `user-${Date.now()}`, 
+      type: 'user', 
+      content: inputMessage, 
+      timestamp: new Date().toISOString(),
+      image: imagePreview
+    };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setSelectedImage(null);
+    setImagePreview(null);
     setShouldAutoScroll(true);
 
     // 첫 번째 메시지인 경우 제목 자동 생성
@@ -598,9 +640,18 @@ function PrototypeLab() {
         
         return (
           <div key={message.id} className="flex justify-end mb-6">
-            <div className="bg-blue-600/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-blue-500/30">
+            <div className="bg-gray-700/90 backdrop-blur-md text-white rounded-2xl px-6 py-3 max-w-xs lg:max-w-md shadow-lg border border-gray-600/30">
+              {message.image && (
+                <div className="mb-3">
+                  <img 
+                    src={message.image} 
+                    alt="Uploaded" 
+                    className="w-full h-auto rounded-lg shadow-md"
+                  />
+                </div>
+              )}
               <p className="text-sm font-medium text-left">{message.content}</p>
-              <p className="text-xs text-blue-200 mt-2 opacity-80">
+                <p className="text-xs text-gray-300 mt-2 opacity-80">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>
             </div>
@@ -836,15 +887,8 @@ function PrototypeLab() {
       
       <div className="flex min-h-screen pt-16">
         {/* Left Sidebar - 대화 세션 이력 */}
-        <div 
-          className="fixed left-2 z-30 w-60"
-          style={{
-            top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
-            transform: 'none',
-            transition: 'top 0.1s ease-out'
-          }}
-        >
-          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[60vh] max-h-[80vh]">
+        <div className="fixed left-4 top-20 bottom-4 w-64 z-30">
+          <div className="bg-gray-800/70 backdrop-blur-md rounded-2xl border border-gray-600/50 shadow-2xl h-full">
             {/* Fixed Header */}
             <div className="p-6 border-b border-gray-700">
               <h3 className="text-xl font-bold text-white text-center">내 대화</h3>
@@ -853,7 +897,7 @@ function PrototypeLab() {
                   console.log('🖱️ 새 대화 버튼 클릭됨!');
                   startNewConversation();
                 }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 mt-4"
+                className="w-full bg-white hover:bg-gray-100 text-black font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 mt-4"
               >
                 <span className="text-lg">+</span>
                 <span>새로운 대화</span>
@@ -861,7 +905,7 @@ function PrototypeLab() {
             </div>
             
             {/* Scrollable Content */}
-            <div className="p-6 flex-1 min-h-[calc(60vh-120px)] max-h-[calc(80vh-120px)] overflow-y-auto">
+            <div className="p-6 flex-1 overflow-y-auto">
               <div className="space-y-4">
                 {chatSessions.map((session) => (
                   <div
@@ -869,7 +913,7 @@ function PrototypeLab() {
                     onClick={() => setCurrentSession(session)}
                     className={`p-3 rounded-lg cursor-pointer transition-colors group relative ${
                       currentSession?.session_id === session.session_id
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-gray-700 text-white'
                         : 'bg-gray-800/50 hover:bg-gray-800/70 text-gray-300'
                     }`}
                   >
@@ -898,7 +942,7 @@ function PrototypeLab() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col relative min-h-screen">
+        <div className="flex-1 flex flex-col relative min-h-screen ml-72">
           {/* Content Overlay */}
           <div className="relative z-10 flex-1 flex flex-col">
             {/* Hero Section */}
@@ -920,10 +964,8 @@ function PrototypeLab() {
             {/* Chat Container - 메시지와 입력창을 하나로 통합 */}
             <div className="flex-1 px-8 pb-4 relative">
               {/* Chat Messages - 백그라운드 위에 직접 배치 */}
-              <div className="relative z-10 h-full ml-60 mb-40">
-                <div className={`space-y-6 px-4 ${
-                  isChecklistExpanded ? 'mr-[calc(100vw-4rem)]' : 'mr-95'
-                } h-[calc(100vh-200px)] overflow-y-auto pb-20`}>
+              <div className="relative z-10 h-full mb-40">
+                <div className="space-y-6 px-4 h-[calc(100vh-200px)] overflow-y-auto pb-20">
                   {messages.map((message, index) => renderMessage(message, index))}
                   
                   {isLoading && !messages.some(msg => msg.isStreaming) && (
@@ -942,8 +984,40 @@ function PrototypeLab() {
               
               {/* Chat Input - 하단에 고정된 입력창 */}
               <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-8 z-20">
-                <div className="bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl p-4">
+                <div className="bg-gray-800/90 backdrop-blur-md rounded-3xl border border-gray-700/50 shadow-2xl p-4">
+                  {/* 이미지 미리보기 */}
+                  {imagePreview && (
+                    <div className="mb-4 relative">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-32 h-32 object-cover rounded-2xl shadow-lg"
+                      />
+                      <button
+                        onClick={handleImageRemove}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  
                   <form onSubmit={handleSendMessage} className="flex space-x-4">
+                    {/* 이미지 업로드 버튼 */}
+                      <label className="bg-white/90 hover:bg-gray-100/90 text-black rounded-2xl px-4 py-3 transition-all cursor-pointer flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm">이미지</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={!currentSession || isLoading}
+                      />
+                    </label>
+                    
                     <input
                       id="chat-input"
                       name="chatMessage"
@@ -951,17 +1025,17 @@ function PrototypeLab() {
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder="무엇이든 물어보세요"
-                      className="flex-1 bg-gray-700/90 backdrop-blur-sm border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className="flex-1 bg-gray-700/90 backdrop-blur-sm border border-gray-600/50 rounded-2xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       disabled={!currentSession || isLoading}
                     />
                     <button
                       type="submit"
-                      disabled={!inputMessage.trim() || !currentSession || isLoading}
+                      disabled={(!inputMessage.trim() && !selectedImage) || !currentSession || isLoading}
                       onClick={(e) => {
                         console.log('🔍 버튼 클릭됨!');
                         handleSendMessage(e);
                       }}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-xl px-6 py-3 transition-all disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                      className="bg-white hover:bg-gray-100 disabled:bg-gray-300 text-black rounded-2xl px-6 py-3 transition-all disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
                     >
                       <span>전송</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -975,97 +1049,133 @@ function PrototypeLab() {
           </div>
         </div>
 
-        {/* Right Sidebar - 체크리스트 */}
+        {/* Floating Design Checklist - 오른쪽 아래 */}
         <div 
-          className={`fixed right-2 z-40 transition-all duration-500 ease-in-out ${
-            isChecklistExpanded ? 'w-[calc(100vw-4rem)]' : 'w-96'
+          className={`fixed right-4 bottom-4 z-40 transition-all duration-500 ease-in-out ${
+            isChecklistExpanded 
+              ? 'w-[calc(100vw-8rem)] h-[calc(100vh-8rem)]' 
+              : isChecklistHovered 
+                ? 'w-[calc(100vw-8rem)] h-[calc(100vh-8rem)]' 
+                : 'w-auto h-auto'
           }`}
-          style={{
-            top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`,
-            transform: 'none',
-            transition: 'top 0.1s ease-out'
-          }}
+          onMouseEnter={() => setIsChecklistHovered(true)}
+          onMouseLeave={() => setIsChecklistHovered(false)}
         >
-          <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl min-h-[60vh] max-h-[80vh]">
-            {/* Fixed Header */}
-            <div className="p-6 border-b border-gray-700 flex items-center justify-between">
-              <div className="text-left">
-                <h3 className="text-xl font-bold text-white">🚗 디자인 체크리스트</h3>
-                <p className="text-gray-400 text-sm mt-2">자동차 프로토타입 생성 가이드</p>
-                {/* 체크리스트 완성도 표시 */}
-                <div className="mt-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-400">완성도</span>
-                    <span className="text-xs text-blue-400">{getChecklistCompletion().percentage}%</span>
+          <div className={`bg-gray-800/70 backdrop-blur-md rounded-2xl border border-gray-600/50 shadow-2xl transition-all duration-500 ${
+            isChecklistExpanded || isChecklistHovered ? 'h-full' : 'h-auto'
+          }`}>
+            {/* Collapsed State */}
+            {!isChecklistExpanded && !isChecklistHovered && (
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">🚗</span>
+                    <div>
+                      <h3 className="text-white font-bold text-sm">디자인 체크리스트</h3>
+                      <p className="text-gray-400 text-xs">자동차 프로토타입 생성 가이드</p>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${getChecklistCompletion().percentage}%` }}
-                    ></div>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-400">완성도</span>
+                        <span className="text-xs text-gray-300">{getChecklistCompletion().percentage}%</span>
+                      </div>
+                      <div className="w-20 bg-gray-700 rounded-full h-1.5">
+                        <div 
+                          className="bg-gray-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${getChecklistCompletion().percentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {getChecklistCompletion().completed}/{getChecklistCompletion().total} 항목 완료
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsChecklistExpanded(true);
+                        // 확장 시 모든 카테고리를 펼치기
+                        setSelectedCategories({
+                          viewpoint: true,
+                          bodyClassification: true,
+                          proportions: true,
+                          surfacing: true,
+                          fascia: true,
+                          lighting: true,
+                          wheels: true,
+                          glass: true,
+                          aero: true,
+                          color: true
+                        });
+                      }}
+                      className="bg-white hover:bg-gray-100 text-black p-2 rounded-lg transition-all duration-200"
+                      title="확장하기"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {getChecklistCompletion().completed}/{getChecklistCompletion().total} 항목 완료
-                  </p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setIsChecklistExpanded(!isChecklistExpanded);
-                  if (!isChecklistExpanded) {
-                    // 확장 시 모든 카테고리를 펼치기
-                    setSelectedCategories({
-                      viewpoint: true,
-                      bodyClassification: true,
-                      proportions: true,
-                      surfacing: true,
-                      fascia: true,
-                      lighting: true,
-                      wheels: true,
-                      glass: true,
-                      aero: true,
-                      color: true
-                    });
-                  } else {
-                    // 축소 시 모든 카테고리를 접기
-                    setSelectedCategories({
-                      viewpoint: false,
-                      bodyClassification: false,
-                      proportions: false,
-                      surfacing: false,
-                      fascia: false,
-                      lighting: false,
-                      wheels: false,
-                      glass: false,
-                      aero: false,
-                      color: false
-                    });
-                  }
-                }}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  isChecklistExpanded 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
-                title={isChecklistExpanded ? "축소하기" : "확장하기"}
-              >
-                {isChecklistExpanded ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
+            )}
+
+            {/* Expanded State */}
+            {(isChecklistExpanded || isChecklistHovered) && (
+              <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+                <div className="text-left">
+                  <h3 className="text-xl font-bold text-white">🚗 디자인 체크리스트</h3>
+                  <p className="text-gray-400 text-sm mt-2">자동차 프로토타입 생성 가이드</p>
+                  {/* 체크리스트 완성도 표시 */}
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-400">완성도</span>
+                      <span className="text-xs text-gray-300">{getChecklistCompletion().percentage}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-gray-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${getChecklistCompletion().percentage}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {getChecklistCompletion().completed}/{getChecklistCompletion().total} 항목 완료
+                    </p>
+                  </div>
+                </div>
+                {isChecklistExpanded && (
+                  <button
+                    onClick={() => {
+                      setIsChecklistExpanded(false);
+                      // 축소 시 모든 카테고리를 접기
+                      setSelectedCategories({
+                        viewpoint: false,
+                        bodyClassification: false,
+                        proportions: false,
+                        surfacing: false,
+                        fascia: false,
+                        lighting: false,
+                        wheels: false,
+                        glass: false,
+                        aero: false,
+                        color: false
+                      });
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all duration-200"
+                    title="축소하기"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 )}
-              </button>
-            </div>
+              </div>
+            )}
             
             {/* Content - 계층적 체크리스트 */}
-            <div className="p-6 min-h-[calc(60vh-240px)] max-h-[calc(80vh-240px)] overflow-y-auto">
-              <div className={`space-y-4 ${
-                isChecklistExpanded ? 'grid grid-cols-3 gap-4' : 'space-y-4'
-              }`}>
+            {(isChecklistExpanded || isChecklistHovered) && (
+              <div className="p-6 flex-1 overflow-y-auto">
+                <div className="space-y-4 grid grid-cols-3 gap-4">
                 {/* 뷰포인트 - 대분류만 표시 */}
                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-600/30">
                   <div className="flex items-center justify-between mb-3">
@@ -1139,8 +1249,8 @@ function PrototypeLab() {
                         <input 
                           type="text" 
                           placeholder="소형/준중형/중형/대형" 
-                          value={checklistData.size_class}
-                          onChange={(e) => updateChecklistData('size_class', e.target.value)}
+                          value={checklistData.body_classification}
+                          onChange={(e) => updateChecklistData('body_classification', e.target.value)}
                           className="w-48 bg-gray-700/80 border border-gray-600/50 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" 
                         />
                       </div>
@@ -1485,11 +1595,13 @@ function PrototypeLab() {
                     rows="3"
                   ></textarea>
                 </div>
+                </div>
               </div>
-            </div>
+            )}
             
             {/* 체크리스트 전송 버튼 */}
-            <div className="p-6 border-t border-gray-700">
+            {(isChecklistExpanded || isChecklistHovered) && (
+              <div className="p-6 border-t border-gray-700">
               <button
                 onClick={handleChecklistSubmit}
                 disabled={!isChecklistComplete}
@@ -1503,10 +1615,11 @@ function PrototypeLab() {
               </button>
               {!isChecklistComplete && (
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  필수 항목: {getChecklistCompletion().completed}/{getChecklistCompletion().total} 완료
+                  필수 항목: {getRequiredChecklistCompletion().completed}/{getRequiredChecklistCompletion().total} 완료
                 </p>
               )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

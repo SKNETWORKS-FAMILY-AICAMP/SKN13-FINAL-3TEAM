@@ -2,59 +2,141 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getAssets, uploadAsset, getComments, createComment, toggleAssetLike, toggleCommentLike } from '../services/libraryService';
-import backgroundImage from '../assets/AssetLibrary_background.png';
 
-// 자산 카테고리 대분류 구조
-const assetCategories = [
+// Import images
+import designBook1 from '../assets/design_book1.jpg';
+import designBook2 from '../assets/design_book2.jpg';
+import designBook3 from '../assets/design_book3.jpeg';
+import hyundaiDoc1 from '../assets/hyundai_document1.jpg';
+import hyundaiDoc2 from '../assets/hyundai_document2.jpg';
+import hyundaiDoc3 from '../assets/hyundai_document3.jpg';
+import hyundaiDoc4 from '../assets/hyundai_document4.jpg';
+import hyundaiDoc5 from '../assets/hyundai_document5.jpg';
+import hyundaiDoc6 from '../assets/hyundai_document6.jpg';
+
+
+
+// 카테고리 필터
+const categoryFilters = [
+  { id: 'all', name: 'All', active: true },
+  { id: 'design', name: 'Design' },
+  { id: 'engineering', name: 'Engineering' },
+  { id: 'philosophy', name: 'Philosophy' },
+  { id: 'business', name: 'Business' },
+  { id: 'education', name: 'Education' }
+];
+
+// 추천 문서 데이터
+const recommendedDocs = [
   {
-    name: '디자인 원리',
-    subItems: [
-      '디자인 철학',
-      '브랜드 아이덴티티',
-      '컨셉카'
-    ]
+    id: 1,
+    title: "현대자동차 디자인 철학",
+    author: "by 현대자동차 디자인팀",
+    image: hyundaiDoc1,
+    category: "디자인 철학"
   },
   {
-    name: '공학적 요소',
-    subItems: [
-      '공기역학',
-      '인간공학',
-      '재료 공학'
-    ]
+    id: 2,
+    title: "자동차 공기역학 연구",
+    author: "by 공학 연구소",
+    image: hyundaiDoc2,
+    category: "공기역학"
   },
   {
-    name: '차량 유형',
-    subItems: [
-      '전기차 디자인',
-      'SUV 디자인',
-      '세단 디자인'
-    ]
+    id: 3,
+    title: "디자인 원리 가이드",
+    author: "by 디자인 전문가",
+    image: designBook1,
+    category: "디자인 원리"
   },
   {
-    name: '디자인 요소',
-    subItems: [
-      '색상 디자인',
-      '인테리어 디자인',
-      '조명 디자인',
-      '휠 디자인'
-    ]
+    id: 4,
+    title: "인간공학적 접근",
+    author: "by UX 연구팀",
+    image: hyundaiDoc3,
+    category: "인간공학"
+  }
+];
+
+// 카테고리별 문서 데이터
+const categoryDocs = [
+  {
+    id: 1,
+    title: "현대자동차 디자인 철학",
+    author: "by 현대자동차 디자인팀",
+    image: hyundaiDoc1,
+    category: "디자인 철학",
+    rating: 4.5
   },
   {
-    name: '사용자 중심',
-    subItems: [
-      '사용자 경험',
-      '모터스튜디오'
-    ]
+    id: 2,
+    title: "자동차 공기역학 연구",
+    author: "by 공학 연구소",
+    image: hyundaiDoc2,
+    category: "공기역학",
+    rating: 4.3
+  },
+  {
+    id: 3,
+    title: "디자인 원리 가이드",
+    author: "by 디자인 전문가",
+    image: designBook1,
+    category: "디자인 원리",
+    rating: 4.8
+  },
+  {
+    id: 4,
+    title: "인간공학적 접근",
+    author: "by UX 연구팀",
+    image: hyundaiDoc3,
+    category: "인간공학",
+    rating: 4.2
+  },
+  {
+    id: 5,
+    title: "모터스튜디오 디자인",
+    author: "by 모터스튜디오",
+    image: hyundaiDoc4,
+    category: "모터스튜디오",
+    rating: 4.6
+  },
+  {
+    id: 6,
+    title: "색상 디자인 전략",
+    author: "by 컬러 전문가",
+    image: designBook2,
+    category: "색상 디자인",
+    rating: 4.4
+  },
+  {
+    id: 7,
+    title: "전기차 디자인 트렌드",
+    author: "by 미래 모빌리티팀",
+    image: hyundaiDoc5,
+    category: "전기차 디자인",
+    rating: 4.7
+  },
+  {
+    id: 8,
+    title: "브랜드 아이덴티티",
+    author: "by 브랜딩팀",
+    image: designBook3,
+    category: "브랜드 아이덴티티",
+    rating: 4.1
+  },
+  {
+    id: 9,
+    title: "재료 공학 연구",
+    author: "by 재료 연구소",
+    image: hyundaiDoc6,
+    category: "재료 공학",
+    rating: 4.0
   }
 ];
 
 function AssetLibrary() {
-  const [assets, setAssets] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeMenu, setActiveMenu] = useState('discover');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -69,79 +151,15 @@ function AssetLibrary() {
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState(new Set());
-  const [scrollY, setScrollY] = useState(0);
 
-  useEffect(() => {
-    loadAssets();
-  }, [currentPage, selectedCategories]);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const loadAssets = async () => {
-    setIsLoading(true);
-    try {
-      // 선택된 카테고리가 있으면 필터링 적용
-      const categoryFilter = selectedCategories.size > 0 ? Array.from(selectedCategories).join(',') : '';
-      const response = await getAssets(currentPage, 6, searchTerm, searchType, categoryFilter);
-      setAssets(response.results || []);
-      setTotalPages(Math.ceil(response.count / 6));
-    } catch (error) {
-      console.error('자산 로드 실패:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  // 사이드바 메뉴 클릭 핸들러
+  const handleMenuClick = (menuId) => {
+    setActiveMenu(menuId);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const searchValue = formData.get('search') || '';
-    setSearchTerm(searchValue);
-    setCurrentPage(1);
-    // 검색어가 변경된 후 loadAssets 호출
-    setTimeout(() => {
-      loadAssets();
-    }, 0);
-  };
-
-  // 카테고리 선택/해제 핸들러
-  const handleCategorySelect = (category) => {
-    setSelectedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-    setCurrentPage(1);
-  };
-
-  // 대분류 클릭 핸들러 (하위 모든 소분류 선택/해제)
-  const handleMainCategorySelect = (mainCategory) => {
-    const category = assetCategories.find(cat => cat.name === mainCategory);
-    if (!category) return;
-
-    const allSubItemsSelected = category.subItems.every(item => selectedCategories.has(item));
-    
-    setSelectedCategories(prev => {
-      const newSet = new Set(prev);
-      if (allSubItemsSelected) {
-        // 모든 하위 항목이 선택되어 있으면 모두 해제
-        category.subItems.forEach(item => newSet.delete(item));
-      } else {
-        // 일부만 선택되어 있으면 모두 선택
-        category.subItems.forEach(item => newSet.add(item));
-      }
-      return newSet;
-    });
-    setCurrentPage(1);
+  // 카테고리 필터 클릭 핸들러
+  const handleCategoryClick = (categoryId) => {
+    setActiveCategory(categoryId);
   };
 
   const handleAssetClick = async (asset) => {
@@ -273,8 +291,9 @@ function AssetLibrary() {
     window.open(pdfPath, '_blank');
   };
 
+
   return (
-    <div className="min-h-screen" style={{backgroundColor: '#353745'}}>
+    <div className="min-h-screen bg-gray-50">
       <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -291,109 +310,33 @@ function AssetLibrary() {
           }
         }
       `}</style>
-      <Header />
       
-      {/* Hero Section */}
-      <section className="relative py-24 lg:py-32" style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '60vh',
-        opacity: selectedAsset ? 0.8 : 1,
-        transition: 'opacity 0.3s ease-out'
-      }}>
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/50"></div>
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-6xl font-bold text-white mb-6">Asset Library</h1>
-          <p className="text-gray-300 text-xl mb-8">
-            A starting point of inspiration that sparks a designer's imagination.
-          </p>
-          <div className="text-gray-400 space-y-2 mb-8">
-            <p>디자인 리소스를 한눈에 모아보고 조합하세요.</p>
-            <p>자동차 디자인에 필요한 이미지, 컬러 팔레트, 파츠 요소 등을 태그 기반으로 쉽게 탐색할 수 있습니다.</p>
-          </div>
-          
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex flex-col max-w-md mx-auto space-y-3">
-            <div className="flex space-x-2">
-              <select
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-                className="px-3 py-3 bg-white border border-gray-300 rounded-l-lg text-gray-900 focus:outline-none focus:border-blue-500"
-              >
-                <option value="all">전체 검색</option>
-                <option value="title">제목만</option>
-                <option value="summary">요약만</option>
-              </select>
-                      <input
-        type="text"
-        name="search"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="검색어를 입력하세요"
-        className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-      />
-              <button 
-                type="submit"
-                className="px-6 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
-              >
-                Search
-              </button>
-            </div>
-          </form>
+      <Header isAssetLibrary={true} />
 
-          {/* Upload Button */}
-          <button
-            onClick={() => setShowUploadModal(true)}
-            className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            + 자산 업로드
-          </button>
-        </div>
-      </section>
-
-      {/* 자산 카테고리 박스 */}
-      <div className="fixed left-2 z-50 w-60 max-h-[80vh]" style={{ 
-        top: `${Math.max(24, window.innerHeight / 2 - 350 - Math.min(scrollY * 0.4, 80) + Math.min(scrollY * 0.4, 80))}px`, 
-        transform: 'none', 
-        transition: 'top 0.1s ease-out' 
-      }}>
-        <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-gray-700 shadow-2xl">
-          <div className="p-6 border-b border-gray-700">
-            <h3 className="text-xl font-bold text-white text-center">자산 카테고리</h3>
-          </div>
-          <div className="p-6 max-h-[calc(80vh-80px)] overflow-y-auto">
+      <div className="flex pt-20">
+        {/* Left Sidebar - Original Filtering Elements */}
+        <div className="w-64 bg-white border-r border-gray-200 min-h-screen p-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">자산 카테고리</h3>
             <div className="space-y-4">
-              {assetCategories.map((category, index) => (
-                <div key={index} className="border-b border-gray-700 pb-3 last:border-b-0">
+            {[
+              { name: '디자인 원리', subItems: ['디자인 철학', '브랜드 아이덴티티', '컨셉카'] },
+              { name: '공학적 요소', subItems: ['공기역학', '인간공학', '재료 공학'] },
+              { name: '차량 유형', subItems: ['전기차 디자인', 'SUV 디자인', '세단 디자인'] },
+              { name: '디자인 요소', subItems: ['색상 디자인', '인테리어 디자인', '조명 디자인', '휠 디자인'] },
+              { name: '사용자 중심', subItems: ['사용자 경험', '모터스튜디오'] }
+            ].map((category, index) => (
+              <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 
-                      className="text-lg font-semibold cursor-pointer transition-colors text-blue-400 hover:text-blue-300"
-                      onClick={() => handleMainCategorySelect(category.name)}
-                    >
+                  <h4 className="text-lg font-semibold cursor-pointer transition-colors text-blue-600 hover:text-blue-700">
                       {category.name}
                     </h4>
-                    {category.subItems.length > 0 && (
-                      <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
-                        {category.subItems.filter(item => selectedCategories.has(item)).length}/{category.subItems.length}
-                      </span>
-                    )}
                   </div>
                   {category.subItems.length > 0 && (
                     <div className="ml-4 space-y-1">
                       {category.subItems.map((item, itemIndex) => (
                         <div 
                           key={itemIndex} 
-                          className={`text-sm cursor-pointer transition-colors py-1 px-2 rounded ${
-                            selectedCategories.has(item)
-                              ? 'text-white bg-blue-600/50 border border-blue-500/50'
-                              : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                          }`}
-                          onClick={() => handleCategorySelect(item)}
+                        className="text-sm cursor-pointer transition-colors py-1 px-2 rounded text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                         >
                           {item}
                         </div>
@@ -402,137 +345,131 @@ function AssetLibrary() {
                   )}
                 </div>
               ))}
+        </div>
+      </div>
+
+        {/* Main Content - Wider Layout */}
+        <div className="flex-1 p-8">
+          {/* Search and Upload Section */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 max-w-md">
+                <form onSubmit={(e) => e.preventDefault()} className="flex">
+                  <input
+                    type="text"
+                    placeholder="Search any documents..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button 
+                    type="submit"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Search
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                + 자산 업로드
+              </button>
+            </div>
+          </div>
+
+          {/* Recommended Section */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Recommended</h2>
+              <button className="text-blue-600 hover:text-blue-700 font-medium">
+                See All &gt;
+              </button>
+                  </div>
+                  
+            <div className="flex space-x-6 overflow-x-auto pb-4">
+              {recommendedDocs.map((doc) => (
+                <div key={doc.id} className="flex-shrink-0 w-48">
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="h-32 bg-gray-200">
+                      <img 
+                        src={doc.image} 
+                        alt={doc.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
+                        {doc.title}
+                      </h3>
+                      <p className="text-gray-600 text-xs">{doc.author}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Categories Section - Wider Grid */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Categories</h2>
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+        </div>
+            
+            {/* Category Filters */}
+            <div className="flex space-x-3 mb-6 overflow-x-auto pb-2">
+              {categoryFilters.map((filter) => (
+                <button 
+                  key={filter.id}
+                  onClick={() => handleCategoryClick(filter.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    filter.active || activeCategory === filter.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {filter.name}
+                    </button>
+                  ))}
+            </div>
+            
+            {/* Documents Grid - 3x3 Layout with Taller Cards */}
+            <div className="grid grid-cols-3 gap-6">
+              {categoryDocs.slice(0, 9).map((doc) => (
+                <div key={doc.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="h-64 bg-gray-200 relative">
+                    <img 
+                      src={doc.image} 
+                      alt={doc.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {doc.rating && (
+                      <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                        <span className="mr-1">★</span>
+                        {doc.rating}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2">
+                      {doc.title}
+                    </h3>
+                    <p className="text-gray-600 text-xs">{doc.author}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <section className="py-12" style={{
-        opacity: selectedAsset ? 0.5 : 1,
-        transition: 'opacity 0.3s ease-out'
-      }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Assets Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '32px'
-          }}>
-            {isLoading ? (
-              <div className="col-span-full text-center text-white">로딩 중...</div>
-            ) : assets.length === 0 ? (
-              <div className="col-span-full text-center text-gray-400">
-                업로드된 자산이 없습니다.
-              </div>
-            ) : (
-              assets.map((asset) => (
-                <div 
-                  key={asset.lib_id}
-                  onClick={() => handleAssetClick(asset)}
-                  className="bg-gray-800 rounded-lg p-6 border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
-                      {asset.category}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      {asset.upload_date}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-white text-xl font-semibold mb-3 line-clamp-2">
-                    {asset.title}
-                  </h3>
-                  
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                    {asset.summary}
-                  </p>
-                  
-                  {asset.img_path && (
-                    <div className="bg-gray-700 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
-                      <img 
-                        src={asset.img_path} 
-                        alt="Asset preview" 
-                        className="max-w-full max-h-full object-contain rounded"
-                        onLoad={() => console.log('✅ 이미지 로드 성공:', asset.img_path)}
-                        onError={(e) => {
-                          console.log('❌ 이미지 로드 실패:', asset.img_path);
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
-                  {!asset.img_path && (
-                    <div className="bg-gray-700 rounded-lg p-4 mb-4 h-32 flex items-center justify-center">
-                      <p className="text-gray-400 text-sm">이미지 없음 (img_path: {asset.img_path})</p>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={(e) => handleAssetLike(asset.lib_id, e)}
-                        className="flex items-center space-x-1 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <span className="text-lg">❤️</span>
-                        <span className="text-sm">{asset.likes}</span>
-                      </button>
-                      <div className="flex items-center space-x-1 text-gray-400">
-                        <span className="text-lg">💬</span>
-                        <span className="text-sm">{asset.comment_count}</span>
-                      </div>
-                    </div>
-                    <div className="text-gray-400 text-xs">
-                      {asset.lib_name}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Pagination */}
-          {totalPages >= 1 && (
-            <div className="mt-12 flex flex-col items-center space-y-4">
-                      <div className="text-gray-400 text-sm">
-          한 페이지당 6개씩 표시
-        </div>
-              <div className="flex items-center justify-center space-x-4">
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                >
-                  ← 이전
-                </button>
-                <div className="flex space-x-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 rounded-full text-sm ${
-                        page === currentPage
-                          ? 'bg-gray-600 text-white'
-                          : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                >
-                  다음 →
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Asset Detail Modal */}
       {selectedAsset && (
@@ -546,43 +483,42 @@ function AssetLibrary() {
           {/* 어두운 배경 오버레이 */}
           <div 
             className="absolute inset-0 bg-black" 
-            style={{ opacity: 0.6 }}
+            style={{ opacity: 0.5 }}
           ></div>
           
           <div 
-            className="relative bg-gray-800 rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl border-2 border-gray-600"
+            className="relative bg-white rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200"
             style={{
-              animation: 'slideUp 0.3s ease-out',
-              backgroundColor: 'rgba(31, 41, 55, 0.95)'
+              animation: 'slideUp 0.3s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-start mb-6">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
-                  <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                     {selectedAsset.category}
                   </span>
-                  <span className="text-gray-400 text-sm">
+                  <span className="text-gray-500 text-sm">
                     {selectedAsset.upload_date}
                   </span>
                 </div>
-                <h2 className="text-white text-2xl font-semibold mb-3">
+                <h2 className="text-gray-900 text-2xl font-semibold mb-3">
                   {selectedAsset.title}
                 </h2>
-                <p className="text-gray-300 text-base mb-4">
+                <p className="text-gray-600 text-base mb-4">
                   {selectedAsset.summary}
                 </p>
                 {/* Asset Like Button */}
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleAssetLike(selectedAsset.lib_id)}
-                    className="flex items-center space-x-2 text-gray-400 hover:text-red-500 transition-colors"
+                    className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors"
                   >
                     <span className="text-xl">❤️</span>
                     <span className="text-sm">{selectedAsset.likes}</span>
                   </button>
-                  <div className="flex items-center space-x-2 text-gray-400">
+                  <div className="flex items-center space-x-2 text-gray-500">
                     <span className="text-lg">💬</span>
                     <span className="text-sm">{selectedAsset.comment_count}</span>
                   </div>
@@ -590,7 +526,7 @@ function AssetLibrary() {
               </div>
               <button
                 onClick={() => setSelectedAsset(null)}
-                className="text-gray-400 hover:text-white text-2xl ml-4"
+                className="text-gray-500 hover:text-gray-700 text-2xl ml-4"
               >
                 ✕
               </button>
@@ -599,7 +535,7 @@ function AssetLibrary() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {selectedAsset.img_path && (
                 <div>
-                  <h3 className="text-white text-lg font-semibold mb-3">대표 이미지</h3>
+                  <h3 className="text-gray-900 text-lg font-semibold mb-3">대표 이미지</h3>
                   <img 
                     src={selectedAsset.img_path} 
                     alt="Asset" 
@@ -612,9 +548,9 @@ function AssetLibrary() {
               )}
               
               <div>
-                <h3 className="text-white text-lg font-semibold mb-3">문서 정보</h3>
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <p className="text-gray-300 mb-2">
+                <h3 className="text-gray-900 text-lg font-semibold mb-3">문서 정보</h3>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-700 mb-2">
                     <span className="font-medium">파일명:</span> {selectedAsset.lib_name}
                   </p>
                   <button
@@ -629,32 +565,32 @@ function AssetLibrary() {
 
             {/* Comments Section */}
             <div className="mt-6">
-              <h3 className="text-white text-lg font-semibold mb-4">
+              <h3 className="text-gray-900 text-lg font-semibold mb-4">
                 댓글 ({comments.length})
               </h3>
               
               {/* Comments List */}
               <div className="space-y-3 mb-4 max-h-60 overflow-y-auto custom-scrollbar">
                 {comments.map((comment) => (
-                  <div key={comment.comment_id} className="bg-gray-700 rounded-lg p-4">
+                  <div key={comment.comment_id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <span className="text-white font-medium">{comment.username}</span>
-                        <span className="text-gray-400 text-xs">
+                        <span className="text-gray-900 font-medium">{comment.username}</span>
+                        <span className="text-gray-500 text-xs">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>
                       </div>
                       <button
                         onClick={() => handleCommentLike(comment.comment_id)}
                         className={`flex items-center space-x-1 text-sm transition-colors ${
-                          comment.user_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                          comment.user_liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
                         }`}
                       >
                         <span>❤️</span>
                         <span>{comment.likes}</span>
                       </button>
                     </div>
-                    <p className="text-white text-sm">{comment.comments}</p>
+                    <p className="text-gray-700 text-sm">{comment.comments}</p>
                   </div>
                 ))}
               </div>
@@ -666,7 +602,7 @@ function AssetLibrary() {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="댓글을 입력하세요..."
-                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   type="submit"
@@ -683,12 +619,12 @@ function AssetLibrary() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-white text-xl font-semibold">자산 업로드</h2>
+              <h2 className="text-gray-900 text-xl font-semibold">자산 업로드</h2>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-500 hover:text-gray-700"
               >
                 ✕
               </button>
@@ -696,46 +632,46 @@ function AssetLibrary() {
 
             <form onSubmit={handleUpload} className="space-y-4">
               <div>
-                <label className="block text-white text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   문서 파일 *
                 </label>
                 <input
                   type="file"
                   accept=".pdf"
                   onChange={handleFileUpload}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-white text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   커버 사진 (선택사항)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleCoverPhotoUpload}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-blue-500"
                 />
-                <p className="text-gray-400 text-xs mt-1">
+                <p className="text-gray-500 text-xs mt-1">
                   커버 사진을 업로드하지 않으면 제목을 기반으로 자동으로 이미지를 생성합니다.
                 </p>
                 {!uploadForm.coverPhoto && (
-                  <div className="mt-2 p-2 bg-gray-700 rounded border border-gray-600">
-                    <p className="text-blue-400 text-xs">
+                  <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                    <p className="text-blue-600 text-xs">
                       💡 커버 사진을 업로드하지 않으면 제목을 기반으로 Unsplash에서 관련 이미지를 자동으로 검색합니다.
                     </p>
                   </div>
                 )}
                 {uploadForm.coverPhoto && (
                   <div className="mt-2">
-                    <p className="text-green-400 text-xs mb-2">선택된 커버 사진:</p>
+                    <p className="text-green-600 text-xs mb-2">선택된 커버 사진:</p>
                     <div className="flex items-center space-x-2">
                       <img 
                         src={URL.createObjectURL(uploadForm.coverPhoto)} 
                         alt="Cover preview" 
-                        className="w-20 h-20 object-cover rounded border border-gray-600"
+                        className="w-20 h-20 object-cover rounded border border-gray-300"
                       />
                       <button
                         type="button"
@@ -750,7 +686,7 @@ function AssetLibrary() {
               </div>
 
               <div>
-                <label className="block text-white text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   제목 *
                 </label>
                 <input
@@ -758,13 +694,13 @@ function AssetLibrary() {
                   value={uploadForm.title}
                   onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="문서 제목을 입력하세요"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-white text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   요약 *
                 </label>
                 <textarea
@@ -772,19 +708,19 @@ function AssetLibrary() {
                   onChange={(e) => setUploadForm(prev => ({ ...prev, summary: e.target.value }))}
                   placeholder="문서 내용을 요약해주세요"
                   rows="3"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-white text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   카테고리 *
                 </label>
                 <select
                   value={uploadForm.category}
                   onChange={(e) => setUploadForm(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-blue-500"
                   required
                 >
                   <option value="">카테고리를 선택하세요</option>
@@ -818,7 +754,7 @@ function AssetLibrary() {
                   type="button"
                   onClick={() => setShowUploadModal(false)}
                   disabled={isUploading}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   취소
                 </button>
@@ -860,7 +796,8 @@ function AssetLibrary() {
         </div>
       )}
       
-      <Footer />
+      {/* Footer with custom styling for Asset Library */}
+      <Footer isAssetLibrary={true} />
     </div>
   );
 }

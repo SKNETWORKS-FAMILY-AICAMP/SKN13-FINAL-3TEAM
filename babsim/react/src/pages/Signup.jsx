@@ -74,7 +74,7 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen" style={{backgroundColor: '#353745'}}>
+    <div className="min-h-screen bg-black">
       <Header />
       
       {/* Main Content */}
@@ -91,15 +91,6 @@ function Signup() {
             </p>
           </div>
 
-          {/* Mock Data Info */}
-          <div className="bg-blue-600 text-white p-4 rounded-lg mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">🧪 개발 모드 - 더미 데이터 사용 중</h3>
-                <p className="text-sm opacity-90">회원가입 후 로그인하여 기능을 테스트해보세요.</p>
-              </div>
-            </div>
-          </div>
 
           {/* Signup Form Container */}
           <div className="bg-dark-blue rounded-lg p-8 border border-gray-700">
@@ -172,7 +163,7 @@ function Signup() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? '회원가입 중...' : 'Sign up'}
                   </button>
@@ -202,24 +193,6 @@ function Signup() {
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     <span>Sign up with Google</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => handleSocialSignup('Naver')}
-                    className="w-full bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center justify-center space-x-3"
-                  >
-                    <span className="font-bold text-lg">N</span>
-                    <span>Sign up with Naver</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => handleSocialSignup('Kakao')}
-                    className="w-full bg-yellow-400 text-black py-3 px-6 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-3"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 3C6.48 3 2 6.48 2 12s4.48 9 10 9 10-4.48 10-9S17.52 3 12 3zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>
-                    </svg>
-                    <span>Sign up with Kakao</span>
                   </button>
                 </div>
               </div>

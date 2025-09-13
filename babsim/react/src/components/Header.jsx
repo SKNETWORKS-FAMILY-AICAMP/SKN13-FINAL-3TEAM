@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function Header() {
+export default function Header({ isAssetLibrary = false }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef(null);
   const location = useLocation();
 
@@ -27,46 +28,74 @@ export default function Header() {
     };
   }, []);
 
+  // 스크롤 감지
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      // 100px 이상 스크롤하면 Header 숨김
+      setIsScrolled(scrollTop > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="bg-gray-800 rounded-t-lg fixed top-0 left-0 right-0 z-50" style={{ borderBottom: '1px solid #374151' }}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isAssetLibrary 
+        ? 'bg-white shadow-md' 
+        : isScrolled 
+          ? 'transform -translate-y-full' 
+          : 'bg-transparent'
+    }`}>
       <div className="w-full px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo - Left */}
           <div className="flex-shrink-0">
-            <div className="text-white font-bold text-2xl">
-              <span style={{color: '#60a5fa'}}>JACK</span>
-              <span>LETTE</span>
-            </div>
-            <div className="text-gray-400 text-sm">
-              with Hyundai Car
-            </div>
+            <Link to="/" className="block">
+              <div className="font-bold text-2xl tracking-tight italic">
+                <span style={{color: isAssetLibrary ? '#1f2937' : '#f6f3f2'}}>JJACK</span>
+                <span style={{color: isAssetLibrary ? '#1f2937' : '#f6f3f2'}}>LETTE</span>
+              </div>
+              <div className={`text-xs tracking-wide italic ${isAssetLibrary ? 'text-gray-600' : 'text-gray-400'}`}>
+                with Hyundai Car
+              </div>
+            </Link>
           </div>
           
           {/* Navigation Links - Center */}
-          <nav className="flex gap-12">
+          <nav className="flex gap-8">
             <Link 
               to="/" 
-              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
-                location.pathname === '/' ? 'border-b-2 border-purple-500 pb-1' : ''
-              }`} 
-              style={{color: 'white', textDecoration: 'none'}}
+              className={`relative transition-all duration-300 font-medium text-base ${
+                isAssetLibrary 
+                  ? location.pathname === '/' 
+                    ? 'text-gray-900 border-b-2 border-gray-900 pb-1' 
+                    : 'text-gray-700 hover:text-gray-900'
+                  : location.pathname === '/' 
+                    ? 'text-white border-b-2 border-white pb-1' 
+                    : 'text-white hover:text-gray-300'
+              }`}
             >
               Home
             </Link>
             <Link 
               to="/" 
-              className="text-white hover:text-gray-300 transition-colors font-medium text-lg" 
-              style={{color: 'white', textDecoration: 'none'}}
+              className={`relative transition-all duration-300 font-medium text-base ${
+                isAssetLibrary 
+                  ? 'text-gray-700 hover:text-gray-900'
+                  : 'text-white hover:text-gray-300'
+              }`}
               onClick={(e) => {
                 e.preventDefault();
-                // 현재 페이지가 홈페이지인 경우에만 스크롤
                 if (window.location.pathname === '/') {
                   const aboutSection = document.getElementById('about');
                   if (aboutSection) {
                     aboutSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 } else {
-                  // 다른 페이지에서 홈페이지로 이동 후 스크롤
                   window.location.href = '/#about';
                 }
               }}
@@ -75,94 +104,119 @@ export default function Header() {
             </Link>
             <Link 
               to="/library" 
-              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
-                location.pathname === '/library' ? 'border-b-2 border-purple-500 pb-1' : ''
-              }`} 
-              style={{color: 'white', textDecoration: 'none'}}
+              className={`relative transition-all duration-300 font-medium text-base ${
+                isAssetLibrary 
+                  ? location.pathname === '/library' 
+                    ? 'text-gray-900 border-b-2 border-gray-900 pb-1' 
+                    : 'text-gray-700 hover:text-gray-900'
+                  : location.pathname === '/library' 
+                    ? 'text-white border-b-2 border-white pb-1' 
+                    : 'text-white hover:text-gray-300'
+              }`}
             >
               Asset Library
             </Link>
             <Link 
               to="/insights" 
-              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
-                location.pathname === '/insights' ? 'border-b-2 border-purple-500 pb-1' : ''
-              }`} 
-              style={{color: 'white', textDecoration: 'none'}}
+              className={`relative transition-all duration-300 font-medium text-base ${
+                isAssetLibrary 
+                  ? location.pathname === '/insights' 
+                    ? 'text-gray-900 border-b-2 border-gray-900 pb-1' 
+                    : 'text-gray-700 hover:text-gray-900'
+                  : location.pathname === '/insights' 
+                    ? 'text-white border-b-2 border-white pb-1' 
+                    : 'text-white hover:text-gray-300'
+              }`}
             >
               Insight&Trends
             </Link>
             <Link 
               to="/lab" 
-              className={`text-white hover:text-gray-300 transition-colors font-medium text-lg ${
-                location.pathname === '/lab' ? 'border-b-2 border-purple-500 pb-1' : ''
-              }`} 
-              style={{color: 'white', textDecoration: 'none'}}
+              className={`relative transition-all duration-300 font-medium text-base ${
+                isAssetLibrary 
+                  ? location.pathname === '/lab' 
+                    ? 'text-gray-900 border-b-2 border-gray-900 pb-1' 
+                    : 'text-gray-700 hover:text-gray-900'
+                  : location.pathname === '/lab' 
+                    ? 'text-white border-b-2 border-white pb-1' 
+                    : 'text-white hover:text-gray-300'
+              }`}
             >
               Prototype Lab
             </Link>
           </nav>
 
           {/* Action Buttons - Right */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {isAuthenticated ? (
               // 로그인된 상태: 사용자 정보와 메뉴 버튼
               <div className="flex items-center space-x-4">
-                <div className="text-white text-sm">
+                <div className={`text-sm ${isAssetLibrary ? 'text-gray-700' : 'text-white'}`}>
                   <div className="font-medium">{user?.user_name}</div>
-                  <div className="text-gray-400">{user?.email}</div>
+                  <div className={`text-xs ${isAssetLibrary ? 'text-gray-500' : 'text-gray-400'}`}>{user?.email}</div>
                 </div>
                 
                 {/* 세 개의 점 메뉴 버튼 */}
                 <div className="relative" ref={menuRef}>
                   <button 
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="text-white p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    className={`p-2 rounded-lg transition-all duration-300 ${
+                      isAssetLibrary 
+                        ? 'text-gray-700 hover:bg-gray-100' 
+                        : 'text-white hover:bg-gray-800/50'
+                    }`}
                   >
-                    <div className="flex flex-col space-y-1">
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                    </div>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
                   </button>
                   
-                                     {/* 드롭다운 메뉴 */}
-                   {isMenuOpen && (
-                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                       <Link 
-                         to="/profile" 
-                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                         onClick={() => setIsMenuOpen(false)}
-                       >
-                         Profile
-                       </Link>
-                       <Link 
-                         to="/workspace" 
-                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                         onClick={() => setIsMenuOpen(false)}
-                       >
-                         My Workspace
-                       </Link>
-                       <hr className="my-1" />
-                       <button 
-                         onClick={handleLogout}
-                         className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
-                       >
-                         Logout
-                       </button>
-                     </div>
-                   )}
+                  {/* 드롭다운 메뉴 */}
+                  {isMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-md rounded-xl shadow-2xl py-2 z-50 border border-gray-700/50">
+                      <Link 
+                        to="/profile" 
+                        className="block px-4 py-3 text-white hover:bg-gray-800/50 transition-all duration-300 rounded-lg mx-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link 
+                        to="/myworkspace" 
+                        className="block px-4 py-3 text-white hover:bg-gray-800/50 transition-all duration-300 rounded-lg mx-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        My Workspace
+                      </Link>
+                      <hr className="my-2 border-gray-700" />
+                      <button 
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 transition-all duration-300 rounded-lg mx-2"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
               // 로그아웃된 상태: 로그인/회원가입 버튼
               <>
                 <Link to="/login">
-                  <button className="bg-blue-700 text-white px-8 py-3 rounded-full hover:bg-blue-800 transition-colors font-medium" style={{backgroundColor: '#60a5fa'}}>
+                  <button className={`px-8 py-3 rounded-full text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    isAssetLibrary 
+                      ? 'bg-transparent text-gray-700 border-2 border-gray-700 hover:bg-gray-700 hover:text-white' 
+                      : 'bg-transparent text-white border-2 border-white hover:bg-white hover:text-gray-900'
+                  }`}>
                     Sign in
                   </button>
                 </Link>
                 <Link to="/signup">
-                  <button className="bg-white text-blue-700 px-8 py-3 rounded-full hover:bg-gray-100 transition-colors font-medium">
+                  <button className={`px-8 py-3 rounded-full text-base font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                    isAssetLibrary 
+                      ? 'bg-gray-700 text-white hover:bg-gray-800' 
+                      : 'bg-white text-gray-900 hover:bg-gray-100'
+                  }`}>
                     Sign up
                   </button>
                 </Link>

@@ -1,80 +1,59 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-function Footer() {
-  const footerLinks = [
-    {
-      title: 'Quick Link',
-      links: ['About Us', 'Feature', 'Career', 'Contact Us']
-    },
-    {
-      title: 'Help',
-      links: ['Customer Support', 'Terms', 'Privacy', 'FAQs']
-    },
-    {
-      title: 'Others',
-      links: ['Start Trading', 'Earn Free Crypto', 'Crypto Wallete', 'Payment Option']
-    }
+function Footer({ isAssetLibrary = false }) {
+  const quickMenuLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Asset Library', path: '/asset-library' },
+    { name: 'Insight & Trends', path: '/insight-trends' },
+    { name: 'Prototype Lab', path: '/lab' }
   ];
 
   return (
-    <footer className="bg-dark-blue border-t border-gray-700">
+    <footer className={`${isAssetLibrary ? 'bg-white border-t border-gray-200' : 'bg-dark-blue border-t border-gray-700'}`}>
       <div className="w-full px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="flex flex-col items-center text-center">
           {/* Logo and Description */}
-          <div className="lg:col-span-2">
-            <h3 className="text-white font-bold text-xl mb-4">
+          <div className="mb-8">
+            <h3 className={`${isAssetLibrary ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-4`}>
               JACKLETTE with Hyundai Car
             </h3>
-            <p className="text-gray-400 mb-6">
+            <p className={`${isAssetLibrary ? 'text-gray-600' : 'text-gray-400'} mb-6`}>
               AI-powered automotive design support platform
             </p>
           </div>
 
-          {/* Footer Links */}
-          {footerLinks.map((section, index) => (
-            <div key={index}>
-              <h4 className="text-white font-semibold mb-4">{section.title}</h4>
-              <ul className="space-y-2">
-                {section.links.map((link, linkIndex) => (
-                  <li key={linkIndex}>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          {/* Download App */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Download App</h4>
-            <div className="space-y-3">
-              <button className="w-full bg-black text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 transition-colors">
-                <span>📱</span>
-                <span className="text-sm">Get It On Google Play</span>
-              </button>
-              <button className="w-full bg-black text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 transition-colors">
-                <span>🍎</span>
-                <span className="text-sm">Download On The App Store</span>
-              </button>
+          {/* Quick Menu */}
+          <div className="mb-8">
+            <h4 className={`${isAssetLibrary ? 'text-gray-900' : 'text-white'} font-semibold mb-4`}>Quick Menu</h4>
+            <div className="flex flex-wrap justify-center gap-6">
+              {quickMenuLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  to={link.path}
+                  className={`${isAssetLibrary ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white'} transition-colors font-medium`}
+                >
+                  {link.name}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © Copyright 2024, all right reserved by cryptodive
+        <div className={`${isAssetLibrary ? 'border-t border-gray-200' : 'border-t border-gray-700'} mt-8 pt-8 flex flex-col md:flex-row justify-between items-center`}>
+          <p className={`${isAssetLibrary ? 'text-gray-600' : 'text-gray-400'} text-sm`}>
+            © Copyright 2025, all right reserved by Babsim
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button className={`${isAssetLibrary ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white'} transition-colors`}>
               <span className="text-lg">a</span>
             </button>
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button className={`${isAssetLibrary ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white'} transition-colors`}>
               <span className="text-lg">⊞</span>
             </button>
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button className={`${isAssetLibrary ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white'} transition-colors`}>
               <span className="text-lg">×</span>
             </button>
           </div>

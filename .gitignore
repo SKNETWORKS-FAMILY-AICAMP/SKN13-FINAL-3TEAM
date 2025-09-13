@@ -149,9 +149,6 @@ Thumbs.db
 ### 데이터
 *.csv
 *.glb
-*.png
-*.jpg
-*.jpeg
 *.gif
 *.bmp
 *.tiff
