@@ -60,7 +60,7 @@ class StandardResultSetPagination(PageNumberPagination):
     QDRANT_PORT = int(getattr(settings, "QDRANT_PORT_REST", 6333))
     QDRANT_COLLECTION = getattr(settings, "QDRANT_COLLECTION", "babsim_rag_db")
     RAG_TOP_K = int(getattr(settings, "RAG_TOP_K", 5))
-    INFERENCE_URL = getattr(settings, "INFERENCE_SERVER_URL", "http://inference-server:8001")
+    # INFERENCE_URL = getattr(settings, "INFERENCE_SERVER_URL", "http://inference-server:8001")
     EMBEDDING_MODEL_NAME = getattr(settings, "EMBEDDING_MODEL_NAME", "BAAI/bge-m3")
     TOKENIZER_PATH = getattr(settings, "KANANA_MODEL_PATH", "/app/models/kanana-1.5-8b-instruct-2505")
 
