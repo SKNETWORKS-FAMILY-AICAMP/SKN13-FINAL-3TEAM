@@ -261,15 +261,15 @@ def get_output_files(since: Optional[float] = None) -> List[Path]:
 def _should_upload(path: Path, task_type: str) -> bool:
     """
     업로드 허용 규칙:
-      - video: mp4/mov만 (png/jpg 전부 제외 → 첫 프레임 PNG 자동 제외)
-      - 3d   : glb/obj만
+      - video: mp4
+      - 3d   : glb
       - 공통 : inputs 디렉토리는 이미 상단에서 제외
     """
     ext = path.suffix.lower()
     if task_type == "video":
         return ext in (".mp4", ".mov")
     if task_type == "3d":
-        return ext in (".glb", ".obj")
+        return ext == ".glb" and "textured" in path.stem.lower()
     return True
 
 def get_outputs_from_history(prompt_id: str) -> List[Path]:

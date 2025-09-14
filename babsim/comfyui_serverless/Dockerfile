@@ -187,7 +187,7 @@ RUN ln -sf /opt/ComfyUI/models /workspace/models && \
 COPY workflows/ /opt/baked_workflows/
 
 # 런타임 스크립트
-COPY start_pod.sh handler.py bootstrap_models.py ${WORKDIR}/
+COPY start_pod.sh handler.py ${WORKDIR}/
 RUN chmod +x ${WORKDIR}/start_pod.sh
 
 # Docker 이미지 크기 최적화 (필수)

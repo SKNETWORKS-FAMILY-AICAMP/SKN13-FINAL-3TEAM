@@ -30,7 +30,7 @@
   "class_type": "CLIPTextEncode",
   "_meta": { "title": "CLIP Text Encode (Negative Prompt)" },
   "inputs": {
-    "text": "lowres, blurry, soft, mushy, watercolor, jpeg artifacts, noise, banding, posterization, cartoon, anime, game render, plastic look, oversharpen halos, ringing, flicker, jitter, wobble, rolling-shutter, stutter, ghosting, trailing, sliding tires, floating, unrealistic physics, warped body, deformed wheels, extra or missing wheels, fused parts, duplicated parts, stretched textures, bad proportions, skewed perspective, tilted horizon, text, watermark, signature, UI overlays, overexposure, clipped highlights, crushed blacks, harsh vignette, strong color cast",
+    "text": "lowers, blurry, watercolor, jpeg artifacts, noise, banding, posterization, cartoon, anime, **flicker, wobble, jitter, rolling-shutter, warping, rubber-sheet, swimming textures**, **extra logos, duplicated logos, hood logo, decals, stickers, text, watermark, badges**, **sliding tires, floating, unrealistic physics, stretched textures, deformed wheels**, oversharpen halos, ringing, ghosting, trailing, shutter, tilted horizon, skewed perspective, harsh vignette, strong color cast",
     "clip": ["4", 0]
   }
 },
@@ -38,7 +38,7 @@
     "inputs": {
       "add_noise": true,
       "noise_seed": 0,
-      "cfg": 2.6,
+      "cfg": 2.8,
       "model": [
         "5",
         0
@@ -91,7 +91,7 @@
       "height": 720,
       "length": 240,
       "batch_size": 1,
-      "strength": 0.26,
+      "strength": 0.22,
       "positive": [
         "14",
         0
@@ -133,9 +133,9 @@
   },
   "11": {
     "inputs": {
-      "steps": 40,
-      "max_shift": 1.25,
-      "base_shift": 0.6,
+      "steps": 48,
+      "max_shift": 1.20,
+      "base_shift": 0.5,
       "stretch": false,
       "terminal": 0.07,
       "latent": [
@@ -155,7 +155,7 @@
       "filename_prefix": "AnimateDiff",
       "format": "video/h264-mp4",
       "pix_fmt": "yuv420p",
-      "crf": 19,
+      "crf": 18,
       "save_metadata": true,
       "pingpong": false,
       "save_output": true,
@@ -182,7 +182,7 @@
     "class_type": "CLIPTextEncode",
     "_meta": { "title": "CLIP Text Encode (Positive Prompt)" },
     "inputs": {
-      "text": "(masterpiece:1.1), (photorealistic:1.2), ultra-detailed textures, physically-based lighting, soft natural daylight, HDR tonality, global illumination, accurate reflections and shadows, temporal consistency, motion coherence, no flicker, no wobble, stable perspective, crisp fine details, micro-contrast preserved, faithful to the input image, preserve original shape and color (no design change:1.1), realistic camera tracking, smooth parallax, road-lane adherence, believable physics, (physically-accurate forward wheel rotation:1.25), natural motion blur on tires and road, logos/emblems sharp, clean background, 4k clarity, natural bokeh, balanced highlights and shadows, realistic glass, rubber, metallic speculars, subject centered, full vehicle in frame, slight 3/4 front-view bias, steady horizon, clean composition",
+      "text": "(masterpiece:1.1), (photorealistic:1.2), ultra-detailed, realistic automotive studio lighting, global illumination, **car driving forward in a straight line**, road contact realistic, subtle forward parallax, **preserve original Hyundai design and body color (no redesign:1.2)**, **front Hyundai emblem/logo sharp, intact, centered, no duplication (1.35)**, hood surface **clean (no text/decals/stickers/logos)**, **physically-cororect forward wheel rotation (1.25)**, **natural motion blur on tires and road**, shutter speed around 1/60s, stable perspective, **no wobble/flicker**, steady horizon, crisp panel gaps and trim, reflections accurate on paint and glass, 4k clarity",
       "clip": ["4", 0]
     }
   }

@@ -45,10 +45,10 @@
   },
   "35": {
     "inputs": {
-      "steps": 45,
+      "steps": 36,
       "width": 512,
       "height": 512,
-      "cfg_image": 1,
+      "cfg_image": 1.4,
       "seed": 0,
       "delight_pipe": [
         "28",
@@ -115,10 +115,10 @@
   },
   "61": {
     "inputs": {
-      "camera_azimuths": "0, 90, 180, 270, 0, 180",
-      "camera_elevations": "0, 0, 0, 0, 60, -60",
-      "view_weights": "1, 0.2, 0.6, 0.2, 0.05, 0.05",
-      "camera_distance": 1.35,
+      "camera_azimuths": "30, 330, 0, 60, 300, 30",
+      "camera_elevations": "0, 0, 0, 0, 0,-20",
+      "view_weights": "1, 0.2, 0.1, 0.2, 0.1, 1",
+      "camera_distance": 1.45,
       "ortho_scale": 1.2
     },
     "class_type": "Hy3DCameraConfig",
@@ -171,7 +171,7 @@
       "view_size": 512,
       "steps": 36,
       "seed": 12345,
-      "denoise_strength": 1,
+      "denoise_strength": 0.7,
       "pipeline": [
         "85",
         0

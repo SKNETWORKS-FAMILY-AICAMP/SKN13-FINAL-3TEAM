@@ -68,7 +68,7 @@ check_environment() {
 }
 
 # ====================================================================
-# 2. 디렉토리 및 심볼릭 링크 설정
+# 디렉토리 및 심볼릭 링크 설정
 # ====================================================================
 setup_directories() {
     log_info "=== Directory Setup ==="
@@ -108,7 +108,7 @@ setup_directories() {
 }
 
 # ====================================================================
-# 3. Python 환경 검증
+# Python 환경 검증
 # ====================================================================
 verify_python() {
     log_info "=== Python Environment Verification ==="
@@ -131,7 +131,7 @@ print('✓ All critical modules imported successfully')
 }
 
 # ====================================================================
-# 4. ComfyUI 서버 시작 (RunPod 최적화)
+#  ComfyUI 서버 시작 (RunPod 최적화)
 # ====================================================================
 start_comfyui() {
     log_info "=== Starting ComfyUI Server ==="
@@ -217,24 +217,9 @@ except:
     curl -sf -X POST http://127.0.0.1:8188/refresh_models >/dev/null 2>&1 || true
 }
 
-# ====================================================================
-# 5. Bootstrap 모델 다운로드 (선택적)
-# ====================================================================
-run_bootstrap() {
-    log_info "=== Running Bootstrap Models ==="
-    
-    if [[ -f /workspace/bootstrap_models.py ]]; then
-        log_info "Running additional model downloads..."
-        python /workspace/bootstrap_models.py || log_warn "Bootstrap failed (non-critical)"
-    else
-        log_info "No bootstrap script found, skipping"
-    fi
-    
-    log_info "✓ Bootstrap completed"
-}
 
 # ====================================================================
-# 6. RunPod 핸들러 시작
+#  RunPod 핸들러 시작
 # ====================================================================
 start_runpod_handler() {
     log_info "=== Starting RunPod Handler ==="
@@ -266,7 +251,6 @@ main() {
     setup_directories
     verify_python
     start_comfyui
-    run_bootstrap
     start_runpod_handler
 }
 
