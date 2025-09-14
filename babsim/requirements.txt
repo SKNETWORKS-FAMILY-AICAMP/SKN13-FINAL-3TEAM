@@ -11,6 +11,10 @@ psycopg2-binary==2.9.9
 django-allauth==0.57.0
 dj-rest-auth[with_social]==5.0.2
 
+# AWS S3 Storage
+boto3
+django-storages
+
 # Google API
 google-api-python-client==2.125.0
 google-auth-httplib2==0.2.0
