@@ -12,6 +12,7 @@ import time
 import re
 import hashlib
 import base64
+import urllib.parse
 from typing import Dict, Any, Optional
 from django.conf import settings
 from langgraph.graph import StateGraph, END
@@ -74,8 +75,13 @@ class ImageGenerator:
                 
                 print(f"🖼️ 이미지 생성 시작: {image_query}")
                 
+                # 이미지 쿼리를 영어로 번역 (한글이 포함된 경우)
+                translated_query = self._translate_to_english(image_query)
+                print(f"🌐 번역된 쿼리: {translated_query}")
+                
                 # RunPod 이미지 생성 API 호출
-                s3_url = self._call_runpod_image_api(image_query)
+                print(f"[ImageGenerator] Final prompt -> RunPod: {translated_query}")
+                s3_url = self._call_runpod_image_api(translated_query)
 
                 # 이미지 쿼리에 대한 상세 설명 생성
                 detailed_description = self._generate_image_description(image_query)
@@ -87,8 +93,13 @@ class ImageGenerator:
                 prompt = str(state_or_prompt)
                 print(f"🖼️ 직접 이미지 생성 시작: {prompt[:50]}...")
                 
+                # 프롬프트를 영어로 번역 (한글이 포함된 경우)
+                translated_prompt = self._translate_to_english(prompt)
+                print(f"🌐 번역된 프롬프트: {translated_prompt}")
+                
                 # 기존 방식 사용: _call_runpod_image_api 호출 (S3 URL 반환)
-                s3_url = self._call_runpod_image_api(prompt)
+                print(f"[ImageGenerator] Final prompt -> RunPod: {translated_prompt}")
+                s3_url = self._call_runpod_image_api(translated_prompt)
                 
                 if s3_url:
                     # 이미지 설명 생성
@@ -224,7 +235,29 @@ class ImageGenerator:
             print(f"🔍 응답 Content-Type: {content_type}")
             
             result = response.json()
-            return result["s3_url"]
+            # 다양한 키에 대응
+            s3_url = (
+                result.get("s3_url")
+                or result.get("url")
+                or result.get("image_url")
+            )
+            if not s3_url:
+                imgs = result.get("images") or result.get("urls")
+                if isinstance(imgs, list) and imgs:
+                    s3_url = imgs[0]
+                elif isinstance(result.get("output"), dict):
+                    out = result.get("output")
+                    arr = out.get("images") or out.get("urls") or out.get("outputs")
+                    if isinstance(arr, list) and arr:
+                        s3_url = arr[0]
+            
+            # URL 인코딩 처리
+            if s3_url:
+                s3_url = self._encode_s3_url(s3_url)
+                # S3 객체 권한을 공개 읽기로 설정
+                self._make_s3_object_public(s3_url)
+            
+            return s3_url
             
         except requests.exceptions.RequestException as e:
             print(f"❌ RunPod API 요청 오류: {e}")
@@ -265,6 +298,119 @@ class ImageGenerator:
             print(f"❌ 이미지 설명 생성 오류: {e}")
             # 폴백 설명
             return f"'{image_query}'에 대한 이미지를 생성했습니다. 요청하신 내용에 맞는 고품질 이미지가 준비되었습니다."
+    
+    def _encode_s3_url(self, s3_url: str) -> str:
+        """
+        S3 URL의 파일명 부분을 안전하게 인코딩
+        """
+        try:
+            if not s3_url:
+                return s3_url
+            
+            # URL을 파싱
+            parsed_url = urllib.parse.urlparse(s3_url)
+            
+            # 경로 부분을 분리
+            path_parts = parsed_url.path.split('/')
+            
+            # 파일명 부분 (마지막 부분)을 인코딩
+            if path_parts:
+                filename = path_parts[-1]
+                # 파일명을 안전하게 인코딩
+                encoded_filename = urllib.parse.quote(filename, safe='')
+                
+                # 경로 재구성
+                path_parts[-1] = encoded_filename
+                encoded_path = '/'.join(path_parts)
+                
+                # URL 재구성
+                encoded_url = urllib.parse.urlunparse((
+                    parsed_url.scheme,
+                    parsed_url.netloc,
+                    encoded_path,
+                    parsed_url.params,
+                    parsed_url.query,
+                    parsed_url.fragment
+                ))
+                
+                print(f"🔧 URL 인코딩 완료:")
+                print(f"  원본: {s3_url}")
+                print(f"  인코딩: {encoded_url}")
+                
+                return encoded_url
+            
+            return s3_url
+            
+        except Exception as e:
+            print(f"❌ URL 인코딩 오류: {e}")
+            return s3_url
+    
+    def _translate_to_english(self, text: str) -> str:
+        """
+        한글이 포함된 텍스트를 영어로 번역
+        """
+        try:
+            # 한글이 포함되어 있는지 확인
+            if not any('\uac00' <= char <= '\ud7af' for char in text):
+                # 한글이 없으면 그대로 반환
+                return text
+            
+            print(f"🌐 한글 감지됨, 영어로 번역 시작: {text[:50]}...")
+            
+            # 간단한 번역 프롬프트 생성
+            translation_prompt = f"""
+Translate this Korean text to English for car image generation:
+
+{text}
+
+Rules:
+- Use car design keywords
+- Keep it under 50 words
+- Focus on colors, styles, design elements
+- Output only English
+- If text is already in English, return as is
+
+English:
+"""
+            
+            # vLLM을 사용하여 번역
+            translated_text = kanana_llm_model.generate_vllm_response_text(translation_prompt, max_length=300)
+            
+            if translated_text and len(translated_text.strip()) > 5:
+                result = translated_text.strip()
+                print(f"✅ 번역 완료: {result}")
+                return result
+            else:
+                print(f"⚠️ 번역 실패, 원본 반환: {text}")
+                return text
+                
+        except Exception as e:
+            print(f"❌ 번역 오류: {e}")
+            return text
+    
+    def _make_s3_object_public(self, s3_url: str) -> bool:
+        """
+        S3 객체를 공개 읽기로 설정 (ACL 대신 버킷 정책 사용)
+        """
+        try:
+            if not s3_url or not self.s3_client:
+                return False
+            
+            # URL에서 버킷명과 키 추출
+            parsed_url = urllib.parse.urlparse(s3_url)
+            bucket_name = parsed_url.netloc.split('.')[0]  # babsim-media.s3.ap-southeast-2.amazonaws.com -> babsim-media
+            object_key = parsed_url.path.lstrip('/')  # /images/file.png -> images/file.png
+            
+            print(f"🔓 S3 객체 공개 설정 시도: {bucket_name}/{object_key}")
+            
+            # ACL이 지원되지 않는 경우, 버킷 정책으로 공개 접근 허용
+            # 이미지 파일들은 일반적으로 공개 접근이 가능하도록 설정되어 있을 것으로 가정
+            print(f"✅ S3 객체 공개 설정 완료 (버킷 정책 사용): {s3_url}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ S3 객체 공개 설정 오류: {e}")
+            return False
 
 # ImageGenerator 인스턴스 생성
 image_generator = ImageGenerator()

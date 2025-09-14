@@ -761,8 +761,12 @@ def build_query_from_history(state: PipelineState) -> Dict[str, Any]:
     if state["waiting_node"] != "build_query_from_history":
         interrupt({"is_loading": True, "generation_type": "image"})
     else:
-        # 이미지 쿼리 생성
-        image_query = _querygen.generate_image_query(state)
+        # 이미지 쿼리 생성 (체크리스트가 있으면 우선 사용)
+        checklist = state.get("checklist_data") or {}
+        if isinstance(checklist, dict) and any(v for v in checklist.values()):
+            image_query = _querygen.generate_image_query_from_checklist(checklist)
+        else:
+            image_query = _querygen.generate_image_query(state)
         
         print(f"[처리] 이미지 쿼리 생성 완료: '{image_query[:50]}...'")
         return {**state, "image_query": image_query, "waiting_node": ""}
@@ -800,9 +804,8 @@ def direct_record_and_build_query(state: PipelineState) -> Dict[str, Any]:
         desc = (state.get("user_query") or "").strip()
         if desc:
             _append_history(state, "user", desc)
-        # chat_history와 desc를 이용한 이미지 쿼리 생성 (폼 데이터 없이)
+        # chat_history와 사용자 desc를 이용한 이미지 쿼리 생성 (폼 데이터 없이)
         chat_history = state.get("chat_history", [])
-        desc = state.get("response", "")  # 현재 응답을 desc로 사용
         query = _querygen.generate_image_query_from_chat(chat_history=chat_history, desc=desc)
         state["image_query"] = query
         print(f"[처리] 직접 생성 쿼리 생성 완료: '{query[:50]}...'")
@@ -852,7 +855,8 @@ def ask_modify(state: PipelineState) -> PipelineState:
                 return {
                     "response": "3D 영상을 생성하겠습니다.",
                     "pipeline_step": "run_3d_generation",
-                    "modification_request": user_input  # 3D / 4D 생성에 user input 사용할 수도..
+                    "modification_request": user_input,
+                    "generation_type": "3d"
                 }
             elif modify_intent == "4d_generation":
                 # 4D 생성을 원함
@@ -860,7 +864,8 @@ def ask_modify(state: PipelineState) -> PipelineState:
                 return {
                     "response": "4D 영상을 생성하겠습니다.",
                     "pipeline_step": "run_4d_generation",
-                    "modification_request": user_input
+                    "modification_request": user_input,
+                    "generation_type": "4d"
                 }
             else:
                 # 수정을 원하지 않음
@@ -884,7 +889,7 @@ def modify_image(state: PipelineState) -> PipelineState:
     print(f"[처리] 이미지 수정 요청: '{modification_request[:50]}...'")
     
     # 이미지 수정을 위한 state 준비
-    modify_state = {**state, "user_query": modification_request}
+    modify_state = {**state, "image_query": modification_request}
     
     # 이미지 수정
     response, s3_url = _image_modifier.modify_image(modify_state)
@@ -894,7 +899,7 @@ def modify_image(state: PipelineState) -> PipelineState:
     updated = chat_manager.add_message(updated, "assistant", response)
     
     print(f"[처리] 이미지 수정 완료: '{response[:50]}...' (S3: {s3_url[:30] if s3_url else 'None'}...)")
-    return {**state, "chat_history": updated, "response": response, "s3_url": s3_url}
+    return {**state, "chat_history": updated, "response": response, "s3_url": s3_url, "generation_type": "image"}
 
 # -----------------------------
 # 3D/4D Generation nodes
@@ -1084,11 +1089,11 @@ def run_3d_generation(state: PipelineState) -> Dict[str, Any]:
     
     # 결과를 상태에 저장
     state["s3_url_3d"] = result["s3_url_3d"]
-    state["generation_type"] = result["generation_type"]
+    state["generation_type"] = "3d"
     
     return {
         "s3_url_3d": result["s3_url_3d"],
-        "generation_type": result["generation_type"],
+        "generation_type": "3d",
         "response": f"3D 모델이 생성되었습니다! 🎉\n\n3D 모델: {result['s3_url_3d']}",
         "waiting_node": "show_3d_4d_result"
     }
@@ -1109,18 +1114,18 @@ def run_4d_generation(state: PipelineState) -> Dict[str, Any]:
     
     # 결과를 상태에 저장
     state["s3_url_4d"] = result["s3_url_4d"]
-    state["generation_type"] = result["generation_type"]
+    state["generation_type"] = "4d"
     
     return {
         "s3_url_4d": result["s3_url_4d"],
-        "generation_type": result["generation_type"],
+        "generation_type": "4d",
         "response": f"4D 모델이 생성되었습니다! 🎉\n\n4D 모델: {result['s3_url_4d']}",
         "waiting_node": "show_3d_4d_result"
     }
 
 def show_3d_4d_result(state: PipelineState) -> PipelineState:
     """3D/4D 결과 표시 및 후속 액션 노드"""
-    generation_type = state.get("generation_type", "")
+    generation_type = (state.get("generation_type", "") or "").lower()
     s3_url_3d = state.get("s3_url_3d", "")
     s3_url_4d = state.get("s3_url_4d", "")
     
@@ -1199,14 +1204,29 @@ def store_mod_image(state: PipelineState) -> Dict[str, Any]:
     print(f"[분기] store_mod_image 노드 접근")
     # user_query에서 받은 사용자 입력을 사용
     user_query = (state.get("user_query") or "").strip()
+    norm = user_query.lower()
+    # 3D/4D 키워드를 이 단계에서 감지하면 해당 생성으로 라우팅
+    if any(k in norm for k in ["3d", "3 d", "3디", "3차원"]):
+        if not state.get("s3_url"):
+            return {"error": "3D 생성을 위해 먼저 이미지를 생성해주세요."}
+        return {"pipeline_step": "run_3d_generation"}
+    if any(k in norm for k in ["4d", "4 d", "4디", "4차원"]):
+        if not state.get("s3_url"):
+            return {"error": "4D 생성을 위해 먼저 이미지를 생성해주세요."}
+        return {"pipeline_step": "run_4d_generation"}
+
     if user_query == "계속":
         if not state.get("s3_url"):
             return {"error": "기존에 생성된 이미지가 존재하지 않습니다."}
         else:
             url = state.get("s3_url")
     elif user_query: # url 형식
-        # image_modifier.modify_image expects 'input_image' in state (commonly)
-        url = user_query
+        # URL 유효성 최소 확인 (http/https로 시작)
+        if user_query.startswith("http://") or user_query.startswith("https://"):
+            url = user_query
+        else:
+            # 유효하지 않은 입력 처리
+            return {"error": "유효한 이미지 URL을 입력하거나 '계속'을 입력해주세요."}
         _append_history(state, "user", f"[이미지 URL] {url}")
         print(f"[처리] 이미지 URL 저장 완료: '{url[:50]}...'")
     else:
@@ -1255,16 +1275,18 @@ def run_image_modification(state: PipelineState) -> Dict[str, Any]:
         interrupt({"is_loading": True, "generation_type": "image"})
     else:
         print(f"[처리] 이미지 수정 실행 중...")
-        out = modify_image(dict(state))
-        response = "이미지 수정이 완료되었습니다 !!"
-        for k in ["s3_url", "generated_image", "image_generation_status", "response", "error"]:
-            if k in out: state[k] = out[k]
-        if not state.get("response"):
-            msg = state.get("s3_url") or state.get("generated_image") or "이미지 수정 완료"
-            response = f"이미지 수정이 완료되었습니다! 🛠️\n\n결과: {msg}"
-        print(f"[처리] 이미지 수정 완료")
+        out = modify_image(dict(state))  # 노드 함수 호출 (ImageModifier 포함)
+        # out은 dict 형태로 s3_url/response를 포함
+        response = out.get("response") or "이미지 수정이 완료되었습니다 !!"
+        s3_url = out.get("s3_url") or state.get("s3_url")
+        # 상태 반영
+        if s3_url:
+            state["s3_url"] = s3_url
+        if out.get("error"):
+            state["error"] = out["error"]
+        print(f"[처리] 이미지 수정 완료: s3_url={s3_url}")
 
-        return {"response": response}
+        return {"response": response, "s3_url": s3_url, "generation_type": "image"}
 
 
 # -----------------------------
@@ -1424,10 +1446,11 @@ def create_text_pipeline():
     # ask_modify에서 라우팅
     g.add_conditional_edges(
         "ask_modify",
-        lambda s: "modify" if s.get("pipeline_step") == "modify_image" else "3d_4d_ask" if s.get("pipeline_step") in ["run_3d_generation", "run_4d_generation"] else "finish",
+        lambda s: "modify" if s.get("pipeline_step") == "modify_image" else "3d_generation" if s.get("pipeline_step") == "run_3d_generation" else "4d_generation" if s.get("pipeline_step") == "run_4d_generation" else "finish",
         {
             "modify": "mod_intro",
-            "3d_4d_ask": "ask_3d_4d_generation",
+            "3d_generation": "run_3d_generation",
+            "4d_generation": "run_4d_generation",
             "finish": "finalize"
         },
     )

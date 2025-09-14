@@ -51,22 +51,30 @@ class Generator3D:
                 "Content-Type": "application/json"
             }
             
-            # RunPod API 호출
+            # RunPod API 호출 (동기 방식)
             response = requests.post(
-                f"{self.serverless_url.rstrip('/')}/run",
+                f"{self.serverless_url.rstrip('/')}/runsync",
                 headers=headers,
                 json=payload,
                 timeout=300  # 5분 타임아웃
             )
             
-            if response.status != "COMPLETED":
+            if response.status_code != 200:
                 return {
                     "error": f"RunPod API 호출 실패: {response.status_code} - {response.text}",
                     "generation_type": "3D",
-                    "s3_url_3d": None
+                    "s3_url_3d": ""
                 }
-            
+
             result = response.json()
+            print(f"[3D 생성기] RunPod 응답: {result}")
+
+            if result.get("status") != "COMPLETED":
+                return {
+                    "error": f"RunPod 작업 실패: {result.get('error', '알 수 없는 오류')}",
+                    "generation_type": "3D",
+                    "s3_url_3d": ""
+                }
             print(f"[3D 생성기] RunPod 응답: {result}")
             
             # 직접 결과 확인 (동기 처리)

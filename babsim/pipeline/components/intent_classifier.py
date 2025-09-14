@@ -61,6 +61,12 @@ class IntentClassifier:
     def classify_initial_intent(self, user_query: str) -> str:
         """1단계: 사용자 쿼리의 초기 의도를 분류"""
         try:
+            # 3D/4D 요청을 먼저 확인 -> 초기에는 이미지 생성 경로로 라우팅
+            # 이후 ask_modify 단계에서 3D/4D 선택을 통해 정확히 분기됨
+            if any(keyword in (user_query or '').lower() for keyword in ['3d', '4d', '3차원', '4차원', '입체', '영상']):
+                print(f"3D/4D 요청 감지: '{user_query}' -> 'image_generation'")
+                return "image_generation"
+            
             # 초기 의도 분류 프롬프트 생성
             prompt = self.initial_prompt_template.format(user_query=user_query)
             
@@ -147,9 +153,11 @@ class IntentClassifier:
 
 다음 중 하나로 분류해주세요:
 - modify: 이미지 수정을 원함 (색상 변경, 디자인 요소 추가/제거, 스타일 변경 등)
-- 3d_generation: 이미지를 바탕으로 3D 영상을 원함 (3D 이미지, 3D 모델, 3D 생성)
-- 4d_generation: 이미지를 바탕으로 4D 영상을 원함 (4D 이미지, 4D 모델, 4D 생성)
+- 3d_generation: 이미지를 바탕으로 3D 영상을 원함 (3D, 3D 만들래, 3D 생성, 3D 모델, 3D 이미지 등)
+- 4d_generation: 이미지를 바탕으로 4D 영상을 원함 (4D, 4D 만들래, 4D 생성, 4D 모델, 4D 이미지 등)
 - finish: 더 이상 대화를 원하지 않음 (고마워, 굳굳, 괜찮습니다 등)
+
+특별히 "3D 만들래", "4D 만들래", "3D도 만들래", "4D도 만들래" 같은 표현은 각각 3d_generation, 4d_generation으로 분류하세요.
 
 분류 결과만 답변해주세요:
 """

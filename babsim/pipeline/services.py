@@ -114,7 +114,8 @@ class BabsimPipelineService:
     def save_generated_result(self, prompt_log: PromptLog, result_type: str, result: str) -> PromptLog:
         """생성 결과 저장 (PromptLog 모델에 직접 저장)"""
         prompt_log.result_type = result_type
-        prompt_log.result_path = result
+        # result_path 필드 길이 제한 (255자)
+        prompt_log.result_path = result[:255] if len(result) > 255 else result
         prompt_log.save()
         logger.info(f"생성 결과 저장: {prompt_log.prompt_id}")
         return prompt_log
@@ -363,7 +364,7 @@ class BabsimPipelineService:
                 # 이전에 interrupt가 발생했고, 사용자 입력이 있는 경우만 재실행
                 # waiting_node는 체크포인터에 저장되지 않으므로 current_state.next만 확인
                 is_resume = (current_state.next is not None and 
-                        #    current_state.values.get("waiting_node") is not None and
+                           len(current_state.next) > 0 and
                            user_query.strip() != "")
                 print(f"🔍 체크포인터 상태 확인 - is_resume: {is_resume}")
                 print(f"🔍 current_state.next: {current_state.next}")
@@ -383,12 +384,15 @@ class BabsimPipelineService:
                 # Command(resume=...)을 사용할 때는 현재 상태에 데이터를 추가
                 print(f"🔍 checklist_data 값 확인: {checklist_data}")
                 print(f"🔍 completion_status 값 확인: {completion_status}")
+                # current_state.next가 비어있지 않은지 확인
+                waiting_node = current_state.next[0] if current_state.next else None
+                
                 resume_data = {
                     "user_query": user_query,
                     "user_id": user_id,
                     "streaming_id": None,  # 스트리밍 ID 초기화
                     "is_streaming": False,  # 스트리밍 상태 초기화
-                    "waiting_node": current_state.next[0],
+                    "waiting_node": waiting_node,
                     "response": current_state.values.get("response"),
                     "current_field_conversation": current_state.values.get("current_field_conversation", ""),
                 }
@@ -411,6 +415,10 @@ class BabsimPipelineService:
             
             # interrupt가 발생한 경우 처리
             interrupt_data = {}
+            is_loading = False  # 기본값 설정
+            is_streaming = False  # 기본값 설정
+            streaming_id = ''  # 기본값 설정
+            
             if '__interrupt__' in pipeline_result:
                 print(f"🔍 Interrupt 발생: {pipeline_result['__interrupt__']}")
                 # interrupt에서 마지막 메시지 추출
