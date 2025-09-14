@@ -1,0 +1,26 @@
+[2025-09-11T07:08:54.058+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: update_car_data.import_car_data manual__2025-09-11T07:08:33.295864+00:00 [queued]>
+[2025-09-11T07:08:54.068+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: update_car_data.import_car_data manual__2025-09-11T07:08:33.295864+00:00 [queued]>
+[2025-09-11T07:08:54.069+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 1
+[2025-09-11T07:08:54.085+0000] {taskinstance.py:2191} INFO - Executing <Task(BashOperator): import_car_data> on 2025-09-11 07:08:33.295864+00:00
+[2025-09-11T07:08:54.093+0000] {standard_task_runner.py:60} INFO - Started process 462 to run task
+[2025-09-11T07:08:54.097+0000] {standard_task_runner.py:87} INFO - Running: ['airflow', 'tasks', 'run', 'update_car_data', 'import_car_data', 'manual__2025-09-11T07:08:33.295864+00:00', '--job-id', '21', '--raw', '--subdir', 'DAGS_FOLDER/update_car_data_dag.py', '--cfg-path', '/tmp/tmpub_hrskp']
+[2025-09-11T07:08:54.099+0000] {standard_task_runner.py:88} INFO - Job 21: Subtask import_car_data
+[2025-09-11T07:08:54.184+0000] {task_command.py:423} INFO - Running <TaskInstance: update_car_data.import_car_data manual__2025-09-11T07:08:33.295864+00:00 [running]> on host ac997e53370e
+[2025-09-11T07:08:54.309+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='update_car_data' AIRFLOW_CTX_TASK_ID='import_car_data' AIRFLOW_CTX_EXECUTION_DATE='2025-09-11T07:08:33.295864+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-09-11T07:08:33.295864+00:00'
+[2025-09-11T07:08:54.310+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2025-09-11T07:08:54.311+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'docker compose exec django_gunicorn python manage.py import_data']
+[2025-09-11T07:08:54.327+0000] {subprocess.py:86} INFO - Output:
+[2025-09-11T07:08:54.344+0000] {subprocess.py:93} INFO - docker: 'compose' is not a docker command.
+[2025-09-11T07:08:54.344+0000] {subprocess.py:93} INFO - See 'docker --help'
+[2025-09-11T07:08:54.345+0000] {subprocess.py:97} INFO - Command exited with return code 1
+[2025-09-11T07:08:54.367+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/bash.py", line 212, in execute
+    raise AirflowException(
+airflow.exceptions.AirflowException: Bash command failed. The command returned a non-zero exit code 1.
+[2025-09-11T07:08:54.371+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=update_car_data, task_id=import_car_data, execution_date=20250911T070833, start_date=20250911T070854, end_date=20250911T070854
+[2025-09-11T07:08:54.385+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 21 for task import_car_data (Bash command failed. The command returned a non-zero exit code 1.; 462)
+[2025-09-11T07:08:54.429+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2025-09-11T07:08:54.459+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check
