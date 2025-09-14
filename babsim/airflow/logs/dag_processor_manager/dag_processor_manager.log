@@ -10152,3 +10152,57 @@ File Path                                   PID  Runtime      # DAGs    # Errors
 /opt/airflow/dags/update_car_data_dag.py    473  0.01s             1           0  0.15s           2025-09-11T07:35:23
 ================================================================================
 [2025-09-11T07:36:04.619+0000] {manager.py:451} INFO - Exiting gracefully upon receiving signal 15
+[2025-09-11T08:17:30.024+0000] {manager.py:469} INFO - Processing files using up to 2 processes at a time 
+[2025-09-11T08:17:30.026+0000] {manager.py:470} INFO - Process each file at most once every 30 seconds
+[2025-09-11T08:17:30.026+0000] {manager.py:471} INFO - Checking for new files in /opt/airflow/dags every 300 seconds
+[2025-09-11T08:17:30.026+0000] {manager.py:738} INFO - Searching for files in /opt/airflow/dags
+[2025-09-11T08:17:30.028+0000] {manager.py:741} INFO - There are 1 files in /opt/airflow/dags
+[2025-09-11T08:17:30.153+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                   PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  ----------
+/opt/airflow/dags/update_car_data_dag.py    162  0.05s             0           0
+================================================================================
+[2025-09-11T08:18:00.303+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                 PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/update_car_data_dag.py                           1           0  0.21s           2025-09-11T08:17:30
+================================================================================
+[2025-09-11T08:18:30.602+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                 PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/update_car_data_dag.py                           1           0  0.16s           2025-09-11T08:18:00
+================================================================================
+[2025-09-11T08:19:00.907+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                   PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/update_car_data_dag.py    178  0.01s             1           0  0.14s           2025-09-11T08:18:30
+================================================================================
+[2025-09-11T08:19:31.202+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                   PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/update_car_data_dag.py    183  0.01s             1           0  0.16s           2025-09-11T08:19:01
+================================================================================
+[2025-09-11T08:20:01.388+0000] {manager.py:879} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                   PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+----------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/update_car_data_dag.py    188  0.01s             1           0  0.14s           2025-09-11T08:19:31
+================================================================================
+[2025-09-11T08:20:10.500+0000] {manager.py:451} INFO - Exiting gracefully upon receiving signal 15
