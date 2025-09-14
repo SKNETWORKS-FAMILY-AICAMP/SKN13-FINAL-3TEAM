@@ -2,113 +2,161 @@
 # 외부 데이터를 모델 객체로 역직렬화(Deserialization)하는 역할
 # 예: 사용자 정보, 아이템 정보 등을 React.js로 보내기 위해 모델 데이터를 JSON으로 변환
 
-from django.db.models import Q
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Users, ChatSession, PromptLog, GeneratedResult, InsightTrends, UserReview, EngineeringSpec, DesignMaterial, SalesStat, AssetLibrary, LibraryComments
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import *
 
+# 사용자 상세 정보 (ERD의 모든 필드 포함)
+class UserDetailSerializer(serializers.ModelSerializer):
+    # e_mail = serializers.EmailField(source='email')
+    # user_name = serializers.CharField(source='first_name')
+    class Meta:
+        model = Users
+        fields = (
+            'user_id', 'user_name', 'email', 'phone_number', 
+            'company', 'department', 'position', 'profile_image', 
+            'background_image', 'created_at', 'last_login'
+        )
 
-# --- Users
-class UserDetailSerializer(serializers.Serializer):
-    user_id   = serializers.UUIDField(source="id")
-    user_name = serializers.CharField(source="username")
-    e_mail    = serializers.EmailField(source="email")
-    created_at = serializers.DateTimeField(source="date_joined", format=None)  # [UPDATED]
-    last_login = serializers.DateTimeField(format=None, allow_null=True)       # [UPDATED]
-
-class UserRegistrationSerializer(serializers.Serializer):
-    user_name = serializers.CharField()
-    e_mail = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True)
+# 회원가입 데이터 처리
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    # user_name = serializers.CharField(write_only=True, required=True)
+    # e_mail = serializers.EmailField(source='email', required=True)
+    password_confirm = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = Users
+        fields = ('user_name', 'email', 'password', 'password_confirm')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["password_confirm"]:
-            raise serializers.ValidationError({"message": "비밀번호가 일치하지 않습니다."})
-        if Users.objects.filter(Q(e_mail=attrs["e_mail"]) | Q(email=attrs["e_mail"])).exists():
-            raise serializers.ValidationError({"message": "이미 존재하는 이메일입니다."})
+        if Users.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError({"email": "이미 사용 중인 이메일입니다."})
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({"password": "비밀번호가 일치하지 않습니다."})
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop("password_confirm", None)
-        return Users.objects.create_user(
-            username=validated_data["user_name"],
-            email=validated_data["e_mail"],
-            password=validated_data["password"],
+        # create_user 호출 시 user_name을 함께 전달
+        user = Users.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            user_name=validated_data['user_name']
         )
+        user.save()
+        return user
 
-# --- Auth(Login)
+# 로그인
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
-
     def validate(self, attrs):
-        email, password = attrs.get("email"), attrs.get("password")
-        user = Users.objects.filter(Q(e_mail=email) | Q(email=email)).first()
-        if not user or not user.check_password(password):
-            raise exceptions.AuthenticationFailed("이메일 또는 비밀번호가 올바르지 않습니다.")
-        refresh = self.get_token(user)
-        return {
-            "access_token": str(refresh.access_token),
-            "refresh_token": str(refresh),
-            "user": UserDetailSerializer(user).data,
-        }
+        data = super().validate(attrs)
+        # user_data = UserDetailSerializer(self.user).data
+        # user_data['e_mail'] = user_data.pop('email')
+        data.update({
+            "message": "로그인 성공",
+            # "user": user_data,
+            "user": UserDetailSerializer(self.user).data,
+            "access_token": data.pop('access'),
+            "refresh_token": data.pop('refresh')
+        })
+        return data
 
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token["uid"] = str(user.id)
-        token["username"] = user.username
-        return token
+# 로그아웃
+class LogoutSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+    # def validate(self, attrs):
+    #     try:
+    #         self.token = RefreshToken(attrs['refresh_token'])
+    #     except Exception:
+    #         raise serializers.ValidationError("유효하지 않거나 만료된 리프레시 토큰입니다.")
+    #     return attrs
+    # def save(self, **kwargs):
+    #     self.token.blacklist()
+    def validate_refresh_token(self, value):
+        try:
+            self.token = RefreshToken(value)
+        except Exception:
+            raise serializers.ValidationError("유효하지 않은 리프레시 토큰입니다.")
+        return value
+    def save(self, **kwargs):
+        self.token.blacklist()
 
-# --- Chat Session
-class ChatSessionCreateSerializer(serializers.Serializer):
-    started_at = serializers.DateTimeField()  # [UNCHANGED]
-
-class ChatSessionOutSerializer(serializers.Serializer):
-    session_id = serializers.UUIDField(source="session_id")
-    user_id    = serializers.UUIDField(source="user_id")
-    started_at = serializers.DateTimeField(format=None)                           # [UPDATED]
-    ended_at   = serializers.DateTimeField(format=None, allow_null=True)          # [UPDATED]
-
-# --- Prompt Log
-class PromptLogCreateSerializer(serializers.Serializer):
-    session_id  = serializers.UUIDField()
-    user_prompt = serializers.CharField()
-    ai_response = serializers.CharField()
-
-class PromptLogOutSerializer(serializers.Serializer):
-    prompt_id   = serializers.UUIDField(source="prompt_id")
-    session_id  = serializers.UUIDField()
-    user_prompt = serializers.CharField()
-    ai_response = serializers.CharField()
-    created_at  = serializers.DateTimeField(format=None)                           # [UPDATED]
-
-# --- Generated Result
-class GeneratedResultOutSerializer(serializers.Serializer):
-    result_id   = serializers.UUIDField(source="result_id")
-    prompt_id   = serializers.UUIDField()
-    result_type = serializers.CharField()
-    result_path = serializers.CharField()
-    result      = serializers.CharField()
-    # created_at 등 확장 필요시 DateTimeField(format=None)로 추가
-
-# -------------------------------------------- 중간 발표 구현 기능
-
-# 인사이트 관련 (InsightService.js)
-class DesignMaterialSerializer(serializers.ModelSerializer):
+# 사용자 정보 수정
+class UserUpdateSerializer(serializers.ModelSerializer):
+    # user_name = serializers.CharField(source='first_name', required=False)
+    # e_mail = serializers.EmailField(source='email', required=False)
     class Meta:
-        model = DesignMaterial
-        fields = '__all__'
+        model = Users
+        fields = ('user_name', 'phone_number', 'company', 'department', 'position', 'profile_image', 'background_image')
+        extra_kwargs = {field: {'required': False} for field in fields}
 
+# --- 2. 챗봇 세션 ---
+class ChatSessionSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.user_id', read_only=True)
+    class Meta:
+        model = ChatSession
+        fields = ('session_id', 'user_id', 'session_title', 'started_at', 'ended_at')
+
+# --- 3. 프롬프트 로그 (통합 모델) ---
+class PromptLogSerializer(serializers.ModelSerializer):
+    session_id = serializers.PrimaryKeyRelatedField(queryset=ChatSession.objects.all(), source='session')
+    
+    class Meta:
+        model = PromptLog
+        fields = (
+            'prompt_id', 'session_id', 'user_prompt', 'ai_response', 
+            'result_type', 'result_path', 'response_time', 'created_at'
+        )
+        read_only_fields = ('prompt_id', 'created_at', 'ai_response')
+
+# --- 4. 에셋 라이브러리 ---
+class AssetLibrarySerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.user_id', read_only=True)
+    user_name = serializers.CharField(source='user.user_name', read_only=True) # 작성자 이름 추가
+    lib_name = serializers.CharField(read_only=True)  # 파일명 저장용
+
+    class Meta:
+        model = AssetLibrary
+        fields = (
+            'lib_id', 'user_id', 'user_name', 'title', 'summary', 'category', 
+            'documents', 'pdf_path', 'img_path', 'upload_date', 
+            'likes', 'comment_count', 'created_at', 'updated_at'
+        )
+        read_only_fields = ('lib_id', 'user_id', 'user_name', 'lib_name', 'pdf_path', 'img_path', 'upload_date', 'likes', 'comment_count', 'created_at', 'updated_at')
+
+        def create(self, validated_data):
+            """모델 인스턴스 생성"""
+            instance = super().create(validated_data)
+            return instance
+
+        def validate_title(self, value):
+            """제목 검증"""
+            if not value or len(value.strip()) == 0:
+                raise serializers.ValidationError("제목은 필수입니다.")
+            if len(value) > 200:
+                raise serializers.ValidationError("제목은 200자를 초과할 수 없습니다.")
+            return value.strip()
+
+# class AssetLibraryCreateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = AssetLibrary
+#         fields = ('documents', 'img_path')
+
+# --- 5. 라이브러리 댓글 ---
+class LibraryCommentsSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.user_id', read_only=True)
+    user_name = serializers.CharField(source='user.user_name', read_only=True) # 작성자 이름 추가
+
+    class Meta:
+        model = LibraryComments
+        fields = ('comment_id', 'asset_library', 'user_id', 'user_name', 'comments', 'likes', 'created_at', 'updated_at')
+        read_only_fields = ('comment_id', 'user_id', 'created_at', 'updated_at')
+
+# --- 6. 인사이트 ---
 class EngineeringSpecSerializer(serializers.ModelSerializer):
     class Meta:
         model = EngineeringSpec
-        fields = '__all__'
-
-class SalesStatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SalesStat
         fields = '__all__'
 
 class UserReviewSerializer(serializers.ModelSerializer):
@@ -116,50 +164,39 @@ class UserReviewSerializer(serializers.ModelSerializer):
         model = UserReview
         fields = '__all__'
 
-# 차량 모델 목록을 위한 serializer
+class RecentArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecentArticle
+        fields = '__all__'
+
+class InsightTrendsDetailSerializer(serializers.ModelSerializer):
+    engineering_specs = EngineeringSpecSerializer(many=True, read_only=True)
+    user_reviews = UserReviewSerializer(many=True, read_only=True)
+    recent_articles = RecentArticleSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = InsightTrends
+        fields = (
+            'car_model_id', 'car_name', 'type', 'release_year', 'model_3d_path',
+            'average_rating', 'review_categories',
+            'engineering_specs', 'user_reviews', 'recent_articles'
+        )
+
 class InsightTrendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InsightTrends
-        fields = ('car_model_id', 'car_name', 'type', 'release_year')
+        fields = ('car_model_id', 'car_name', 'type', 'release_year', 'model_3d_path', 'average_rating', 'review_categories')
 
-# 차량 모델 상세 정보 serializer. FK에 해당하는 serializer 중첩해서 꼬리물고 사용.
-class InsightTrendsDetailSerializer(serializers.ModelSerializer):
-    design_materials = DesignMaterialSerializer(many=True, read_only=True)
-    engineering_specs = EngineeringSpecSerializer(many=True, read_only=True)
-    sales_stats = SalesStatSerializer(many=True, read_only=True)
-    user_reviews = UserReviewSerializer(many=True, read_only=True)
-
+# --- 7. 좋아요 ---
+class AssetLikesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InsightTrends
-        fields = ('car_model_id', 'car_name', 'type', 'release_year', 
-                  'design_materials', 'engineering_specs', 'sales_stats', 'user_reviews')
-
-
-# library 관련 (LibraryService.js)
-class AssetLibrarySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AssetLibrary
+        model = AssetLikes
         fields = '__all__'
 
-class LibraryCommentsSerializer(serializers.ModelSerializer):
+class CommentLikesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LibraryComments
+        model = CommentLikes
         fields = '__all__'
-
-# [ADDED] 생성 공용 요청 스키마
-class GenerateRequestSerializer(serializers.Serializer):
-    result_type = serializers.ChoiceField(choices=["text", "image", "3d", "4d"])
-    session_id = serializers.UUIDField()
-    prompt = serializers.CharField(max_length=4000)
-
-class TextGenerateRequest(serializers.Serializer):  # [ADDED]
-    session_id = serializers.UUIDField()
-    prompt = serializers.CharField(max_length=4000)
-
-class ImageGenerateRequest(serializers.Serializer):  # [ADDED]
-    session_id = serializers.UUIDField()
-    prompt = serializers.CharField(max_length=4000)
-
 
 
 

@@ -22,7 +22,7 @@
       <img src="https://github.com/user-attachments/assets/7d5d501e-a319-4704-8f15-e593fcf2f90f" width="100"/><br/>최호연🐓
     </td>
     <td align="center">
-      <img src="https://github.com/user-attachments/assets/af8e3f73-c42f-451d-b3c9-1234aa6328cf" width="100"/><br/>우민규🍗
+      <img src="https://github.com/user-attachments/assets/11b99726-249d-4b55-957d-c42890a2609b" width="100"/><br/>우민규🍗
     </td>
   </tr>
   <tr>
@@ -93,6 +93,7 @@
 
 - **1) 텍스트·이미지·3D·비디오 프로토타입 생성**  
   - LLM 기반 자동차 디자인 관련 질의응답/아이디어 요약/트렌드 분석
+  - 사용자와의 커뮤니케이션을 통한 체크리스트 완성
   - 기업 맞춤형 디자인 프롬프트 입력 → 이미지, 3D 모델, 주행 영상까지 생성 가능
 - **2) 기업 내부 지식 반영**
   - 내부 규정·가이드라인·기술 문서 연동(RAG)
@@ -100,7 +101,7 @@
 - **3) 실시간 협업 지원**
   - 생성된 시안 아카이빙, 버전 관리, 코멘트, 프로토타입 부분 수정 기능
 - **4) 실사급 시각화/시뮬레이션**
-  - Stable Diffusion 기반 렌더링, Trellis 기반 3D 변환, Stable-video-diffusion 기반 시뮬레이션 영상
+  - FLUX.1 기반 렌더링, Hunyuan3D-2 기반 3D 변환, LTX-Video 기반 시뮬레이션 영상
 - **5) 엔터프라이즈 수준 보안/확장성**
   - 데이터 암호화, 권한관리
 
@@ -108,17 +109,16 @@
 
 ## 🐥 3. 기술 스택
 
-| **분야**                  | **기술 및 라이브러리**                                                                                                                                                                                                                    |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **분야**                  | **기술 및 라이브러리**                                                                                                                                                                                                                     |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 🖥️ 프로그래밍 언어/환경      | <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white" /> <img src="https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge&logo=VisualStudioCode&logoColor=white" /> |
-| 🐳 컨테이너/배포              | <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white" />                                                                                                                                                                   |
-| 🖼️ 사용한 LLM/멀티모달 모델 | <img src="https://img.shields.io/badge/EXAONE--4.0%201.2B-008B8B?style=for-the-badge" /> <img src="https://img.shields.io/badge/InternVL3--8B-FF6F61?style=for-the-badge" /> <img src="https://img.shields.io/badge/stable--diffusion--v3.5-4F8A8B?style=for-the-badge&logo=StableDiffusion&logoColor=white" /> |
-| 🗂️ 데이터 저장/검색          | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white" /> <img src="https://img.shields.io/badge/Qdrant-E34F26?style=for-the-badge&logo=qdrant&logoColor=white" />                                              |
-| 🖼️ 프론트엔드                | <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black" /> <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />                                            |
-| ⚙️ 백엔드                    | <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white" /> <img src="https://img.shields.io/badge/WSGI-000000?style=for-the-badge&logo=python&logoColor=white" />                                                     |
-| ☁️ 인프라/클라우드            | <img src="https://img.shields.io/badge/Runpod-4285F4?style=for-the-badge" /> <img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=Amazon-EC2&logoColor=white" />                                                                         |
-| 🛠️ 기타                      | <img src="https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=Selenium&logoColor=white" /> <img src="https://img.shields.io/badge/PyMuPDF-00599C?style=for-the-badge&logo=AdobeAcrobatReader&logoColor=white" /> <img src="https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" /> <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white" />   |
-
+| 🐳 컨테이너/배포              | <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white" /> <img src="https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache-Airflow&logoColor=white" />                                                                                      |
+| 🖼️ 사용한 LLM/멀티모달 모델 | <img src="https://img.shields.io/badge/kanana-008B8B?style=for-the-badge" /> <img src="https://img.shields.io/badge/InternVL3-FF6F61?style=for-the-badge" /> <img src="https://img.shields.io/badge/FLUX.1-4F8A8B?style=for-the-badge" /> <img src="https://img.shields.io/badge/Hunyuan3D--2-4F8A8B?style=for-the-badge" /> <img src="https://img.shields.io/badge/LTX--Video-4F8A8B?style=for-the-badge" /> |
+| 🗂️ 데이터 저장/검색          | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white" /> <img src="https://img.shields.io/badge/AWS%20S3-569A31?style=for-the-badge&logo=Amazon-S3&logoColor=white" /> <img src="https://img.shields.io/badge/Qdrant-E34F26?style=for-the-badge&logo=qdrant&logoColor=white" /> |
+| 🖼️ 프론트엔드                | <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black" /> <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />                                               |
+| ⚙️ 백엔드                    | <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white" /> <img src="https://img.shields.io/badge/WSGI-000000?style=for-the-badge&logo=python&logoColor=white" /> <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white" /> |
+| ☁️ 인프라/클라우드            | <img src="https://img.shields.io/badge/Runpod-4285F4?style=for-the-badge" /> <img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=Amazon-EC2&logoColor=white" /> <img src="https://img.shields.io/badge/AWS%20RDS-527FFF?style=for-the-badge&logo=Amazon-RDS&logoColor=white" /> |
+| 🛠️ 기타                      | <img src="https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=Selenium&logoColor=white" /> <img src="https://img.shields.io/badge/PyMuPDF-00599C?style=for-the-badge&logo=AdobeAcrobatReader&logoColor=white" /> <img src="https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" /> <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white" /> <img src="https://img.shields.io/badge/vLLM-00599C?style=for-the-badge" /> <img src="https://img.shields.io/badge/ComfyUI-007ACC?style=for-the-badge" /> |
 
 ---
 
@@ -127,10 +127,10 @@
 | 이름     | 역할                                   | 주요 담당                                   |
 |--------|--------------------------------------|------------------------------------------|
 | **기원준** | PM / AI모델링(Exaone) / DevOps / DBA / 백엔드 | 파인튜닝, 배포, 백엔드              |
-| **전진혁** | AI모델링(Trellis) / AI/ML 엔지니어링 / 디자인 / 프론트 | 3D 변환, 프론트 UI, 디자인                     |
-| **강지윤** | AI모델링(InternVL3) / AI/ML 엔지니어링 / 디자인 / 파이프라인 | 이미지 특징추출, 전체 파이프라인, DB설계                    |
-| **최호연** | AI모델링(stable-video-diffusion-img2vid) / AI/ML 엔지니어링 / 백엔드 | 영상 생성, 백엔드 API                          |
-| **우민규** | AI모델링(Stable-Diffusion) / AI/ML 엔지니어링      | 이미지 생성, AI연동                           |
+| **전진혁** | AI/ML 엔지니어링 / 디자인 / 프론트 | 이미지 -> 3D 변환, 프론트 UI, 디자인                     |
+| **강지윤** | AI모델링(InternVL3) / AI/ML 엔지니어링 / 디자인 / 파이프라인 | 이미지 특징추출, 전체 파이프라인, ERD설계                    |
+| **최호연** | AI모델링(LTX-Video) / AI/ML 엔지니어링 / 백엔드 | 영상 생성, 백엔드                          |
+| **우민규** | AI모델링(FLUX.1) / AI/ML 엔지니어링      | 이미지 생성, AI연동                           |
 
 > ※ 상세:  
 > - **DevOps**: 인프라, 배포, CI/CD  
@@ -138,7 +138,6 @@
 > - **AI/ML**: 임베딩·RAG·모델 연동  
 > - **디자인**: Figma UI/UX  
 > - **백엔드**: Django  
-> - **챗봇**: 모델 활용 Q&A 시스템
 
 ---
 
@@ -268,44 +267,114 @@
 
 ## 🐥 7. 모델 학습 결과서
 
-> (파인튜닝/모델 실험 결과, 주요 지표, 예시 Q&A 등. 추후 작성)
-### 📊 SD-3.5-medium 파인튜닝 결과 요약
-모델: `stabilityai/stable-diffusion-3.5-medium` (LoRA 방식, SimpleTuner 사용, 시드값 42 고정)  
-데이터셋: 이미지-캡션 쌍 100개 (학습·테스트 동일)  
-목표: 베이스 vs 파인튜닝 모델 이미지 생성 품질 비교  
-평가 지표: CLIP Score, FID
+### 📊 FLUX.1-Kontext-dev 파인튜닝 결과 요약
 
-| 실험 | 학습 조건 | CLIP Score 변화 | FID 변화 | 분석 |
-|------|-----------|-----------------|----------|------|
-| 1차  | 2 epoch, 1000 steps | +1.1 ↑ | 10.59 → 4.03 | 품질 큰 폭 향상 |
-| 2차  | 5 epoch, 3000 steps | +0.4 ↑ | 10.59 → 8.63 | 개선 폭 감소, 과적합 가능성 |
+- **모델**: `black-forest-labs/FLUX.1-Kontext-dev`  
+  - LoRA 방식, (`SimpleTuner` 사용), 시드값 42 고정  
 
-**결론:** 적절한 학습 스텝(1000~2000)에서 가장 효과적이며, 과도한 학습 시 품질 저하 우려, 총 이미지 데이터셋이 개수 걸맞게 에폭을 주면 될 것으로 예상.
+#### 📂 데이터셋
+
+- 이미지-캡션 쌍 총 1768개  
+  - 학습 데이터: 1,604개  
+  - 테스트 데이터: 164개  
+
+#### 🎯 목표
+
+- 베이스 모델 대비 파인튜닝 모델의 **이미지 생성 품질 향상**
 
 
-### 📊 Exaone-4.0-1.2B 파인튜닝 결과 요약
+### 평가 지표 1: CLIP Score, FID
 
-모델: `LGAI-EXAONE/EXAONE-4.0-1.2B`  (LoRA 적용 (`peft` 사용), 시드값 42 고정)
-데이터셋: 자동차 디자인 QA 쌍  
-  - 학습 데이터: 266건  
-  - 검증 데이터: 50건  
-  - 테스트 데이터: 40건  
-목표: 베이스 모델 대비 파인튜닝 모델의 응답 품질 향상  
-평가 지표: BERTScore (Precision, Recall, F1)
+| 지표         | Base 모델 | LoRA 모델 | 우수 모델 |
+|--------------|------------|------------|------------|
+| **CLIP Score** | 24.0207    | 22.0444    | Base       |
+| **FID Score**  | 66.3546    | 52.4227    | LoRA       |
+
+- **CLIP Score**: Base 모델이 LoRA보다 약간 높은 점수를 기록 → 프롬프트 일치도에서 우위  
+- **FID Score**: LoRA 모델이 더 낮은 점수 → 실제 이미지 분포에 더 가까운 사실적인 이미지 생성
+
+
+### 평가 지표 2: GPT 기반 정성적 평가 (5점 만점)
+
+| 평가 항목       | Base 모델 평균 | LoRA 모델 평균 | 우수 모델 |
+|----------------|----------------|----------------|------------|
+| 프롬프트 충실도 | 3.28           | 3.82           | LoRA       |
+| 디자인 품질     | 4.00           | 4.18           | LoRA       |
+| 브랜드 정체성   | 4.18           | 4.27           | LoRA       |
+| 이미지 품질     | 4.64           | 4.55           | Base       |
+
+#### 🔍 주요 분석
+
+- **프롬프트 충실도**: LoRA가 세부 사항 반영에 더 우수  
+- **디자인 품질**: LoRA가 미학적 완성도에서 우위  
+- **브랜드 정체성**: LoRA가 현대차 디자인 언어를 더 잘 표현  
+- **이미지 품질**: Base 모델이 해상도 및 선명도에서 약간 우수  
+
+
+### ⚙️ LoRA 스케일 조정 결과
+
+- 테스트 스케일: `0.5`, `0.25`  
+- **최적 스케일**: `0.5` → LoRA 가중치가 적절히 적용되어 성능 최적화
+
+
+### 🧠 결론
+
+- LoRA 파인튜닝은 **현대차 이미지 생성 모델의 사실성 및 프롬프트 반영 능력**을 효과적으로 향상시킴  
+- 특히 **FID 점수 개선**과 **정성적 평가 항목에서 우수한 성능**을 보임  
+- **CLIP Score 및 이미지 품질**은 Base 모델이 약간 우수하거나 유사  
+- **LoRA 스케일 0.5**가 최적의 성능 제공  
+- 향후 연구에서는 **이미지 품질 저하 없이 CLIP 점수 개선** 방안 모색 필요  
+- **적절한 학습 스텝(1000~2000)**이 가장 효과적이며, 과도한 학습은 품질 저하 우려
+
+---
+
+### 📊 kanana-1.5-8b-instruct-2505 파인튜닝 결과 요약
+
+- **모델**: `kakaocorp/kanana-1.5-8b-instruct-2505`  
+  - LoRA 적용 (`peft` 사용), 시드값 42 고정  
+
+#### 📂 데이터셋
+
+- 자동차 디자인 QA 쌍  
+  - 학습 데이터: 2324건  
+  - 검증 데이터: 291건  
+  - 테스트 데이터: 289건  
+
+#### 🎯 목표
+- 베이스 모델 대비 파인튜닝 모델의 **응답 품질 향상**
+
+
+### 평가 지표 1: BERTScore (Precision, Recall, F1)
 
 | 실험 | 학습 조건 | BERTScore-F1 변화 | 분석 |
 |------|-----------|-------------------|------|
-| 1차  | 5 epoch, batch size 4, LoRA 적용 | 0.398 → **0.578** (+0.18 ↑) | 응답 품질 대폭 향상, 전문성·일관성 개선 |
+| 1차  | 5 epoch, batch size 4, LoRA 적용 | 0.6977 → **0.7058** (+0.0081 ↑) | 응답 품질 소폭 향상, 할루시네이션 및 일관성 발견 |
+| 2차  | 3 epoch, batch size 2, LoRA 적용 | 0.7344 → **0.8884** (+0.1540 ↑) | 응답 품질 대폭 향상, 할루시네이션 및 일관성 여전히 발견 |
+| 3차  | 5 epoch, batch size 2, LoRA 적용 | 0.8011 → **0.9161** (+0.1150 ↑) | 응답 품질 대폭 향상, 할루시네이션 및 일관성 제거 |
 
-**결론**
+
+### 평가 지표 2: Cosine Similarity
+
+| 지표         | Base 모델 | Finetuned 모델 | 변화 |
+|--------------|------------|----------------|------|
+| CosineSim    | 0.9004     | **0.9526**     | +0.0523 ↑ |
+
+- 파인튜닝 모델이 문맥 유사도 측면에서도 베이스 모델보다 높은 일치도를 보임  
+- 응답의 의미적 일관성과 정보 정합성이 개선됨을 시사
+
+### 🧠 결론
 - 적절한 에폭 수(3~5)와 LoRA 설정으로 큰 품질 향상 가능  
-- 과도한 학습은 성능 정체 또는 미세한 저하 유발  
-- 베이스 모델 대비 파인튜닝 모델은 전문성, 응답 일관성, 문맥 이해에서 우수함
+- 과도한 학습은 성능 정체 또는 미세한 저하 등의 과적합 유발  
+- 주어진 문맥에서 핵심 정보 파악 가능  
+- 베이스 모델 대비 파인튜닝 모델은 전문성, 응답 일관성, 문맥 이해에서 우수함 
+- Cosine 유사도 향상은 의미적 응답 품질 개선을 뒷받침함 
+
+---
 
 ## 📦 모델 저장 및 활용
 
-- **저장 형식**: LoRA 어댑터 (`llm_finetuned_model`), PyTorch 기반  
-- **추론 속도**: 평균 0.3초/건 (GPU 기준)  
+- **저장 형식**: LoRA 어댑터 허깅페이스에 업로드 (sLLM: `ki-student/kanana-finetuned-model-v1`, Flux: `mingyu-oo/FLUX_LoRA_adapter`), PyTorch 기반  
+- **추론 속도**: sLLM - 평균 0.3초/건, FLUX.1 - 평균 1분 30초/건 (GPU 기준)  
 - **활용 방안**:  
   - 자동차 디자인 챗봇  
   - 브랜드 철학 설명 AI  
@@ -354,5 +423,9 @@
 
 ## 🐥 10. 한 줄 회고
 
-> (추후 작성)
+ - 🥚기원준: 아 배고프다
+ - 🐣전진혁: React master
+ - 🐥강지윤: Human in the Loop master
+ - 🐓최호연: ComfyUI master
+ - 🍗우민규: MultiModal master
 

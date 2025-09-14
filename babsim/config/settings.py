@@ -17,6 +17,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your_default_secret_key_if_not_set')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,52.62.239.147.nip.io').split(',')
 
 
 # Application definition
@@ -39,14 +40,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
     # 3rd
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'rest_framework.authtoken',
     'corsheaders',
 
-    'JJACKLETTE',
+    # 'JJACKLETTE',
+    "JJACKLETTE.apps.JjackletteConfig",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -123,9 +132,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+
+# USE_I18N = True
+
+# USE_TZ = True
+
+LANGUAGE_CODE = 'ko-kr'
+
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -140,29 +157,24 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경�
 
 # [ADDED] 생성 이미지 서빙을 위한 미디어 경로
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
-EXAONE_MODEL_PATH = os.getenv("EXAONE_MODEL_PATH", str(BASE_DIR / "models" / "exaone_4.0_1.2b"))
-SD35_MODEL_ID     = os.getenv("SD35_MODEL_ID",     str(BASE_DIR / "models" / "sd_3.5_medium"))
-
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# [DELETED] RunPod API를 사용하므로, 아래의 로컬 모델 경로 설정들은 더 이상 필요하지 않아 삭제합니다.
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
 
-# CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b'
-# CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
-
-# Hugging Face 모델은 폴더명을 지정합니다.
-CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b' # <-- 파인튜닝되면 바꾸기
-
-CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
-
 # Custom User Model
 AUTH_USER_MODEL = 'JJACKLETTE.Users'
+
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -175,34 +187,39 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
 }
-AUTH_USER_MODEL = 'JJACKLETTE.Users'
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # ← 추가: 토큰 수명
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # ← 추가
     "ROTATE_REFRESH_TOKENS": True,                    # 로그아웃: refresh 회전 시 새 토큰 발급
     "BLACKLIST_AFTER_ROTATION": True,                 # 로그아웃: 회전된 이전 refresh를 블랙리스트 처리
-    "AUTH_HEADER_TYPES": ("Bearer",),                 # ← 추가
+    "AUTH_HEADER_TYPES": ("Bearer",), 
+    "USER_ID_FIELD": "user_id",
 }
 
 
-# CORS 설정 (React 프론트엔드와 통신을 위해 필수)
+# CORS 설정 (하이브리드 방식)
+# 1. 로컬 개발용 주소는 코드에 유지합니다.
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", # React 개발 서버 주소
-    "http://localhost:5173", # Vite 기본 포트
+    "http://localhost:3000",
+    "http://localhost:5173",
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173"
-    # "http://localhost", # Nginx를 통한 접근 (배포 환경)
-    # "http://your.domain.com", # 배포 시 실제 도메인
-
+    "http://127.0.0.1:5173",
+    "http://localhost",
+    "http://52.62.239.147.nip.io",
+    "http://jjacklette.com",
 ]
 
-# CSRF_TRUSTED_ORIGINS = [       # ← 추가: 폼/쿠키 기반 호출 시 필요
-#     "http://localhost:3000",
-#     "http://localhost:5173",
-#     "http://127.0.0.1:3000",
-#     "http://127.0.0.1:5173",
-# ]
+# CSRF도 동일한 방식으로 적용합니다.
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost",
+    "http://52.62.239.147.nip.io",
+    "http://jjacklette.com",
+]
 
 CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True
 
@@ -216,179 +233,69 @@ LOGGING = {
 # Qdrant/Milvus 설정 (services.py 등에서 사용)
 QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
 QDRANT_PORT_GRPC = int(os.getenv('QDRANT_PORT', '6334'))
-QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))"""
-Django settings for config project.
+QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
 
-Generated by 'django-admin startproject' using Django 5.2.4.
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost')
 
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/topics/settings/
+# allauth가 여러 사이트를 관리할 수 있도록 설정
+SITE_ID = 8
+LOGIN_REDIRECT_URL = '/api/oauth/callback/' # allauth, 로그인 후 커스텀 OAuth 콜백으로 리디렉션
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/api/oauth/callback/' # 소셜 로그인 후 리디렉션
 
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/5.2/ref/settings/
-"""
+# dj-rest-auth가 JWT 토큰을 사용하도록 설정
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False, # 소셜 로그인은 이 옵션을 False로 해야 함
+}
 
-import os
-from pathlib import Path
-from dotenv import load_dotenv
+# 이메일 관련 설정 (구글이 이미 인증했으므로 별도 인증은 불필요)
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
+# allauth가 중간 확인 페이지 없이 바로 구글로 리디렉션하도록 설정
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# OAuth 로그인 완료 후 자동으로 Django 세션 설정
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_STORE_TOKENS = True
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'your_default_secret_key_if_not_set')
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# 커스텀 어댑터 설정 (UUID 자동 생성)
+ACCOUNT_ADAPTER = 'JJACKLETTE.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'JJACKLETTE.adapters.CustomSocialAccountAdapter'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'corsheaders',
-    'corsheaders',
-    'JJACKLETTE',
-    'rest_framework'
-    'rest_framework_simplejwt',
-    'simplejwt_logout'
-    
-]
-
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'config.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+# 구글 소셜 로그인 설정
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [ # 구글로부터 어떤 정보를 가져올지 정의
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': { # 인증 요청 시 파라미터
+            'access_type': 'online',
         },
-    },
-]
-
-WSGI_APPLICATION = 'config.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'), # docker-compose 서비스 이름
-        'PORT': os.getenv('POSTGRES_PORT'),
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
+INFERENCE_SERVER_URL = os.getenv("INFERENCE_SERVER_URL", "http://inference-server:8001")
 
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = os.getenv('ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# RunPod vLLM API Endpoint
+VLLM_API_URL = os.getenv("VLLM_API_URL")
+VLLM_MODEL_NAME = os.getenv("VLLM_MODEL_NAME")
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-# React 빌드 결과물을 Nginx가 서빙하므로, Django의 STATIC_URL 등은 백엔드 관리용
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # collectstatic이 파일을 모을 경로
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-AI_MODELS_DIR = BASE_DIR / 'JJACKLETTE' / 'models'
-
-# Hugging Face 모델은 폴더명을 지정합니다.
-CURRENT_MODEL_FOLDER_NAME = 'exaone_4.0_1.2b' # <-- 파인튜닝되면 바꾸기
-
-CURRENT_MODEL_PATH = AI_MODELS_DIR / CURRENT_MODEL_FOLDER_NAME
-
-# Custom User Model
-AUTH_USER_MODEL = 'JJACKLETTE.Users'
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
-AUTH_USER_MODEL = 'JJACKLETTE.Users'
-
-# CORS 설정 (React 프론트엔드와 통신을 위해 필수)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", # React 개발 서버 주소
-    "http://locahhost:5173", # Vite 기본 포트
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173"
-    # "http://localhost", # Nginx를 통한 접근 (배포 환경)
-    # "http://your.domain.com", # 배포 시 실제 도메인
-
-]
-CORS_ALLOW_CREDENTIALS = True # 인증 정보 (쿠키 등)를 보내려면 True
-
-# Qdrant/Milvus 설정 (services.py 등에서 사용)
-QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
-QDRANT_PORT_GRPC = int(os.getenv('QDRANT_PORT', '6334'))
-QDRANT_PORT_REST = int(os.getenv('QDRANT_PORT_REST', '6333'))
+# File Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
