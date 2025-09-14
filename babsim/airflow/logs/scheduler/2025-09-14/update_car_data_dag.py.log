@@ -1,0 +1,42 @@
+[2025-09-14T09:50:51.942+0000] {processor.py:161} INFO - Started process (PID=163) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:50:51.944+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:50:51.945+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:50:51.945+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:50:51.967+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:50:52.072+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:50:52.071+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:50:52.110+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:50:52.109+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-12 15:00:00+00:00, run_after=2025-09-13 15:00:00+00:00
+[2025-09-14T09:50:52.146+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.209 seconds
+[2025-09-14T09:51:22.203+0000] {processor.py:161} INFO - Started process (PID=743) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:22.205+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:51:22.207+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:22.206+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:22.225+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:22.274+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:22.274+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:51:22.304+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:22.304+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-13 15:00:00+00:00, run_after=2025-09-14 15:00:00+00:00
+[2025-09-14T09:51:22.327+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.129 seconds
+[2025-09-14T09:51:52.502+0000] {processor.py:161} INFO - Started process (PID=748) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:52.502+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:51:52.503+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:52.503+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:52.517+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:51:52.559+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:52.559+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:51:52.588+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:51:52.588+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-13 15:00:00+00:00, run_after=2025-09-14 15:00:00+00:00
+[2025-09-14T09:51:52.611+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.113 seconds
+[2025-09-14T09:52:22.668+0000] {processor.py:161} INFO - Started process (PID=753) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:22.669+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:52:22.670+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:22.670+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:22.685+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:22.730+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:22.729+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:52:22.757+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:22.757+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-13 15:00:00+00:00, run_after=2025-09-14 15:00:00+00:00
+[2025-09-14T09:52:22.780+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.116 seconds
+[2025-09-14T09:52:52.916+0000] {processor.py:161} INFO - Started process (PID=758) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:52.917+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:52:52.919+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:52.918+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:52.937+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:52:52.993+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:52.992+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:52:53.029+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:52:53.029+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-13 15:00:00+00:00, run_after=2025-09-14 15:00:00+00:00
+[2025-09-14T09:52:53.058+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.147 seconds
+[2025-09-14T09:53:23.222+0000] {processor.py:161} INFO - Started process (PID=763) to work on /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:53:23.224+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/update_car_data_dag.py for tasks to queue
+[2025-09-14T09:53:23.225+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:53:23.224+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:53:23.240+0000] {processor.py:840} INFO - DAG(s) 'update_car_data' retrieved from /opt/airflow/dags/update_car_data_dag.py
+[2025-09-14T09:53:23.291+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:53:23.291+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2025-09-14T09:53:23.317+0000] {logging_mixin.py:188} INFO - [2025-09-14T09:53:23.317+0000] {dag.py:3823} INFO - Setting next_dagrun for update_car_data to 2025-09-13 15:00:00+00:00, run_after=2025-09-14 15:00:00+00:00
+[2025-09-14T09:53:23.339+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/update_car_data_dag.py took 0.122 seconds
