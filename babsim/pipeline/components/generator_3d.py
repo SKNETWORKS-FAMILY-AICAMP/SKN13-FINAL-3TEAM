@@ -40,10 +40,9 @@ class Generator3D:
             # RunPod Serverless API 호출
             payload = {
                 "input": {
-                    "image_url": image_url,
-                    "prompt": prompt or "Generate a high-quality 3D model of this car",
-                    "quality": "high",
-                    "format": "glb"
+                    "task_type": "3d",
+                    "workflow": "hunyuan_3d",
+                    "image_path": image_url
                 }
             }
             
@@ -54,53 +53,55 @@ class Generator3D:
             
             # RunPod API 호출
             response = requests.post(
-                f"{self.serverless_url}/run",
+                f"{self.serverless_url.rstrip('/')}/run",
                 headers=headers,
                 json=payload,
                 timeout=300  # 5분 타임아웃
             )
             
-            if response.status_code != 200:
+            if response.status != "COMPLETED":
                 return {
                     "error": f"RunPod API 호출 실패: {response.status_code} - {response.text}",
-                    "generation_type": "3d",
+                    "generation_type": "3D",
                     "s3_url_3d": None
                 }
             
             result = response.json()
+            print(f"[3D 생성기] RunPod 응답: {result}")
             
-            # 작업 ID 추출
-            job_id = result.get("id")
-            if not job_id:
+            # 직접 결과 확인 (동기 처리)
+            if "error" in result:
                 return {
-                    "error": "RunPod에서 작업 ID를 받지 못했습니다.",
-                    "generation_type": "3d", 
-                    "s3_url_3d": None
+                    "error": f"RunPod API 오류: {result['error']}",
+                    "generation_type": "3D", 
+                    "s3_url_3d": ""
                 }
             
-            print(f"[3D 생성기] 작업 ID: {job_id}")
-            
-            # 작업 완료 대기 및 결과 조회
-            final_result = self._wait_for_completion(job_id)
-            
-            if "error" in final_result:
-                return final_result
-            
-            # 3D 모델 파일을 S3에 업로드
-            s3_url = self._upload_to_s3(final_result["output"], "3d_model.glb")
-            
-            if not s3_url:
+            # 결과에서 3D 모델 파일 경로 추출
+            output_data = result.get("output", {})
+            if not output_data or not output_data.get("success"):
                 return {
-                    "error": "3D 모델을 S3에 업로드하는데 실패했습니다.",
-                    "generation_type": "3d",
-                    "s3_url_3d": None
+                    "error": f"RunPod에서 결과를 받지 못했습니다: {output_data}",
+                    "generation_type": "3D",
+                    "s3_url_3d": ""
                 }
             
-            print(f"[3D 생성기] 3D 모델 생성 완료: {s3_url}")
+            # outputs 배열에서 첫 번째 3D 모델 파일 URL 추출
+            outputs = output_data.get("outputs", [])
+            if not outputs:
+                return {
+                    "error": "생성된 3D 모델 파일이 없습니다.",
+                    "generation_type": "3D",
+                    "s3_url_3d": ""
+                }
+            
+            # 첫 번째 3D 모델 파일 URL 사용 (이미 S3에 업로드됨)
+            s3_url = outputs[0]
+            print(f"[3D 생성기] 생성된 3D 모델 URL: {s3_url}")
             
             return {
                 "s3_url_3d": s3_url,
-                "generation_type": "3d",
+                "generation_type": "3D",
                 "status": "success",
                 "error": None
             }
@@ -109,49 +110,49 @@ class Generator3D:
             print(f"[3D 생성기] 오류 발생: {str(e)}")
             return {
                 "error": f"3D 모델 생성 중 오류: {str(e)}",
-                "generation_type": "3d",
-                "s3_url_3d": None
+                "generation_type": "3D",
+                "s3_url_3d": ""
             }
     
-    def _wait_for_completion(self, job_id: str, max_wait_time: int = 600) -> Dict[str, Any]:
-        """작업 완료까지 대기"""
-        import time
-        
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        start_time = time.time()
-        
-        while time.time() - start_time < max_wait_time:
-            try:
-                response = requests.get(
-                    f"{self.serverless_url}/status/{job_id}",
-                    headers=headers,
-                    timeout=30
-                )
-                
-                if response.status_code != 200:
-                    return {"error": f"상태 조회 실패: {response.status_code}"}
-                
-                result = response.json()
-                status = result.get("status")
-                
-                if status == "COMPLETED":
-                    return result
-                elif status == "FAILED":
-                    return {"error": f"작업 실패: {result.get('error', 'Unknown error')}"}
-                elif status in ["IN_QUEUE", "IN_PROGRESS"]:
-                    print(f"[3D 생성기] 작업 진행 중... (상태: {status})")
-                    time.sleep(10)  # 10초 대기
-                else:
-                    return {"error": f"알 수 없는 상태: {status}"}
-                    
-            except Exception as e:
-                return {"error": f"상태 조회 중 오류: {str(e)}"}
-        
-        return {"error": "작업 완료 시간 초과"}
+    # def _wait_for_completion(self, job_id: str, max_wait_time: int = 600) -> Dict[str, Any]:
+    #     """작업 완료까지 대기 (동기 처리에서는 사용하지 않음)"""
+    #     import time
+    #     
+    #     headers = {
+    #         "Authorization": f"Bearer {self.api_key}",
+    #         "Content-Type": "application/json"
+    #     }
+    #     
+    #     start_time = time.time()
+    #     
+    #     while time.time() - start_time < max_wait_time:
+    #         try:
+    #             response = requests.get(
+    #                 f"{self.serverless_url.rstrip('/')}/status/{job_id}",
+    #                 headers=headers,
+    #                 timeout=30
+    #             )
+    #             
+    #             if response.status_code != 200:
+    #                 return {"error": f"상태 조회 실패: {response.status_code}"}
+    #             
+    #             result = response.json()
+    #             status = result.get("status")
+    #             
+    #             if status == "COMPLETED":
+    #                 return result
+    #             elif status == "FAILED":
+    #                 return {"error": f"작업 실패: {result.get('error', 'Unknown error')}"}
+    #             elif status in ["IN_QUEUE", "IN_PROGRESS"]:
+    #                 print(f"[3D 생성기] 작업 진행 중... (상태: {status})")
+    #                 time.sleep(10)  # 10초 대기
+    #             else:
+    #                 return {"error": f"알 수 없는 상태: {status}"}
+    #                 
+    #         except Exception as e:
+    #             return {"error": f"상태 조회 중 오류: {str(e)}"}
+    #     
+    #     return {"error": "작업 완료 시간 초과"}
     
     def _upload_to_s3(self, file_data: Any, filename: str) -> Optional[str]:
         """3D 모델 파일을 S3에 업로드"""

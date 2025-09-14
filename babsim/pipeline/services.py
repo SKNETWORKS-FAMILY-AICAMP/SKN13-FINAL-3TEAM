@@ -466,12 +466,12 @@ class BabsimPipelineService:
                         "result_type": "image",
                         "result_path": "",
                     })
-                elif generation_type == "3D":
+                elif generation_type in ["3D", "3d"]:
                     generated_results.append({
                         "result_type": "3d",
                         "result_path": "",
                     })
-                elif generation_type == "4D":
+                elif generation_type in ["4D", "4d"]:
                     generated_results.append({
                         "result_type": "4d",
                         "result_path": "",

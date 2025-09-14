@@ -33,8 +33,15 @@ class ImageModifier:
         """
         ImageModifier 초기화
         """
-        self.api_url = getattr(settings, 'RUNPOD_IMAGE_API_URL', '')
-        self.api_key = getattr(settings, 'RUNPOD_API_KEY', '')
+        self.api_url = os.getenv('FLUX_API_URL', '').rstrip('/') + '/generate'
+        self.api_key = os.getenv('RUNPOD_API_KEY', '')
+        
+        # URL 검증
+        if not self.api_url:
+            print("⚠️ FLUX_API_URL이 설정되지 않았습니다.")
+        if not self.api_key:
+            print("⚠️ RUNPOD_API_KEY가 설정되지 않았습니다.")
+            
         self.s3_client = None
         self._initialize_s3_client()
     
@@ -120,6 +127,11 @@ class ImageModifier:
         RunPod을 통해 이미지 수정 API 호출
         """
         try:
+            # URL 검증
+            if not self.api_url:
+                print("❌ FLUX_API_URL이 설정되지 않았습니다.")
+                return None
+                
             # 이미지 바이너리를 base64로 인코딩
             img_str = base64.b64encode(image_binary).decode()
             
@@ -172,7 +184,15 @@ class ImageModifier:
 """
             
             # vLLM을 사용하여 설명 생성
-            description = kanana_llm_model.generate_vllm_response_streaming(prompt, max_length=200)
+            response = kanana_llm_model.generate_vllm_response_text(prompt, max_length=200)
+            
+            # StreamingHttpResponse인 경우 처리
+            if hasattr(response, 'content'):
+                # StreamingHttpResponse의 경우 content를 읽어서 문자열로 변환
+                description = response.content.decode('utf-8') if isinstance(response.content, bytes) else str(response.content)
+            else:
+                # 일반 문자열인 경우
+                description = str(response)
             
             # 기본 설명이 생성되지 않은 경우 폴백
             if not description or len(description.strip()) < 10:

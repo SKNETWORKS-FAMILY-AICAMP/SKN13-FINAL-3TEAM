@@ -474,7 +474,7 @@ def guided_prepare_question(state: PipelineState) -> Dict[str, Any]:
 
     # 첫 번째 누락된 필드를 current_field로 설정
     missing = missing_req if missing_req else missing_opt
-    current_field = missing[0]
+    current_field = missing[0] if missing else ""
     
     print(f"[처리] 다음 질문 필드 설정: '{current_field}' (필수: {len(missing_req)}, 선택: {len(missing_opt)})")
     
@@ -919,9 +919,15 @@ def route_3d_4d_choice(state: PipelineState) -> str:
     user_input = _norm(state.get("user_query", ""))
     
     if "3d" in user_input or "3D" in user_input or "정적" in user_input:
-        return "run_3d_generation"
+        if state["waiting_node"] != "route_3d_4d_choice":
+            interrupt({"is_loading": True, "generation_type": "3D"})
+        else:
+            return "run_3d_generation"
     elif "4d" in user_input or "4D" in user_input or "애니메이션" in user_input:
-        return "run_4d_generation"
+        if state["waiting_node"] != "route_3d_4d_choice":
+            interrupt({"is_loading": True, "generation_type": "4D"})
+        else:
+            return "run_4d_generation"
     elif "다른 이미지" in user_input or "이미지 선택" in user_input:
         return "select_other_image"
     elif "수정" in user_input or "modify" in user_input:
@@ -1242,12 +1248,14 @@ def run_image_modification(state: PipelineState) -> Dict[str, Any]:
     else:
         print(f"[처리] 이미지 수정 실행 중...")
         out = modify_image(dict(state))
+        response = "이미지 수정이 완료되었습니다 !!"
         for k in ["s3_url", "generated_image", "image_generation_status", "response", "error"]:
             if k in out: state[k] = out[k]
         if not state.get("response"):
             msg = state.get("s3_url") or state.get("generated_image") or "이미지 수정 완료"
             response = f"이미지 수정이 완료되었습니다! 🛠️\n\n결과: {msg}"
         print(f"[처리] 이미지 수정 완료")
+
         return {"response": response}
 
 
