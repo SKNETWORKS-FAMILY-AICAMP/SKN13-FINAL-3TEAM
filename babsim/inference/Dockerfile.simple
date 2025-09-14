@@ -1,0 +1,30 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 시스템 의존성 설치
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python 의존성 설치 (CPU 전용, 간단한 버전)
+# 1단계: 일반 패키지 설치
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    pydantic \
+    transformers
+
+# 2단계: PyTorch CPU 버전 설치
+RUN pip install --no-cache-dir \
+    torch \
+    torchvision \
+    torchaudio \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# 소스 코드 복사
+COPY . /app/
+
+# 간단한 FastAPI 서버 실행 (vLLM 대신 transformers 직접 사용)
+CMD ["python", "main_simple.py"]

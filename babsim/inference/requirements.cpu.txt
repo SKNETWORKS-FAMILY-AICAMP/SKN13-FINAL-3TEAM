@@ -1,0 +1,29 @@
+# CPU 전용 Inference 서버 requirements
+# PyTorch CPU 버전
+torch==2.3.1
+torchvision==0.18.1
+torchaudio==2.3.1
+
+# FastAPI 및 웹 서버 (vLLM 호환 버전)
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==1.10.13
+
+# AI/ML 라이브러리 (CPU 최적화)
+transformers==4.35.0
+tokenizers==0.14.1
+peft==0.6.0
+accelerate==0.24.0
+diffusers==0.24.0
+sentencepiece==0.1.99
+
+# vLLM (CPU 전용)
+vllm==0.2.0
+
+# HuggingFace
+huggingface_hub
+hf-transfer
+
+# 기타
+openai
+bitsandbytes>=0.41.0
