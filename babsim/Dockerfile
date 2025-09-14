@@ -10,6 +10,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     postgresql-client \
     gcc \
+    netcat-openbsd \
+    curl \
     # Add other necessary packages for your Python libraries if any
     && rm -rf /var/lib/apt/lists/*
 
