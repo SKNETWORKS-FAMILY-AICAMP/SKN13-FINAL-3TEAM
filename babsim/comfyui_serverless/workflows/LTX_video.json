@@ -1,0 +1,189 @@
+{
+  "3": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSampler (선택)"
+    }
+  },
+  "4": {
+  "class_type": "CLIPLoader",
+  "_meta": { "title": "CLIP Loader (LTXV/T5 weights)" },
+  "inputs": {
+    "clip_name": "t5xxl_fp16.safetensors",
+    "type": "ltxv",
+    "device": "default"
+  }
+},
+  "5": {
+    "inputs": {
+      "ckpt_name": "ltxv-2b-0.9.8-distilled.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "체크포인트 로드"
+    }
+  },
+  "6":  {
+  "class_type": "CLIPTextEncode",
+  "_meta": { "title": "CLIP Text Encode (Negative Prompt)" },
+  "inputs": {
+    "text": "lowers, blurry, watercolor, jpeg artifacts, noise, banding, posterization, cartoon, anime, **flicker, wobble, jitter, rolling-shutter, warping, rubber-sheet, swimming textures**, **extra logos, duplicated logos, hood logo, decals, stickers, text, watermark, badges**, **sliding tires, floating, unrealistic physics, stretched textures, deformed wheels**, oversharpen halos, ringing, ghosting, trailing, shutter, tilted horizon, skewed perspective, harsh vignette, strong color cast",
+    "clip": ["4", 0]
+  }
+},
+  "7": {
+    "inputs": {
+      "add_noise": true,
+      "noise_seed": 0,
+      "cfg": 2.8,
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "sampler": [
+        "3",
+        0
+      ],
+      "sigmas": [
+        "11",
+        0
+      ],
+      "latent_image": [
+        "9",
+        2
+      ]
+    },
+    "class_type": "SamplerCustom",
+    "_meta": {
+      "title": "사용자 정의 샘플러"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "7",
+        0
+      ],
+      "vae": [
+        "5",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE 디코드"
+    }
+  },
+  "9": {
+    "inputs": {
+      "width": 1280,
+      "height": 720,
+      "length": 240,
+      "batch_size": 1,
+      "strength": 0.22,
+      "positive": [
+        "14",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "vae": [
+        "5",
+        2
+      ],
+      "image": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "LTXVImgToVideo",
+    "_meta": {
+      "title": "LTXV 비디오 생성 (이미지 → 비디오)"
+    }
+  },
+  "10": {
+    "inputs": {
+      "frame_rate": 24,
+      "positive": [
+        "9",
+        0
+      ],
+      "negative": [
+        "9",
+        1
+      ]
+    },
+    "class_type": "LTXVConditioning",
+    "_meta": {
+      "title": "LTXV 조건 설정"
+    }
+  },
+  "11": {
+    "inputs": {
+      "steps": 48,
+      "max_shift": 1.20,
+      "base_shift": 0.5,
+      "stretch": false,
+      "terminal": 0.07,
+      "latent": [
+        "9",
+        2
+      ]
+    },
+    "class_type": "LTXVScheduler",
+    "_meta": {
+      "title": "LTXV 스케줄러"
+    }
+  },
+  "12": {
+    "inputs": {
+      "frame_rate": 24,
+      "loop_count": 1,
+      "filename_prefix": "AnimateDiff",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 18,
+      "save_metadata": true,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine 🎥🅥🅗🅢"
+    }
+  },
+  "13": {
+    "inputs": {
+      "image": "Large-42077-2021Tucson.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "이미지 로드"
+    }
+  },
+  "14": {
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Positive Prompt)" },
+    "inputs": {
+      "text": "(masterpiece:1.1), (photorealistic:1.2), ultra-detailed, realistic automotive studio lighting, global illumination, **car driving forward in a straight line**, road contact realistic, subtle forward parallax, **preserve original Hyundai design and body color (no redesign:1.2)**, **front Hyundai emblem/logo sharp, intact, centered, no duplication (1.35)**, hood surface **clean (no text/decals/stickers/logos)**, **physically-cororect forward wheel rotation (1.25)**, **natural motion blur on tires and road**, shutter speed around 1/60s, stable perspective, **no wobble/flicker**, steady horizon, crisp panel gaps and trim, reflections accurate on paint and glass, 4k clarity",
+      "clip": ["4", 0]
+    }
+  }
+}

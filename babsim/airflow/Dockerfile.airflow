@@ -1,0 +1,10 @@
+FROM apache/airflow:2.8.1
+USER root
+
+# Install Chromium and chromedriver
+RUN apt-get update && apt-get install -y chromium chromium-driver
+
+USER airflow
+
+# Install Python packages for crawling and Django dependencies
+RUN pip install selenium
