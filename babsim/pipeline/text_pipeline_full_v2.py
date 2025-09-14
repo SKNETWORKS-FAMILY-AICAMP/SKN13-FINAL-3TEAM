@@ -574,8 +574,16 @@ def guided_next_category(state: PipelineState) -> PipelineState:
 
 
         # 첫 방문 시, Interrupt 걸리기 이전
+        # 첫 방문 시, Interrupt 걸리기 이전
+        # if state["waiting_node"] != "build_query_from_history":
+        #     interrupt({"is_loading": True, "generation_type": "text"})
         if state["waiting_node"] != "build_query_from_history":
-            interrupt({"is_loading": True, "generation_type": "text"})
+            return safe_merge_user_query(
+                user_query,
+                pipeline_step="guided_llm_chat", 
+                current_field=current_field,
+                waiting_node="guided_llm_chat",
+            )
         else:
             return safe_merge_user_query(
                     user_query,

@@ -25,7 +25,7 @@ def oauth_callback(request):
             ).order_by('-date_joined').first()
             
             if latest_social_account:
-                user = latest_social_account.user
+                user = request.user
                 
                 # Django 세션에 사용자 로그인 (backend 명시)
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')

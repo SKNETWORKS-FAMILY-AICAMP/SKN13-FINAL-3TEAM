@@ -7,3 +7,4 @@ __pycache__/
 
 # 데이터셋
 *.arrow
+ariflow/logs
