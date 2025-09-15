@@ -10,7 +10,7 @@ import {
   sendChatMessage,
   deleteChatSession
 } from '../services/chatService';
-import backgroundImage from '../assets/PrototypeLab_background.png';
+import backgroundImage from '../assets/car_main.jpg';
 
 function PrototypeLab() {
   const [chatSessions, setChatSessions] = useState([]);

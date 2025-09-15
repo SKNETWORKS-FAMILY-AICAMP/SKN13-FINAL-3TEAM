@@ -19,7 +19,7 @@ function HeroSection() {
     <section
       className="relative min-h-screen flex items-center overflow-hidden"
       style={{
-        backgroundImage: `url('/car_main.jpg')`,
+        backgroundImage: `url(${carMain})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
