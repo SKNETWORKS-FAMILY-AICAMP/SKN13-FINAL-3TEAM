@@ -1,4 +1,4 @@
-<img width="1704" height="978" alt="assetpage" src="https://github.com/user-attachments/assets/d94e5e44-bb2f-4353-8974-183f50cd97f1" /><img width="4026" height="1767" alt="pipeline" src="https://github.com/user-attachments/assets/f81ef651-ba1a-4cad-8c0b-2b08daa1da20" /># SKN13-FINAL-3TEAM
+# SKN13-FINAL-3TEAM
 
 ### 최종 프로젝트: JJACKLETTE - 현대자동차에 특화된 디자인 프로토타입 생성 플랫폼
 
@@ -144,7 +144,7 @@
 ## 🐥 5. 파이프라인, 시스템 아키텍처, ERD
 
 🔧**파이프라인**
-<img width="4026" height="1767" alt="pipeline" src="https://github.com/user-attachments/assets/467402f6-5a40-45e4-8246-7519c32fb527" /> <br>
+<img width="4026" height="1767" alt="pipeline" src="https://github.com/user-attachments/assets/76f2ecb6-39e3-4a73-96d8-c027a1133716" /> <br>
 
 🔧**시스템 아키텍처**  
 <img width="4026" height="1767" alt="architecture" src="https://github.com/user-attachments/assets/32e7bd74-05f0-429f-8b0f-efeb45575a4a" /> <br>
@@ -161,132 +161,131 @@
 
 📦ProjectRoot<br>
 ┣ 📜README.md<br>
-┣ 📂babsim
-┃ ┣ 📜.DS_Store
-┃ ┣ 📜.gitignore
-┃ ┣ 📜docker-compose.yml
-┃ ┣ 📜Dockerfile
-┃ ┣ 📜manage.py
-┃ ┣ 📜nginx.conf
-┃ ┣ 📜package-lock.json
-┃ ┣ 📜requirements.txt
-┃ ┣ 📜test_model.py
-┃ ┣ 📂.vscode
-┃ ┃ ┗ 📜settings.json
-┃ ┣ 📂airflow
-┃ ┃ ┣ 📜dags
-┃ ┃ ┗ 📜scripts
-┃ ┣ 📂comfyui_serverless
-┃ ┃ ┗ 📜workflows
-┃ ┣ 📂config
-┃ ┃ ┣ 📜asgi.py
-┃ ┃ ┣ 📜settings.py
-┃ ┃ ┣ 📜urls.py
-┃ ┃ ┣ 📜views.py
-┃ ┃ ┣ 📜wsgi.py
-┃ ┃ ┣ 📜__init__.py
-┃ ┃ ┗ 📂__pycache__
-┃ ┃ ┣ 📜settings.cpython-310.pyc
-┃ ┃ ┣ ...
-┃ ┣ 📂embedding_api
-┃ ┣ 📂inference
-┃ ┣ 📂JJACKLETTE
-┃ ┃ ┣ 📜admin.py
-┃ ┃ ┣ 📜apps.py
-┃ ┃ ┣ 📜llm.py
-┃ ┃ ┣ 📜llm_interface.py
-┃ ┃ ┣ 📜models.py
-┃ ┃ ┣ 📜serializers.py
-┃ ┃ ┣ 📜services.py
-┃ ┃ ┣ 📜tests.py
-┃ ┃ ┣ 📜urls.py
-┃ ┃ ┣ 📜views.py
-┃ ┃ ┣ 📜__init__.py
-┃ ┃ ┣ 📂management
-┃ ┃ ┃ ┗ 📂commands
-┃ ┃ ┃ ┣ 📜import_data.py
-┃ ┃ ┃ ┗ 📂__pycache__
-┃ ┃ ┣ 📂migrations
-┃ ┃ ┃ ┣ 📜0001_initial.py
-┃ ┃ ┃ ┣ 📜__init__.py
-┃ ┃ ┃ ┗ 📂__pycache__
-┃ ┃ ┣ 📂__pycache__
-┃ ┃ ┃ ┣ 📜admin.cpython-310.pyc
-┃ ┃ ┃ ┣ ...
-┃ ┣ 📂node_modules
-┃ ┃ ┗ ...
-┃ ┣ 📂pipeline
-┃ ┃ ┣ 📂.vscode
-┃ ┃ ┣ 📂components
-┃ ┃ ┃ ┗ 📂__pycache__
-┃ ┃ ┗ 📂__pycache__
-┃ ┣ 📂react
-┃ ┃ ┣ 📂.vite
-┃ ┃ ┃ ┗ 📂deps
-┃ ┃ ┣ 📂build
-┃ ┃ ┃ ┣ 📂assets
-┃ ┃ ┃ ┗ 📂models
-┃ ┃ ┣ 📂node_modules
-┃ ┃ ┃ ┣ 📂.bin
-┃ ┃ ┃ ┣ 📂.vite
-┃ ┃ ┃ ┃ ┗ 📂deps
-┃ ┃ ┃ ┣ 📂public
-┃ ┃ ┃ ┃ ┗ 📂models
-┃ ┃ ┃ ┗ ...
-┃ ┃ ┗ 📂src
-┃ ┃ ┃ ┣ 📂assets
-┃ ┃ ┃ ┃ ┣ 📂asset_library
-┃ ┃ ┃ ┃ ┣ 📂insight_trends
-┃ ┃ ┃ ┃ ┃ ┗ 📂car_specs
-┃ ┃ ┃ ┃ ┣ 📂profile
-┃ ┃ ┃ ┃ ┗ 📂prototype_lab
-┃ ┃ ┃ ┣ 📂components
-┃ ┃ ┃ ┣ 📂contexts
-┃ ┃ ┃ ┣ 📂pages
-┃ ┃ ┃ ┣ 📂services
-┃ ┃ ┃ ┗ 📂utils
-┃ ┣ 📂staticfiles
-┃ ┣ 📂templates
-┃ ┣ 📂text_data
-┃ ┃ ┣ 📂DB
-┃ ┃ ┃ ┗ 📂car_specs
-┃ ┃ ┗ 📂RAG
-┃ ┗ 📂__pycache__
-┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024
-┃ ┣ 📂hyundai_images_nobg_cropped_1024
-┃ ┣ 📂insight&trends_images
-┃ ┗ 📂insight&trends_images_cropped
-┃ ┣ 📂chunking_result
-┃ ┣ 📂DB
-┃ ┃ ┗ 📂car_specs
-┃ ┣ 📂finetuning
-┃ ┃ ┗ 📂code
-┃ ┣ 📂preprocessing
-┃ ┣ 📂QA_context
-┃ ┣ 📂QA_json
-┃ ┣ 📂RAG
-┃ ┗ 📂split_data
-┣ 📂document
-┃ ┣ 📜API_SPEC.md
-┃ ┣ 📜chat_pipeline_5.png
-┃ ┣ 📜jjacklette_ERD.png
-┃ ┗ 📜System Architecture.pdf
-┣ 📂evaluation
-┃ ┣ 📜baseline_performance_report.md
-┃ ┣ 📜base_model_evaluation_results.md
-┃ ┣ 📜finetuned_evaluation_results.md
-┃ ┗ 📜md.ipynb
-┣ 📂image_data
-┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024
-┃ ┃ ┣ 📜Hyundai-45_EV_Concept-2019-thb.jpg
-┃ ┃ ┣ ...
-┃ ┗ 📂hyundai_images_nobg_cropped_1024
-┃ ┣ 📜Large-36014-2021Sonata.jpg
-┃ ┣ ...
-┣ 📂SD-3.5
-┣ 📂text_data
-┗ 📂산출물
-
+┣ 📂babsim<br>
+┃ ┣ 📜.DS_Store<br>
+┃ ┣ 📜.gitignore<br>
+┃ ┣ 📜docker-compose.yml<br>
+┃ ┣ 📜Dockerfile<br>
+┃ ┣ 📜manage.py<br>
+┃ ┣ 📜nginx.conf<br>
+┃ ┣ 📜package-lock.json<br>
+┃ ┣ 📜requirements.txt<br>
+┃ ┣ 📜test_model.py<br>
+┃ ┣ 📂.vscode<br>
+┃ ┃ ┗ 📜settings.json<br>
+┃ ┣ 📂airflow<br>
+┃ ┃ ┣ 📜dags<br>
+┃ ┃ ┗ 📜scripts<br>
+┃ ┣ 📂comfyui_serverless<br>
+┃ ┃ ┗ 📜workflows<br>
+┃ ┣ 📂config<br>
+┃ ┃ ┣ 📜asgi.py<br>
+┃ ┃ ┣ 📜settings.py<br>
+┃ ┃ ┣ 📜urls.py<br>
+┃ ┃ ┣ 📜views.py<br>
+┃ ┃ ┣ 📜wsgi.py<br>
+┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃ ┣ 📜settings.cpython-310.pyc<br>
+┃ ┃ ┣ ...<br>
+┃ ┣ 📂embedding_api<br>
+┃ ┣ 📂inference<br>
+┃ ┣ 📂JJACKLETTE<br>
+┃ ┃ ┣ 📜admin.py<br>
+┃ ┃ ┣ 📜apps.py<br>
+┃ ┃ ┣ 📜llm.py<br>
+┃ ┃ ┣ 📜llm_interface.py<br>
+┃ ┃ ┣ 📜models.py<br>
+┃ ┃ ┣ 📜serializers.py<br>
+┃ ┃ ┣ 📜services.py<br>
+┃ ┃ ┣ 📜tests.py<br>
+┃ ┃ ┣ 📜urls.py<br>
+┃ ┃ ┣ 📜views.py<br>
+┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┣ 📂management<br>
+┃ ┃ ┃ ┗ 📂commands<br>
+┃ ┃ ┃ ┣ 📜import_data.py<br>
+┃ ┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃ ┣ 📂migrations<br>
+┃ ┃ ┃ ┣ 📜0001_initial.py<br>
+┃ ┃ ┃ ┣ 📜__init__.py<br>
+┃ ┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃ ┣ 📂__pycache__<br>
+┃ ┃ ┃ ┣ 📜admin.cpython-310.pyc<br>
+┃ ┃ ┃ ┣ ...<br>
+┃ ┣ 📂node_modules<br>
+┃ ┃ ┗ ...<br>
+┃ ┣ 📂pipeline<br>
+┃ ┃ ┣ 📂.vscode<br>
+┃ ┃ ┣ 📂components<br>
+┃ ┃ ┃ ┗ 📂__pycache__<br>
+┃ ┃ ┗ 📂__pycache__<br>
+┃ ┣ 📂react<br>
+┃ ┃ ┣ 📂.vite<br>
+┃ ┃ ┃ ┗ 📂deps<br>
+┃ ┃ ┣ 📂build<br>
+┃ ┃ ┃ ┣ 📂assets<br>
+┃ ┃ ┃ ┗ 📂models<br>
+┃ ┃ ┣ 📂node_modules<br>
+┃ ┃ ┃ ┣ 📂.bin<br>
+┃ ┃ ┃ ┣ 📂.vite<br>
+┃ ┃ ┃ ┃ ┗ 📂deps<br>
+┃ ┃ ┃ ┣ 📂public<br>
+┃ ┃ ┃ ┃ ┗ 📂models<br>
+┃ ┃ ┃ ┗ ...<br>
+┃ ┃ ┗ 📂src<br>
+┃ ┃ ┃ ┣ 📂assets<br>
+┃ ┃ ┃ ┃ ┣ 📂asset_library<br>
+┃ ┃ ┃ ┃ ┣ 📂insight_trends<br>
+┃ ┃ ┃ ┃ ┃ ┗ 📂car_specs<br>
+┃ ┃ ┃ ┃ ┣ 📂profile<br>
+┃ ┃ ┃ ┃ ┗ 📂prototype_lab<br>
+┃ ┃ ┃ ┣ 📂components<br>
+┃ ┃ ┃ ┣ 📂contexts<br>
+┃ ┃ ┃ ┣ 📂pages<br>
+┃ ┃ ┃ ┣ 📂services<br>
+┃ ┃ ┃ ┗ 📂utils<br>
+┃ ┣ 📂staticfiles<br>
+┃ ┣ 📂templates<br>
+┃ ┣ 📂text_data<br>
+┃ ┃ ┣ 📂DB<br>
+┃ ┃ ┃ ┗ 📂car_specs<br>
+┃ ┃ ┗ 📂RAG<br>
+┃ ┗ 📂__pycache__<br>
+┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024<br>
+┃ ┣ 📂hyundai_images_nobg_cropped_1024<br>
+┃ ┣ 📂insight&trends_images<br>
+┃ ┗ 📂insight&trends_images_cropped<br>
+┃ ┣ 📂chunking_result<br>
+┃ ┣ 📂DB<br>
+┃ ┃ ┗ 📂car_specs<br>
+┃ ┣ 📂finetuning<br>
+┃ ┃ ┗ 📂code<br>
+┃ ┣ 📂preprocessing<br>
+┃ ┣ 📂QA_context<br>
+┃ ┣ 📂QA_json<br>
+┃ ┣ 📂RAG<br>
+┃ ┗ 📂split_data<br>
+┣ 📂document<br>
+┃ ┣ 📜API_SPEC.md<br>
+┃ ┣ 📜chat_pipeline_5.png<br>
+┃ ┣ 📜jjacklette_ERD.png<br>
+┃ ┗ 📜System Architecture.pdf<br>
+┣ 📂evaluation<br>
+┃ ┣ 📜baseline_performance_report.md<br>
+┃ ┣ 📜base_model_evaluation_results.md<br>
+┃ ┣ 📜finetuned_evaluation_results.md<br>
+┃ ┗ 📜md.ipynb<br>
+┣ 📂image_data<br>
+┃ ┣ 📂hyundai_concept_car_nogb_cropped_1024<br>
+┃ ┃ ┣ 📜Hyundai-45_EV_Concept-2019-thb.jpg<br>
+┃ ┃ ┣ ...<br>
+┃ ┗ 📂hyundai_images_nobg_cropped_1024<br>
+┃ ┣ 📜Large-36014-2021Sonata.jpg<br>
+┃ ┣ ...<br>
+┣ 📂SD-3.5<br>
+┣ 📂text_data<br>
+┗ 📂산출물<br>
 
 
 
