@@ -410,29 +410,28 @@
 
   
 ><br>**Home**<br>
-<img width="1700" height="978" alt="homepage" src="https://github.com/user-attachments/assets/9820e6cd-2aa0-4648-8e9f-422b1a5b9ecb" />
-<br>
+<img width="1700" height="978" alt="homepage" src="https://github.com/user-attachments/assets/9820e6cd-2aa0-4648-8e9f-422b1a5b9ecb" /> <br>
+
 ><br>**Gallery**<br>
-<img width="1703" height="978" alt="gallerypage" src="https://github.com/user-attachments/assets/937f456a-75e1-47af-9513-086594975c25" />
-<br>
+<img width="1703" height="978" alt="gallerypage" src="https://github.com/user-attachments/assets/937f456a-75e1-47af-9513-086594975c25" /> <br>
+
 ><br>**Asset Library**<br>
-<img width="1704" height="978" alt="assetpage" src="https://github.com/user-attachments/assets/b4792d24-07d1-4574-b121-dd2f93d1813a" />
-<br>
+<img width="1704" height="978" alt="assetpage" src="https://github.com/user-attachments/assets/b4792d24-07d1-4574-b121-dd2f93d1813a" /> <br>
+
 ><br>**Detailed Asset Page**<br>
-<img width="466" height="704" alt="detailed_assetpage" src="https://github.com/user-attachments/assets/28d08682-c698-446b-b5ae-247b2101edf9" />
-<br>
+<img width="466" height="704" alt="detailed_assetpage" src="https://github.com/user-attachments/assets/28d08682-c698-446b-b5ae-247b2101edf9" /> <br>
+
 ><br>**Insight & Trends**<br>
-<img width="1706" height="969" alt="insightpage" src="https://github.com/user-attachments/assets/0b9c29f1-6418-4156-b0f1-5e84c6cc09f0" />
-<br>
+<img width="1706" height="969" alt="insightpage" src="https://github.com/user-attachments/assets/0b9c29f1-6418-4156-b0f1-5e84c6cc09f0" /> <br>
+
 ><br>**PrototypeLab**<br>
-<img width="1707" height="970" alt="prototypepage" src="https://github.com/user-attachments/assets/4d8da797-c83b-47ca-bd5f-e30d22747586" />
-<br>
+<img width="1707" height="970" alt="prototypepage" src="https://github.com/user-attachments/assets/4d8da797-c83b-47ca-bd5f-e30d22747586" /> <br>
+
 ><br>**Profile**<br>
-<img width="1707" height="985" alt="profilepage" src="https://github.com/user-attachments/assets/f70294b0-7bc6-43b3-9eda-9defcc3ac5d9" />
-<br>
+<img width="1707" height="985" alt="profilepage" src="https://github.com/user-attachments/assets/f70294b0-7bc6-43b3-9eda-9defcc3ac5d9" /> <br>
+
 ><br>**MyWorkSpace**<br>
-<img width="1706" height="979" alt="workspacepage" src="https://github.com/user-attachments/assets/0a00f729-8647-4991-8ec0-fbec2c0fcb5a" />
-<br>
+<img width="1706" height="979" alt="workspacepage" src="https://github.com/user-attachments/assets/0a00f729-8647-4991-8ec0-fbec2c0fcb5a" /> <br>
 
 ---
 
