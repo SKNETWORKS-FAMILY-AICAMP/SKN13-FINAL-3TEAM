@@ -1,0 +1,244 @@
+_wandb:
+    value:
+        cli_version: 0.21.1
+        e:
+            n3bce10b5cph33fws0nlwarzxwsss73f:
+                args:
+                    - --pretrained_model_name_or_path=black-forest-labs/FLUX.1-Kontext-dev
+                    - --dataset_name=mingyu-oo/HD-car-img-caption
+                    - --image_column=image
+                    - --caption_column=caption
+                    - --output_dir=./FLUX_HD_ES
+                    - --resolution=1024
+                    - --train_batch_size=4
+                    - --gradient_accumulation_steps=4
+                    - --gradient_checkpointing
+                    - --mixed_precision=bf16
+                    - --optimizer=AdamW
+                    - --learning_rate=5e-5
+                    - --rank=16
+                    - --lora_alpha=32
+                    - --num_train_epochs=2
+                    - --cache_latents
+                    - --use_8bit_adam
+                    - --report_to=wandb
+                    - '--validation_prompt=Designed by Hyundai, mid-sized SUV, 3/4 front view, two-box shape, long wheelbase, short overhangs, clean body surfacing, parametric grille, pixel DRL headlamps, large alloy wheels, panoramic glass roof, aerodynamic silhouette, matte silver finish, white background '
+                    - --validation_epochs=1
+                    - --seed=42
+                    - --checkpointing_steps=200
+                    - --push_to_hub
+                codePath: train_dreambooth_lora_flux_kontext_earlystop.py
+                codePathLocal: train_dreambooth_lora_flux_kontext_earlystop.py
+                cpu_count: 64
+                cpu_count_logical: 128
+                cudaVersion: "12.8"
+                disk:
+                    /:
+                        total: "75161927680"
+                        used: "46343225344"
+                email: tdnmbvv@gmail.com
+                executable: /workspace/FLUX/bin/python
+                gpu: NVIDIA A100-SXM4-80GB
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "85899345920"
+                      name: NVIDIA A100-SXM4-80GB
+                      uuid: GPU-62989189-9e1e-ac75-4676-114f14998542
+                host: 19ad9e35b69a
+                memory:
+                    total: "2163985264640"
+                os: Linux-6.5.0-35-generic-x86_64-with-glibc2.35
+                program: /workspace/train_dreambooth_lora_flux_kontext_earlystop.py
+                python: CPython 3.11.11
+                root: /workspace
+                startedAt: "2025-09-01T07:03:49.886216Z"
+                writerId: n3bce10b5cph33fws0nlwarzxwsss73f
+        m: []
+        python_version: 3.11.11
+        t:
+            "1":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 71
+                - 83
+                - 98
+            "2":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 71
+                - 83
+                - 98
+            "3":
+                - 2
+                - 61
+            "4": 3.11.11
+            "5": 0.21.1
+            "6": 4.55.4
+            "12": 0.21.1
+            "13": linux-x86_64
+adam_beta1:
+    value: 0.9
+adam_beta2:
+    value: 0.999
+adam_epsilon:
+    value: 1e-08
+adam_weight_decay:
+    value: 0.0001
+adam_weight_decay_text_encoder:
+    value: 0.001
+allow_tf32:
+    value: false
+aspect_ratio_buckets:
+    value: null
+cache_dir:
+    value: null
+cache_latents:
+    value: true
+caption_column:
+    value: caption
+center_crop:
+    value: false
+checkpointing_steps:
+    value: 200
+checkpoints_total_limit:
+    value: null
+class_data_dir:
+    value: null
+class_prompt:
+    value: null
+cond_image_column:
+    value: null
+dataloader_num_workers:
+    value: 0
+dataset_config_name:
+    value: null
+dataset_name:
+    value: mingyu-oo/HD-car-img-caption
+gradient_accumulation_steps:
+    value: 4
+gradient_checkpointing:
+    value: true
+guidance_scale:
+    value: 3.5
+hub_model_id:
+    value: null
+hub_token:
+    value: null
+image_column:
+    value: image
+instance_data_dir:
+    value: null
+instance_prompt:
+    value: null
+learning_rate:
+    value: 5e-05
+local_rank:
+    value: -1
+logging_dir:
+    value: logs
+logit_mean:
+    value: 0
+logit_std:
+    value: 1
+lora_alpha:
+    value: 32
+lora_dropout:
+    value: 0
+lora_layers:
+    value: null
+lr_num_cycles:
+    value: 1
+lr_power:
+    value: 1
+lr_scheduler:
+    value: constant
+lr_warmup_steps:
+    value: 500
+max_grad_norm:
+    value: 1
+max_sequence_length:
+    value: 512
+max_train_steps:
+    value: 202
+mixed_precision:
+    value: bf16
+mode_scale:
+    value: 1.29
+num_class_images:
+    value: 100
+num_train_epochs:
+    value: 2
+num_validation_images:
+    value: 4
+optimizer:
+    value: AdamW
+output_dir:
+    value: ./FLUX_HD_ES
+pretrained_model_name_or_path:
+    value: black-forest-labs/FLUX.1-Kontext-dev
+prior_generation_precision:
+    value: null
+prior_loss_weight:
+    value: 1
+prodigy_beta3:
+    value: null
+prodigy_decouple:
+    value: true
+prodigy_safeguard_warmup:
+    value: true
+prodigy_use_bias_correction:
+    value: true
+push_to_hub:
+    value: true
+random_flip:
+    value: false
+rank:
+    value: 16
+repeats:
+    value: 1
+report_to:
+    value: wandb
+resolution:
+    value: 1024
+resume_from_checkpoint:
+    value: null
+revision:
+    value: null
+sample_batch_size:
+    value: 4
+scale_lr:
+    value: false
+seed:
+    value: 42
+text_encoder_lr:
+    value: 5e-06
+train_batch_size:
+    value: 4
+train_text_encoder:
+    value: false
+upcast_before_saving:
+    value: false
+use_8bit_adam:
+    value: true
+vae_encode_mode:
+    value: mode
+validation_epochs:
+    value: 1
+validation_image:
+    value: null
+validation_prompt:
+    value: 'Designed by Hyundai, mid-sized SUV, 3/4 front view, two-box shape, long wheelbase, short overhangs, clean body surfacing, parametric grille, pixel DRL headlamps, large alloy wheels, panoramic glass roof, aerodynamic silhouette, matte silver finish, white background '
+variant:
+    value: null
+weighting_scheme:
+    value: none
+with_prior_preservation:
+    value: false

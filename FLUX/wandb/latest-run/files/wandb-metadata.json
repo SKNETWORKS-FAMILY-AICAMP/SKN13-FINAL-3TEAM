@@ -1,0 +1,61 @@
+{
+  "os": "Linux-6.5.0-35-generic-x86_64-with-glibc2.35",
+  "python": "CPython 3.11.11",
+  "startedAt": "2025-09-01T07:03:49.886216Z",
+  "args": [
+    "--pretrained_model_name_or_path=black-forest-labs/FLUX.1-Kontext-dev",
+    "--dataset_name=mingyu-oo/HD-car-img-caption",
+    "--image_column=image",
+    "--caption_column=caption",
+    "--output_dir=./FLUX_HD_ES",
+    "--resolution=1024",
+    "--train_batch_size=4",
+    "--gradient_accumulation_steps=4",
+    "--gradient_checkpointing",
+    "--mixed_precision=bf16",
+    "--optimizer=AdamW",
+    "--learning_rate=5e-5",
+    "--rank=16",
+    "--lora_alpha=32",
+    "--num_train_epochs=2",
+    "--cache_latents",
+    "--use_8bit_adam",
+    "--report_to=wandb",
+    "--validation_prompt=Designed by Hyundai, mid-sized SUV, 3/4 front view, two-box shape, long wheelbase, short overhangs, clean body surfacing, parametric grille, pixel DRL headlamps, large alloy wheels, panoramic glass roof, aerodynamic silhouette, matte silver finish, white background ",
+    "--validation_epochs=1",
+    "--seed=42",
+    "--checkpointing_steps=200",
+    "--push_to_hub"
+  ],
+  "program": "/workspace/train_dreambooth_lora_flux_kontext_earlystop.py",
+  "codePath": "train_dreambooth_lora_flux_kontext_earlystop.py",
+  "codePathLocal": "train_dreambooth_lora_flux_kontext_earlystop.py",
+  "email": "tdnmbvv@gmail.com",
+  "root": "/workspace",
+  "host": "19ad9e35b69a",
+  "executable": "/workspace/FLUX/bin/python",
+  "cpu_count": 64,
+  "cpu_count_logical": 128,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "75161927680",
+      "used": "46343225344"
+    }
+  },
+  "memory": {
+    "total": "2163985264640"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA A100-SXM4-80GB",
+      "memoryTotal": "85899345920",
+      "cudaCores": 6912,
+      "architecture": "Ampere",
+      "uuid": "GPU-62989189-9e1e-ac75-4676-114f14998542"
+    }
+  ],
+  "cudaVersion": "12.8",
+  "writerId": "n3bce10b5cph33fws0nlwarzxwsss73f"
+}

@@ -1,0 +1,15 @@
+{"time":"2025-09-01T07:03:50.679956958Z","level":"INFO","msg":"stream: starting","core version":"0.21.1"}
+{"time":"2025-09-01T07:03:50.939333747Z","level":"INFO","msg":"stream: created new stream","id":"xow47k14"}
+{"time":"2025-09-01T07:03:50.939909006Z","level":"INFO","msg":"stream: started","id":"xow47k14"}
+{"time":"2025-09-01T07:03:50.939948452Z","level":"INFO","msg":"sender: started","stream_id":"xow47k14"}
+{"time":"2025-09-01T07:03:50.939950173Z","level":"INFO","msg":"writer: started","stream_id":"xow47k14"}
+{"time":"2025-09-01T07:03:50.939979498Z","level":"INFO","msg":"handler: started","stream_id":"xow47k14"}
+{"time":"2025-09-01T07:54:27.928815707Z","level":"WARN","msg":"handler: ignoring partial history record","step":101,"current":102}
+{"time":"2025-09-01T07:54:35.243867944Z","level":"WARN","msg":"handler: ignoring partial history record","step":101,"current":102}
+{"time":"2025-09-01T07:54:42.557667107Z","level":"WARN","msg":"handler: ignoring partial history record","step":101,"current":102}
+{"time":"2025-09-01T08:48:36.879846578Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-01T08:48:36.99109211Z","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-09-01T08:48:37.019221879Z","level":"INFO","msg":"stream: closing","id":"xow47k14"}
+{"time":"2025-09-01T08:48:37.02123085Z","level":"INFO","msg":"handler: closed","stream_id":"xow47k14"}
+{"time":"2025-09-01T08:48:37.027783175Z","level":"INFO","msg":"sender: closed","stream_id":"xow47k14"}
+{"time":"2025-09-01T08:48:37.030805936Z","level":"INFO","msg":"stream: closed","id":"xow47k14"}

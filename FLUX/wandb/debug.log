@@ -1,0 +1,29 @@
+2025-09-01 07:03:49,925 INFO    MainThread:565 [wandb_setup.py:_flush():80] Current SDK version is 0.21.1
+2025-09-01 07:03:49,926 INFO    MainThread:565 [wandb_setup.py:_flush():80] Configure stats pid to 565
+2025-09-01 07:03:49,926 INFO    MainThread:565 [wandb_setup.py:_flush():80] Loading settings from /root/.config/wandb/settings
+2025-09-01 07:03:49,926 INFO    MainThread:565 [wandb_setup.py:_flush():80] Loading settings from /workspace/wandb/settings
+2025-09-01 07:03:49,927 INFO    MainThread:565 [wandb_setup.py:_flush():80] Loading settings from environment variables
+2025-09-01 07:03:49,930 INFO    MainThread:565 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /workspace/wandb/run-20250901_070349-xow47k14/logs/debug.log
+2025-09-01 07:03:49,931 INFO    MainThread:565 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /workspace/wandb/run-20250901_070349-xow47k14/logs/debug-internal.log
+2025-09-01 07:03:49,932 INFO    MainThread:565 [wandb_init.py:init():830] calling init triggers
+2025-09-01 07:03:49,932 INFO    MainThread:565 [wandb_init.py:init():835] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2025-09-01 07:03:49,933 INFO    MainThread:565 [wandb_init.py:init():871] starting backend
+2025-09-01 07:03:50,641 INFO    MainThread:565 [wandb_init.py:init():874] sending inform_init request
+2025-09-01 07:03:50,671 INFO    MainThread:565 [wandb_init.py:init():882] backend started and connected
+2025-09-01 07:03:50,679 INFO    MainThread:565 [wandb_init.py:init():953] updated telemetry
+2025-09-01 07:03:50,685 INFO    MainThread:565 [wandb_init.py:init():977] communicating run to backend with 90.0 second timeout
+2025-09-01 07:03:51,126 INFO    MainThread:565 [wandb_init.py:init():1029] starting run threads in backend
+2025-09-01 07:03:52,813 INFO    MainThread:565 [wandb_run.py:_console_start():2494] atexit reg
+2025-09-01 07:03:52,813 INFO    MainThread:565 [wandb_run.py:_redirect():2342] redirect: wrap_raw
+2025-09-01 07:03:52,815 INFO    MainThread:565 [wandb_run.py:_redirect():2411] Wrapping output streams.
+2025-09-01 07:03:52,815 INFO    MainThread:565 [wandb_run.py:_redirect():2434] Redirects installed.
+2025-09-01 07:03:52,839 INFO    MainThread:565 [wandb_init.py:init():1075] run started, returning control to user process
+2025-09-01 07:03:52,842 INFO    MainThread:565 [wandb_run.py:_config_callback():1380] config_cb None None {'pretrained_model_name_or_path': 'black-forest-labs/FLUX.1-Kontext-dev', 'revision': None, 'vae_encode_mode': 'mode', 'variant': None, 'dataset_name': 'mingyu-oo/HD-car-img-caption', 'dataset_config_name': None, 'instance_data_dir': None, 'cache_dir': None, 'image_column': 'image', 'cond_image_column': None, 'caption_column': 'caption', 'repeats': 1, 'class_data_dir': None, 'instance_prompt': None, 'class_prompt': None, 'max_sequence_length': 512, 'validation_prompt': 'Designed by Hyundai, mid-sized SUV, 3/4 front view, two-box shape, long wheelbase, short overhangs, clean body surfacing, parametric grille, pixel DRL headlamps, large alloy wheels, panoramic glass roof, aerodynamic silhouette, matte silver finish, white background ', 'validation_image': None, 'num_validation_images': 4, 'validation_epochs': 1, 'rank': 16, 'lora_alpha': 32, 'lora_dropout': 0.0, 'with_prior_preservation': False, 'prior_loss_weight': 1.0, 'num_class_images': 100, 'output_dir': './FLUX_HD_ES', 'seed': 42, 'resolution': 1024, 'aspect_ratio_buckets': None, 'center_crop': False, 'random_flip': False, 'train_text_encoder': False, 'train_batch_size': 4, 'sample_batch_size': 4, 'num_train_epochs': 2, 'max_train_steps': 202, 'checkpointing_steps': 200, 'checkpoints_total_limit': None, 'resume_from_checkpoint': None, 'gradient_accumulation_steps': 4, 'gradient_checkpointing': True, 'learning_rate': 5e-05, 'guidance_scale': 3.5, 'text_encoder_lr': 5e-06, 'scale_lr': False, 'lr_scheduler': 'constant', 'lr_warmup_steps': 500, 'lr_num_cycles': 1, 'lr_power': 1.0, 'dataloader_num_workers': 0, 'weighting_scheme': 'none', 'logit_mean': 0.0, 'logit_std': 1.0, 'mode_scale': 1.29, 'optimizer': 'AdamW', 'use_8bit_adam': True, 'adam_beta1': 0.9, 'adam_beta2': 0.999, 'prodigy_beta3': None, 'prodigy_decouple': True, 'adam_weight_decay': 0.0001, 'adam_weight_decay_text_encoder': 0.001, 'lora_layers': None, 'adam_epsilon': 1e-08, 'prodigy_use_bias_correction': True, 'prodigy_safeguard_warmup': True, 'max_grad_norm': 1.0, 'push_to_hub': True, 'hub_token': None, 'hub_model_id': None, 'logging_dir': 'logs', 'allow_tf32': False, 'cache_latents': True, 'report_to': 'wandb', 'mixed_precision': 'bf16', 'upcast_before_saving': False, 'prior_generation_precision': None, 'local_rank': -1}
+2025-09-01 08:48:36,503 INFO    MainThread:565 [wandb_run.py:_finish():2260] finishing run mingyu-oo/dreambooth-flux-kontext-lora/xow47k14
+2025-09-01 08:48:36,505 INFO    MainThread:565 [wandb_run.py:_atexit_cleanup():2459] got exitcode: 0
+2025-09-01 08:48:36,507 INFO    MainThread:565 [wandb_run.py:_restore():2441] restore
+2025-09-01 08:48:36,507 INFO    MainThread:565 [wandb_run.py:_restore():2447] restore done
+2025-09-01 08:48:36,995 INFO    MainThread:565 [wandb_run.py:_footer_history_summary_info():3895] rendering history
+2025-09-01 08:48:36,998 INFO    MainThread:565 [wandb_run.py:_footer_history_summary_info():3927] rendering summary
+2025-09-01 08:48:37,006 INFO    MainThread:565 [wandb_run.py:_footer_sync_info():3856] logging synced files
