@@ -1,8 +1,14 @@
 # SKN13-FINAL-3TEAM
 
+
+
+
 ### 최종 프로젝트: JJACKLETTE - 현대자동차에 특화된 디자인 프로토타입 생성 플랫폼
 
 **개발기간:** 2025.07.23 ~ 2025.09.15
+
+https://github.com/user-attachments/assets/eed546a2-6848-47bd-ad71-df840d49fff6
+
 
 ## 🐥 팀 소개
 ### 팀명: 밥심 🍚
